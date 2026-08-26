@@ -1,0 +1,29 @@
+{
+  "floor": 1,
+  "provisional": true,
+  "note": "PROVISIONAL geometry. The real dormitory plan has not been supplied. Room numbers 101-107 assume 7 rooms per floor (7 x 3 = 21). When the real plan arrives, remap x/y/width/height here only -- no component changes are needed.",
+  "viewBox": "0 0 700 730",
+  "outline": [
+    [50, 50],
+    [650, 50],
+    [650, 290],
+    [300, 290],
+    [300, 680],
+    [50, 680]
+  ],
+  "decorations": [
+    { "type": "corridor", "x": 70, "y": 200, "width": 560, "height": 70 },
+    { "type": "corridor", "x": 210, "y": 270, "width": 70, "height": 390 },
+    { "type": "stairs", "x": 545, "y": 208, "width": 75, "height": 54 },
+    { "type": "entrance", "x": 212, "y": 662, "width": 66, "height": 16 }
+  ],
+  "rooms": [
+    { "roomNumber": "101", "x": 70, "y": 70, "width": 140, "height": 130 },
+    { "roomNumber": "102", "x": 210, "y": 70, "width": 140, "height": 130 },
+    { "roomNumber": "103", "x": 350, "y": 70, "width": 140, "height": 130 },
+    { "roomNumber": "104", "x": 490, "y": 70, "width": 140, "height": 130 },
+    { "roomNumber": "105", "x": 70, "y": 270, "width": 140, "height": 130 },
+    { "roomNumber": "106", "x": 70, "y": 400, "width": 140, "height": 130 },
+    { "roomNumber": "107", "x": 70, "y": 530, "width": 140, "height": 130 }
+  ]
+}

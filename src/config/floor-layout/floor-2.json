@@ -1,0 +1,28 @@
+{
+  "floor": 2,
+  "provisional": true,
+  "note": "PROVISIONAL geometry -- see floor-1.json. Floors 2 and 3 currently repeat the floor 1 footprint; adjust independently once the real plan is available.",
+  "viewBox": "0 0 700 730",
+  "outline": [
+    [50, 50],
+    [650, 50],
+    [650, 290],
+    [300, 290],
+    [300, 680],
+    [50, 680]
+  ],
+  "decorations": [
+    { "type": "corridor", "x": 70, "y": 200, "width": 560, "height": 70 },
+    { "type": "corridor", "x": 210, "y": 270, "width": 70, "height": 390 },
+    { "type": "stairs", "x": 545, "y": 208, "width": 75, "height": 54 }
+  ],
+  "rooms": [
+    { "roomNumber": "201", "x": 70, "y": 70, "width": 140, "height": 130 },
+    { "roomNumber": "202", "x": 210, "y": 70, "width": 140, "height": 130 },
+    { "roomNumber": "203", "x": 350, "y": 70, "width": 140, "height": 130 },
+    { "roomNumber": "204", "x": 490, "y": 70, "width": 140, "height": 130 },
+    { "roomNumber": "205", "x": 70, "y": 270, "width": 140, "height": 130 },
+    { "roomNumber": "206", "x": 70, "y": 400, "width": 140, "height": 130 },
+    { "roomNumber": "207", "x": 70, "y": 530, "width": 140, "height": 130 }
+  ]
+}
