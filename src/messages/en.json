@@ -1,0 +1,462 @@
+{
+  "app": {
+    "name": "Dormitory Management",
+    "shortName": "Dormitory",
+    "tagline": "Rooms, contracts, billing and maintenance in one place"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "floorPlan": "Floor Plan",
+    "rooms": "Rooms",
+    "tenants": "Tenants",
+    "contracts": "Contracts",
+    "accessCards": "Access Cards",
+    "meters": "Meter Readings",
+    "billing": "Billing",
+    "payments": "Payments",
+    "maintenance": "Maintenance",
+    "reports": "Reports",
+    "settings": "Settings",
+    "testMode": "Test Mode",
+    "operations": "Operations",
+    "finance": "Finance",
+    "system": "System"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "noData": "No data",
+    "back": "Back",
+    "close": "Close",
+    "viewAll": "View all",
+    "viewDetails": "View details",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No",
+    "all": "All",
+    "total": "Total",
+    "notAvailable": "-",
+    "required": "Required",
+    "optional": "Optional",
+    "day": "day",
+    "days": "days",
+    "month": "month",
+    "unit": "unit",
+    "rate": "Rate",
+    "amount": "Amount",
+    "date": "Date",
+    "status": "Status",
+    "note": "Note",
+    "language": "Language",
+    "signOut": "Sign out"
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "signInSubtitle": "For the dormitory owner and staff only",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "invalidCredentials": "Incorrect email or password",
+    "noProfile": "This account has not been granted access. Please contact the owner.",
+    "signedInAs": "Signed in as",
+    "accessDenied": "You do not have access to this page",
+    "accessDeniedDetail": "Requires the {role} role or higher"
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "staff": "Staff"
+  },
+  "roomStatus": {
+    "vacant": "Vacant",
+    "occupied": "Occupied",
+    "reserved": "Reserved",
+    "maintenance": "Maintenance"
+  },
+  "financialStatus": {
+    "none": "No invoice",
+    "paid": "Paid",
+    "payment_due": "Payment due",
+    "overdue": "Overdue"
+  },
+  "combinedStatus": {
+    "vacant": "Vacant",
+    "occupiedPaid": "Occupied • Paid",
+    "occupiedDue": "Occupied • Payment due",
+    "occupiedOverdue": "Occupied • Overdue",
+    "occupiedNoBill": "Occupied • Not yet invoiced",
+    "reserved": "Reserved",
+    "maintenance": "Maintenance"
+  },
+  "roomType": {
+    "standard": "Standard",
+    "air_conditioned": "Air conditioned",
+    "studio": "Studio"
+  },
+  "contractStatus": {
+    "draft": "Draft",
+    "active": "Active",
+    "expired": "Expired",
+    "terminated": "Terminated"
+  },
+  "cardStatus": {
+    "available": "Available",
+    "active": "Active",
+    "lost": "Lost",
+    "disabled": "Disabled",
+    "damaged": "Damaged",
+    "returned": "Returned"
+  },
+  "cardAction": {
+    "issue": "Issue",
+    "activate": "Activate",
+    "disable": "Disable",
+    "report_lost": "Report lost",
+    "replace": "Replace",
+    "return": "Return",
+    "mark_damaged": "Mark damaged"
+  },
+  "invoiceStatus": {
+    "draft": "Draft",
+    "issued": "Issued",
+    "partially_paid": "Partially paid",
+    "paid": "Paid",
+    "overdue": "Overdue",
+    "cancelled": "Cancelled"
+  },
+  "invoiceItemType": {
+    "rent": "Room rent",
+    "electricity": "Electricity",
+    "water": "Water",
+    "internet": "Internet",
+    "parking": "Parking",
+    "other": "Other charge",
+    "discount": "Discount"
+  },
+  "paymentMethod": {
+    "cash": "Cash",
+    "bank_transfer": "Bank transfer",
+    "promptpay": "PromptPay"
+  },
+  "paymentStatus": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled"
+  },
+  "maintenanceStatus": {
+    "open": "Open",
+    "in_progress": "In progress",
+    "waiting": "Waiting",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "maintenancePriority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "meterType": {
+    "electricity": "Electricity",
+    "water": "Water"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Across {count} real rooms. Test data is excluded.",
+    "rooms": "Rooms",
+    "totalRooms": "Total rooms",
+    "occupied": "Occupied",
+    "vacant": "Vacant",
+    "reserved": "Reserved",
+    "maintenance": "Maintenance",
+    "occupancyRate": "Occupancy rate",
+    "finance": "Finance",
+    "expectedRevenue": "Expected revenue",
+    "expectedRevenueHint": "Total rent from active contracts",
+    "invoicedThisMonth": "Invoiced this month",
+    "collectedThisMonth": "Collected this month",
+    "outstanding": "Outstanding",
+    "overdue": "Overdue",
+    "operations": "Needs attention",
+    "contractsExpiring": "Contracts expiring soon",
+    "openTickets": "Open maintenance tickets",
+    "lostCards": "Lost access cards",
+    "paymentsDue": "Payments due",
+    "registeredTenants": "Registered tenants",
+    "totalOccupants": "Total occupants",
+    "daysRemaining": "{days} days left",
+    "expiresToday": "Expires today",
+    "expired": "Expired",
+    "daysOverdue": "{days} days overdue",
+    "noExpiringContracts": "No contracts expiring soon",
+    "noOpenTickets": "No open maintenance tickets",
+    "noLostCards": "No lost access cards",
+    "noOverdue": "Nothing overdue",
+    "testDataExcluded": "All figures exclude the T01 test room"
+  },
+  "floorPlan": {
+    "title": "Floor Plan",
+    "subtitle": "Click a room to see its details",
+    "floor": "Floor {floor}",
+    "legend": "Legend",
+    "provisional": "This layout is provisional",
+    "provisionalDetail": "Room positions will be mapped to the real building plan once it is supplied. Edit src/config/floor-layout/ to update them.",
+    "corridor": "Corridor",
+    "stairs": "Stairs",
+    "entrance": "Entrance",
+    "lift": "Lift",
+    "noRooms": "No rooms on this floor",
+    "roomsOnFloor": "{count} rooms"
+  },
+  "room": {
+    "title": "Room {roomNumber}",
+    "roomNumber": "Room number",
+    "floor": "Floor",
+    "type": "Room type",
+    "size": "Size",
+    "sqm": "sqm",
+    "status": "Room status",
+    "mainTenant": "Main tenant",
+    "mainTenantHint": "The main tenant is the contact person for this room",
+    "contactPerson": "Contact person",
+    "phone": "Phone",
+    "email": "Email",
+    "occupants": "Number of occupants",
+    "occupantsValue": "{count} people",
+    "occupantsHint": "Includes the main tenant. No personal data is stored for the other occupants.",
+    "additionalOccupants": "{count} additional occupants (no individual records kept)",
+    "contractPeriod": "Contract period",
+    "monthlyRent": "Monthly rent",
+    "deposit": "Deposit",
+    "paymentDueDay": "Payment due on day",
+    "accessCards": "Access cards",
+    "electricity": "Electricity",
+    "water": "Water",
+    "currentBill": "Current bill",
+    "paymentStatus": "Payment status",
+    "maintenance": "Maintenance",
+    "noTenant": "No tenant",
+    "noContract": "No contract",
+    "noInvoice": "Not yet invoiced",
+    "noMeterReading": "No meter reading yet",
+    "noPayments": "No payments yet",
+    "noCards": "No access cards",
+    "noMaintenance": "No maintenance tickets",
+    "openFullPage": "Open full room page",
+    "emptyRoomHint": "This room is vacant and available to let",
+    "tabs": {
+      "overview": "Overview",
+      "contract": "Contract",
+      "meters": "Meters",
+      "billing": "Billing",
+      "payments": "Payments",
+      "cards": "Access Cards",
+      "maintenance": "Maintenance"
+    }
+  },
+  "rooms": {
+    "title": "Rooms",
+    "subtitle": "{count} real rooms",
+    "filterByFloor": "Filter by floor",
+    "filterByStatus": "Filter by status",
+    "allFloors": "All floors",
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search room number or tenant name",
+    "resultCount": "{count} rooms",
+    "noResults": "No rooms match these filters"
+  },
+  "tenant": {
+    "title": "Tenant",
+    "fullName": "Full name",
+    "idCard": "ID card / passport",
+    "nationality": "Nationality",
+    "emergencyContact": "Emergency contact",
+    "emergencyPhone": "Emergency phone",
+    "singleTenantNotice": "One main tenant is registered per room, and is the contact person for that room."
+  },
+  "contract": {
+    "title": "Contract",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "moveIn": "Move in",
+    "renew": "Renew contract",
+    "moveOut": "Move out",
+    "terminate": "Terminate contract",
+    "terminatedAt": "Terminated on",
+    "terminationReason": "Termination reason"
+  },
+  "cards": {
+    "title": "Access Cards",
+    "subtitle": "Each room has 2 cards. Cards belong to the room, not to a person.",
+    "cardNumber": "Card number",
+    "cardUid": "Card UID",
+    "issuedDate": "Issued on",
+    "returnedDate": "Returned on",
+    "replacementFee": "Replacement fee",
+    "history": "History",
+    "slotA": "Card 1",
+    "slotB": "Card 2",
+    "belongsToRoom": "Cards belong to the room; no cardholder needs to be assigned"
+  },
+  "meters": {
+    "title": "Meter Readings",
+    "billingMonth": "Billing month",
+    "previousReading": "Previous reading",
+    "currentReading": "Current reading",
+    "usage": "Usage",
+    "recordedAt": "Recorded on",
+    "electricityRate": "Electricity rate (THB per unit)",
+    "waterRate": "Water rate (THB per unit)",
+    "usageUnits": "{units} units"
+  },
+  "billing": {
+    "title": "Billing",
+    "invoiceNumber": "Invoice number",
+    "issueDate": "Issue date",
+    "dueDate": "Due date",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "total": "Total",
+    "paid": "Paid",
+    "outstanding": "Outstanding",
+    "items": "Items",
+    "description": "Description",
+    "quantity": "Qty",
+    "unitPrice": "Unit price",
+    "generateInvoices": "Generate monthly invoices",
+    "print": "Print invoice"
+  },
+  "payments": {
+    "title": "Payments",
+    "paymentDate": "Payment date",
+    "method": "Method",
+    "reference": "Reference",
+    "slip": "Payment slip",
+    "uploadSlip": "Upload slip",
+    "recordPayment": "Record payment",
+    "receipt": "Receipt",
+    "history": "Payment history",
+    "partialPayment": "Partial payment",
+    "maxAllowed": "Maximum {amount}"
+  },
+  "maintenance": {
+    "title": "Maintenance",
+    "category": "Category",
+    "description": "Description",
+    "priority": "Priority",
+    "cost": "Cost",
+    "technician": "Technician",
+    "photo": "Photo",
+    "reportedAt": "Reported on",
+    "completedAt": "Completed on",
+    "commonArea": "Common area",
+    "newTicket": "New ticket"
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Every report excludes test data",
+    "occupancy": "Room occupancy",
+    "monthlyBilling": "Monthly billing",
+    "collection": "Payment collection",
+    "outstanding": "Outstanding balance",
+    "meterUsage": "Meter usage",
+    "contractExpiry": "Contract expiration",
+    "maintenance": "Maintenance",
+    "cardStatus": "Access card status",
+    "export": "Export CSV"
+  },
+  "settings": {
+    "title": "Settings",
+    "utilityRates": "Utility rates",
+    "fees": "Other fees",
+    "internetFee": "Internet fee (THB per month)",
+    "parkingFee": "Parking fee (THB per month)",
+    "cardReplacementFee": "Card replacement fee (THB)",
+    "defaultPaymentDueDay": "Default payment due day",
+    "ownerOnly": "Only the owner can change settings",
+    "saved": "Settings saved"
+  },
+  "testMode": {
+    "title": "Test Mode",
+    "subtitle": "T01 is a mock room, not a physical one, and never affects any report.",
+    "banner": "This page shows test data. None of it is counted in the dashboard or reports.",
+    "scenario": "Test scenario",
+    "currentScenario": "Current scenario",
+    "applyScenario": "Apply scenario",
+    "reset": "Reset test data",
+    "resetConfirm": "Restore T01 to all of its default values?",
+    "resetDone": "Test data reset",
+    "sameComponents": "This page uses exactly the same components as a real room",
+    "notOnFloorPlan": "T01 is on floor 0, so it never appears on the floor plans for floors 1-3",
+    "scenarios": {
+      "normal": "Normal",
+      "payment_due": "Payment due",
+      "overdue": "Overdue",
+      "vacant": "Vacant",
+      "maintenance": "Maintenance",
+      "lost_card": "Lost card",
+      "partial_payment": "Partial payment",
+      "contract_expiring": "Contract expiring"
+    },
+    "scenarioDescriptions": {
+      "normal": "Occupied, invoice paid in full, both access cards active",
+      "payment_due": "An invoice is outstanding but not yet past its due date",
+      "overdue": "The invoice is past its due date",
+      "vacant": "No tenant, no contract, both cards available",
+      "maintenance": "Room withdrawn for repair with an urgent open ticket",
+      "lost_card": "The second card is reported lost and carries a replacement fee",
+      "partial_payment": "Part of the invoice has been paid, a balance remains",
+      "contract_expiring": "The contract expires within 15 days"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "date": {
+      "format": "Date must be in YYYY-MM-DD format",
+      "firstOfMonth": "Billing month must be the first day of the month"
+    },
+    "money": {
+      "negative": "Amount cannot be negative",
+      "notPositive": "Amount must be greater than 0"
+    },
+    "phone": {
+      "format": "Phone number must start with 0 and have 9-10 digits"
+    },
+    "email": {
+      "format": "Invalid email address"
+    },
+    "room": {
+      "floorRange": "Floor must be between 1 and 3"
+    },
+    "contract": {
+      "dueDayRange": "Payment due day must be between 1 and 28",
+      "occupantsMin": "There must be at least 1 occupant",
+      "endBeforeStart": "The end date must be after the start date"
+    },
+    "card": {
+      "slot": "Card number must end in -A or -B"
+    },
+    "meter": {
+      "reversed": "The current reading cannot be below the previous reading"
+    },
+    "invoice": {
+      "noItems": "An invoice needs at least one item"
+    },
+    "payment": {
+      "exceedsTotal": "Amount exceeds the outstanding balance"
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "Not found",
+    "roomNotFound": "Room not found",
+    "permissionDenied": "You do not have permission to do this"
+  }
+}

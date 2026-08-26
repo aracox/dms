@@ -1,0 +1,462 @@
+{
+  "app": {
+    "name": "ระบบจัดการหอพัก",
+    "shortName": "หอพัก",
+    "tagline": "จัดการห้องพัก สัญญา บิล และงานซ่อมในที่เดียว"
+  },
+  "nav": {
+    "dashboard": "ภาพรวม",
+    "floorPlan": "ผังห้องพัก",
+    "rooms": "ห้องพัก",
+    "tenants": "ผู้เช่า",
+    "contracts": "สัญญาเช่า",
+    "accessCards": "คีย์การ์ด",
+    "meters": "จดมิเตอร์",
+    "billing": "ใบแจ้งหนี้",
+    "payments": "การชำระเงิน",
+    "maintenance": "งานซ่อมบำรุง",
+    "reports": "รายงาน",
+    "settings": "ตั้งค่า",
+    "testMode": "โหมดทดสอบ",
+    "operations": "งานประจำวัน",
+    "finance": "การเงิน",
+    "system": "ระบบ"
+  },
+  "common": {
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "add": "เพิ่ม",
+    "search": "ค้นหา",
+    "filter": "กรอง",
+    "loading": "กำลังโหลด...",
+    "noData": "ไม่มีข้อมูล",
+    "back": "ย้อนกลับ",
+    "close": "ปิด",
+    "viewAll": "ดูทั้งหมด",
+    "viewDetails": "ดูรายละเอียด",
+    "actions": "การทำงาน",
+    "yes": "ใช่",
+    "no": "ไม่",
+    "all": "ทั้งหมด",
+    "total": "รวม",
+    "notAvailable": "-",
+    "required": "จำเป็น",
+    "optional": "ไม่บังคับ",
+    "day": "วัน",
+    "days": "วัน",
+    "month": "เดือน",
+    "unit": "หน่วย",
+    "rate": "อัตรา",
+    "amount": "จำนวนเงิน",
+    "date": "วันที่",
+    "status": "สถานะ",
+    "note": "หมายเหตุ",
+    "language": "ภาษา",
+    "signOut": "ออกจากระบบ"
+  },
+  "auth": {
+    "signInTitle": "เข้าสู่ระบบ",
+    "signInSubtitle": "สำหรับเจ้าของและเจ้าหน้าที่หอพักเท่านั้น",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "signIn": "เข้าสู่ระบบ",
+    "signingIn": "กำลังเข้าสู่ระบบ...",
+    "invalidCredentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+    "noProfile": "บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน กรุณาติดต่อเจ้าของหอพัก",
+    "signedInAs": "เข้าสู่ระบบในชื่อ",
+    "accessDenied": "คุณไม่มีสิทธิ์เข้าถึงหน้านี้",
+    "accessDeniedDetail": "ต้องมีสิทธิ์ระดับ {role} ขึ้นไป"
+  },
+  "roles": {
+    "owner": "เจ้าของ",
+    "admin": "ผู้ดูแล",
+    "staff": "เจ้าหน้าที่"
+  },
+  "roomStatus": {
+    "vacant": "ห้องว่าง",
+    "occupied": "มีผู้เช่า",
+    "reserved": "จองแล้ว",
+    "maintenance": "ปิดซ่อม"
+  },
+  "financialStatus": {
+    "none": "ไม่มีบิล",
+    "paid": "ชำระแล้ว",
+    "payment_due": "รอชำระ",
+    "overdue": "เกินกำหนด"
+  },
+  "combinedStatus": {
+    "vacant": "ห้องว่าง",
+    "occupiedPaid": "มีผู้เช่า • ชำระแล้ว",
+    "occupiedDue": "มีผู้เช่า • รอชำระ",
+    "occupiedOverdue": "มีผู้เช่า • เกินกำหนด",
+    "occupiedNoBill": "มีผู้เช่า • ยังไม่ออกบิล",
+    "reserved": "จองแล้ว",
+    "maintenance": "ปิดซ่อม"
+  },
+  "roomType": {
+    "standard": "ห้องธรรมดา",
+    "air_conditioned": "ห้องแอร์",
+    "studio": "สตูดิโอ"
+  },
+  "contractStatus": {
+    "draft": "ฉบับร่าง",
+    "active": "ใช้งานอยู่",
+    "expired": "หมดอายุ",
+    "terminated": "ยกเลิกแล้ว"
+  },
+  "cardStatus": {
+    "available": "พร้อมใช้งาน",
+    "active": "ใช้งานอยู่",
+    "lost": "สูญหาย",
+    "disabled": "ปิดใช้งาน",
+    "damaged": "เสียหาย",
+    "returned": "คืนแล้ว"
+  },
+  "cardAction": {
+    "issue": "ออกบัตร",
+    "activate": "เปิดใช้งาน",
+    "disable": "ปิดใช้งาน",
+    "report_lost": "แจ้งสูญหาย",
+    "replace": "ออกบัตรใหม่",
+    "return": "รับคืนบัตร",
+    "mark_damaged": "แจ้งเสียหาย"
+  },
+  "invoiceStatus": {
+    "draft": "ฉบับร่าง",
+    "issued": "ออกบิลแล้ว",
+    "partially_paid": "ชำระบางส่วน",
+    "paid": "ชำระแล้ว",
+    "overdue": "เกินกำหนด",
+    "cancelled": "ยกเลิก"
+  },
+  "invoiceItemType": {
+    "rent": "ค่าเช่าห้อง",
+    "electricity": "ค่าไฟฟ้า",
+    "water": "ค่าน้ำ",
+    "internet": "ค่าอินเทอร์เน็ต",
+    "parking": "ค่าที่จอดรถ",
+    "other": "ค่าใช้จ่ายอื่น",
+    "discount": "ส่วนลด"
+  },
+  "paymentMethod": {
+    "cash": "เงินสด",
+    "bank_transfer": "โอนเงิน",
+    "promptpay": "พร้อมเพย์"
+  },
+  "paymentStatus": {
+    "pending": "รอตรวจสอบ",
+    "confirmed": "ยืนยันแล้ว",
+    "cancelled": "ยกเลิก"
+  },
+  "maintenanceStatus": {
+    "open": "แจ้งใหม่",
+    "in_progress": "กำลังดำเนินการ",
+    "waiting": "รอดำเนินการ",
+    "completed": "เสร็จสิ้น",
+    "cancelled": "ยกเลิก"
+  },
+  "maintenancePriority": {
+    "low": "ต่ำ",
+    "medium": "ปานกลาง",
+    "high": "สูง",
+    "urgent": "เร่งด่วน"
+  },
+  "meterType": {
+    "electricity": "ไฟฟ้า",
+    "water": "น้ำ"
+  },
+  "dashboard": {
+    "title": "ภาพรวม",
+    "subtitle": "ข้อมูลของห้องพักจริง {count} ห้อง (ไม่รวมข้อมูลทดสอบ)",
+    "rooms": "ห้องพัก",
+    "totalRooms": "ห้องพักทั้งหมด",
+    "occupied": "มีผู้เช่า",
+    "vacant": "ห้องว่าง",
+    "reserved": "จองแล้ว",
+    "maintenance": "ปิดซ่อม",
+    "occupancyRate": "อัตราการเข้าพัก",
+    "finance": "การเงิน",
+    "expectedRevenue": "รายได้ที่คาดว่าจะได้รับ",
+    "expectedRevenueHint": "ค่าเช่ารวมจากสัญญาที่ใช้งานอยู่",
+    "invoicedThisMonth": "ยอดออกบิลเดือนนี้",
+    "collectedThisMonth": "ยอดเก็บได้เดือนนี้",
+    "outstanding": "ยอดค้างชำระ",
+    "overdue": "เกินกำหนดชำระ",
+    "operations": "งานที่ต้องติดตาม",
+    "contractsExpiring": "สัญญาใกล้หมดอายุ",
+    "openTickets": "งานซ่อมที่ค้างอยู่",
+    "lostCards": "คีย์การ์ดสูญหาย",
+    "paymentsDue": "รายการรอชำระ",
+    "registeredTenants": "ผู้เช่าที่ลงทะเบียน",
+    "totalOccupants": "จำนวนผู้พักรวม",
+    "daysRemaining": "เหลือ {days} วัน",
+    "expiresToday": "หมดอายุวันนี้",
+    "expired": "หมดอายุแล้ว",
+    "daysOverdue": "เกิน {days} วัน",
+    "noExpiringContracts": "ไม่มีสัญญาใกล้หมดอายุ",
+    "noOpenTickets": "ไม่มีงานซ่อมค้างอยู่",
+    "noLostCards": "ไม่มีคีย์การ์ดสูญหาย",
+    "noOverdue": "ไม่มียอดเกินกำหนด",
+    "testDataExcluded": "ตัวเลขทั้งหมดไม่รวมห้องทดสอบ T01"
+  },
+  "floorPlan": {
+    "title": "ผังห้องพัก",
+    "subtitle": "คลิกที่ห้องเพื่อดูรายละเอียด",
+    "floor": "ชั้น {floor}",
+    "legend": "สัญลักษณ์",
+    "provisional": "ผังนี้เป็นผังชั่วคราว",
+    "provisionalDetail": "ตำแหน่งห้องจะถูกปรับให้ตรงกับผังอาคารจริงเมื่อได้รับแบบแปลน แก้ไขได้ที่ src/config/floor-layout/",
+    "corridor": "ทางเดิน",
+    "stairs": "บันได",
+    "entrance": "ทางเข้า",
+    "lift": "ลิฟต์",
+    "noRooms": "ไม่มีห้องในชั้นนี้",
+    "roomsOnFloor": "{count} ห้อง"
+  },
+  "room": {
+    "title": "ห้อง {roomNumber}",
+    "roomNumber": "เลขห้อง",
+    "floor": "ชั้น",
+    "type": "ประเภทห้อง",
+    "size": "ขนาด",
+    "sqm": "ตร.ม.",
+    "status": "สถานะห้อง",
+    "mainTenant": "ผู้เช่าหลัก",
+    "mainTenantHint": "ผู้เช่าหลักคือผู้ติดต่อของห้องนี้",
+    "contactPerson": "ผู้ติดต่อ",
+    "phone": "เบอร์โทรศัพท์",
+    "email": "อีเมล",
+    "occupants": "จำนวนผู้พัก",
+    "occupantsValue": "{count} คน",
+    "occupantsHint": "รวมผู้เช่าหลัก ระบบไม่เก็บข้อมูลส่วนตัวของผู้พักคนอื่น",
+    "additionalOccupants": "ผู้พักเพิ่มเติมอีก {count} คน (ไม่บันทึกข้อมูลรายบุคคล)",
+    "contractPeriod": "ระยะเวลาสัญญา",
+    "monthlyRent": "ค่าเช่าต่อเดือน",
+    "deposit": "เงินประกัน",
+    "paymentDueDay": "กำหนดชำระวันที่",
+    "accessCards": "คีย์การ์ด",
+    "electricity": "ค่าไฟฟ้า",
+    "water": "ค่าน้ำ",
+    "currentBill": "ยอดบิลปัจจุบัน",
+    "paymentStatus": "สถานะการชำระ",
+    "maintenance": "งานซ่อม",
+    "noTenant": "ยังไม่มีผู้เช่า",
+    "noContract": "ยังไม่มีสัญญา",
+    "noInvoice": "ยังไม่ออกบิล",
+    "noMeterReading": "ยังไม่ได้จดมิเตอร์",
+    "noPayments": "ยังไม่มีการชำระเงิน",
+    "noCards": "ยังไม่มีคีย์การ์ด",
+    "noMaintenance": "ไม่มีงานซ่อม",
+    "openFullPage": "เปิดหน้าห้องแบบเต็ม",
+    "emptyRoomHint": "ห้องนี้ยังว่าง สามารถเริ่มทำสัญญาเช่าใหม่ได้",
+    "tabs": {
+      "overview": "ภาพรวม",
+      "contract": "สัญญา",
+      "meters": "มิเตอร์",
+      "billing": "บิล",
+      "payments": "การชำระ",
+      "cards": "คีย์การ์ด",
+      "maintenance": "งานซ่อม"
+    }
+  },
+  "rooms": {
+    "title": "ห้องพัก",
+    "subtitle": "ห้องพักจริงทั้งหมด {count} ห้อง",
+    "filterByFloor": "กรองตามชั้น",
+    "filterByStatus": "กรองตามสถานะ",
+    "allFloors": "ทุกชั้น",
+    "allStatuses": "ทุกสถานะ",
+    "searchPlaceholder": "ค้นหาเลขห้องหรือชื่อผู้เช่า",
+    "resultCount": "พบ {count} ห้อง",
+    "noResults": "ไม่พบห้องที่ตรงกับเงื่อนไข"
+  },
+  "tenant": {
+    "title": "ผู้เช่า",
+    "fullName": "ชื่อ-นามสกุล",
+    "idCard": "เลขบัตรประชาชน / พาสปอร์ต",
+    "nationality": "สัญชาติ",
+    "emergencyContact": "ผู้ติดต่อฉุกเฉิน",
+    "emergencyPhone": "เบอร์ติดต่อฉุกเฉิน",
+    "singleTenantNotice": "ระบบบันทึกผู้เช่าหลัก 1 คนต่อห้อง โดยเป็นผู้ติดต่อของห้องนั้น"
+  },
+  "contract": {
+    "title": "สัญญาเช่า",
+    "startDate": "วันเริ่มสัญญา",
+    "endDate": "วันสิ้นสุดสัญญา",
+    "moveIn": "ทำสัญญาเข้าพัก",
+    "renew": "ต่อสัญญา",
+    "moveOut": "แจ้งย้ายออก",
+    "terminate": "ยกเลิกสัญญา",
+    "terminatedAt": "วันที่ยกเลิก",
+    "terminationReason": "เหตุผลการยกเลิก"
+  },
+  "cards": {
+    "title": "คีย์การ์ด",
+    "subtitle": "แต่ละห้องมีคีย์การ์ด 2 ใบ ผูกกับห้อง ไม่ผูกกับบุคคล",
+    "cardNumber": "หมายเลขบัตร",
+    "cardUid": "รหัสบัตร (UID)",
+    "issuedDate": "วันที่ออกบัตร",
+    "returnedDate": "วันที่รับคืน",
+    "replacementFee": "ค่าออกบัตรใหม่",
+    "history": "ประวัติการใช้งาน",
+    "slotA": "ใบที่ 1",
+    "slotB": "ใบที่ 2",
+    "belongsToRoom": "คีย์การ์ดผูกกับห้อง ไม่ต้องระบุผู้ถือบัตร"
+  },
+  "meters": {
+    "title": "จดมิเตอร์",
+    "billingMonth": "รอบบิล",
+    "previousReading": "เลขครั้งก่อน",
+    "currentReading": "เลขครั้งนี้",
+    "usage": "หน่วยที่ใช้",
+    "recordedAt": "วันที่จด",
+    "electricityRate": "อัตราค่าไฟฟ้า (บาท/หน่วย)",
+    "waterRate": "อัตราค่าน้ำ (บาท/หน่วย)",
+    "usageUnits": "{units} หน่วย"
+  },
+  "billing": {
+    "title": "ใบแจ้งหนี้",
+    "invoiceNumber": "เลขที่บิล",
+    "issueDate": "วันที่ออกบิล",
+    "dueDate": "กำหนดชำระ",
+    "subtotal": "รวมเป็นเงิน",
+    "discount": "ส่วนลด",
+    "total": "ยอดสุทธิ",
+    "paid": "ชำระแล้ว",
+    "outstanding": "คงค้าง",
+    "items": "รายการ",
+    "description": "รายละเอียด",
+    "quantity": "จำนวน",
+    "unitPrice": "ราคาต่อหน่วย",
+    "generateInvoices": "ออกบิลประจำเดือน",
+    "print": "พิมพ์บิล"
+  },
+  "payments": {
+    "title": "การชำระเงิน",
+    "paymentDate": "วันที่ชำระ",
+    "method": "ช่องทางชำระ",
+    "reference": "เลขอ้างอิง",
+    "slip": "สลิปการโอน",
+    "uploadSlip": "แนบสลิป",
+    "recordPayment": "บันทึกการชำระ",
+    "receipt": "ใบเสร็จ",
+    "history": "ประวัติการชำระ",
+    "partialPayment": "ชำระบางส่วน",
+    "maxAllowed": "ชำระได้ไม่เกิน {amount}"
+  },
+  "maintenance": {
+    "title": "งานซ่อมบำรุง",
+    "category": "ประเภทงาน",
+    "description": "รายละเอียด",
+    "priority": "ความสำคัญ",
+    "cost": "ค่าใช้จ่าย",
+    "technician": "ช่างผู้รับงาน",
+    "photo": "รูปภาพ",
+    "reportedAt": "วันที่แจ้ง",
+    "completedAt": "วันที่เสร็จ",
+    "commonArea": "พื้นที่ส่วนกลาง",
+    "newTicket": "แจ้งงานซ่อม"
+  },
+  "reports": {
+    "title": "รายงาน",
+    "subtitle": "ทุกรายงานไม่รวมข้อมูลทดสอบ",
+    "occupancy": "รายงานการเข้าพัก",
+    "monthlyBilling": "รายงานการออกบิลรายเดือน",
+    "collection": "รายงานการเก็บเงิน",
+    "outstanding": "รายงานยอดค้างชำระ",
+    "meterUsage": "รายงานการใช้น้ำ-ไฟ",
+    "contractExpiry": "รายงานสัญญาหมดอายุ",
+    "maintenance": "รายงานงานซ่อม",
+    "cardStatus": "รายงานสถานะคีย์การ์ด",
+    "export": "ส่งออก CSV"
+  },
+  "settings": {
+    "title": "ตั้งค่า",
+    "utilityRates": "อัตราค่าน้ำ-ไฟ",
+    "fees": "ค่าบริการอื่น",
+    "internetFee": "ค่าอินเทอร์เน็ต (บาท/เดือน)",
+    "parkingFee": "ค่าที่จอดรถ (บาท/เดือน)",
+    "cardReplacementFee": "ค่าออกคีย์การ์ดใหม่ (บาท)",
+    "defaultPaymentDueDay": "กำหนดชำระเริ่มต้น (วันที่)",
+    "ownerOnly": "เฉพาะเจ้าของหอพักเท่านั้นที่แก้ไขการตั้งค่าได้",
+    "saved": "บันทึกการตั้งค่าแล้ว"
+  },
+  "testMode": {
+    "title": "โหมดทดสอบ",
+    "subtitle": "ห้อง T01 เป็นห้องจำลอง ไม่ใช่ห้องจริง และไม่มีผลต่อรายงานใด ๆ",
+    "banner": "ข้อมูลในหน้านี้เป็นข้อมูลทดสอบ ไม่ถูกนับในภาพรวมหรือรายงาน",
+    "scenario": "สถานการณ์ทดสอบ",
+    "currentScenario": "สถานการณ์ปัจจุบัน",
+    "applyScenario": "ใช้สถานการณ์นี้",
+    "reset": "รีเซ็ตข้อมูลทดสอบ",
+    "resetConfirm": "คืนค่าห้อง T01 กลับเป็นค่าเริ่มต้นทั้งหมด?",
+    "resetDone": "รีเซ็ตข้อมูลทดสอบแล้ว",
+    "sameComponents": "หน้านี้ใช้คอมโพเนนต์เดียวกับห้องจริงทั้งหมด",
+    "notOnFloorPlan": "T01 อยู่ชั้น 0 จึงไม่ปรากฏบนผังห้องพักของชั้น 1-3",
+    "scenarios": {
+      "normal": "ปกติ",
+      "payment_due": "รอชำระ",
+      "overdue": "เกินกำหนดชำระ",
+      "vacant": "ห้องว่าง",
+      "maintenance": "ปิดซ่อม",
+      "lost_card": "คีย์การ์ดสูญหาย",
+      "partial_payment": "ชำระบางส่วน",
+      "contract_expiring": "สัญญาใกล้หมดอายุ"
+    },
+    "scenarioDescriptions": {
+      "normal": "มีผู้เช่า บิลชำระครบแล้ว คีย์การ์ดใช้งานได้ทั้ง 2 ใบ",
+      "payment_due": "มีบิลค้างอยู่แต่ยังไม่ถึงกำหนดชำระ",
+      "overdue": "บิลเกินกำหนดชำระแล้ว",
+      "vacant": "ไม่มีผู้เช่า ไม่มีสัญญา คีย์การ์ดพร้อมใช้งาน",
+      "maintenance": "ห้องปิดซ่อม มีงานซ่อมเร่งด่วนค้างอยู่",
+      "lost_card": "คีย์การ์ดใบที่ 2 แจ้งสูญหาย และมีค่าออกบัตรใหม่",
+      "partial_payment": "ชำระเงินมาแล้วบางส่วน ยังคงค้างอยู่",
+      "contract_expiring": "สัญญาจะหมดอายุภายใน 15 วัน"
+    }
+  },
+  "validation": {
+    "required": "กรุณากรอกข้อมูลนี้",
+    "date": {
+      "format": "รูปแบบวันที่ต้องเป็น ปปปป-ดด-วว",
+      "firstOfMonth": "รอบบิลต้องเป็นวันที่ 1 ของเดือน"
+    },
+    "money": {
+      "negative": "จำนวนเงินต้องไม่ติดลบ",
+      "notPositive": "จำนวนเงินต้องมากกว่า 0"
+    },
+    "phone": {
+      "format": "เบอร์โทรศัพท์ต้องเริ่มด้วย 0 และมี 9-10 หลัก"
+    },
+    "email": {
+      "format": "รูปแบบอีเมลไม่ถูกต้อง"
+    },
+    "room": {
+      "floorRange": "ชั้นต้องอยู่ระหว่าง 1 ถึง 3"
+    },
+    "contract": {
+      "dueDayRange": "วันกำหนดชำระต้องอยู่ระหว่าง 1 ถึง 28",
+      "occupantsMin": "จำนวนผู้พักต้องมีอย่างน้อย 1 คน",
+      "endBeforeStart": "วันสิ้นสุดสัญญาต้องหลังวันเริ่มสัญญา"
+    },
+    "card": {
+      "slot": "หมายเลขบัตรต้องลงท้ายด้วย -A หรือ -B"
+    },
+    "meter": {
+      "reversed": "เลขมิเตอร์ครั้งนี้ต้องไม่น้อยกว่าครั้งก่อน"
+    },
+    "invoice": {
+      "noItems": "บิลต้องมีรายการอย่างน้อย 1 รายการ"
+    },
+    "payment": {
+      "exceedsTotal": "จำนวนเงินเกินยอดคงค้าง"
+    }
+  },
+  "errors": {
+    "generic": "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง",
+    "notFound": "ไม่พบข้อมูลที่ต้องการ",
+    "roomNotFound": "ไม่พบห้องพักนี้",
+    "permissionDenied": "คุณไม่มีสิทธิ์ทำรายการนี้"
+  }
+}

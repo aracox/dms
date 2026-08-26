@@ -1,0 +1,104 @@
+@import 'tailwindcss';
+
+/*
+ * CP AXTRA / Lotus's palette. Defined once here; components use the semantic
+ * tokens (bg-status-paid, text-brand-blue) rather than raw hex, so a rebrand is
+ * a change to this file alone.
+ */
+@theme {
+  --color-brand-blue: rgb(48 111 199);
+  --color-brand-yellow: rgb(246 194 74);
+  --color-brand-green: rgb(67 147 143);
+  --color-brand-red: rgb(218 56 50);
+
+  /* Tints, for fills behind dark text. */
+  --color-brand-blue-soft: rgb(233 240 250);
+  --color-brand-yellow-soft: rgb(254 246 228);
+  --color-brand-green-soft: rgb(232 243 242);
+  --color-brand-red-soft: rgb(252 234 233);
+
+  /* Shades, for text and borders that must pass contrast on a tint. */
+  --color-brand-blue-deep: rgb(28 72 133);
+  --color-brand-yellow-deep: rgb(140 100 12);
+  --color-brand-green-deep: rgb(38 92 89);
+  --color-brand-red-deep: rgb(150 30 26);
+
+  --color-surface: rgb(255 255 255);
+  --color-surface-muted: rgb(247 248 250);
+  --color-surface-sunken: rgb(241 243 246);
+  --color-border: rgb(224 228 234);
+  --color-border-strong: rgb(199 205 214);
+  --color-ink: rgb(24 30 40);
+  --color-ink-muted: rgb(96 106 122);
+  --color-ink-subtle: rgb(138 147 161);
+
+  --font-sans:
+    'Noto Sans Thai', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+}
+
+/*
+ * Room status colours. Colour is never the only signal -- every consumer pairs
+ * these with an icon and a text label (see components/status/status-styles.ts).
+ */
+@theme {
+  --color-status-vacant: rgb(241 243 246);
+  --color-status-vacant-ink: rgb(96 106 122);
+  --color-status-vacant-edge: rgb(199 205 214);
+
+  --color-status-paid: rgb(232 243 242);
+  --color-status-paid-ink: rgb(38 92 89);
+  --color-status-paid-edge: rgb(67 147 143);
+
+  --color-status-due: rgb(254 246 228);
+  --color-status-due-ink: rgb(140 100 12);
+  --color-status-due-edge: rgb(246 194 74);
+
+  --color-status-overdue: rgb(252 234 233);
+  --color-status-overdue-ink: rgb(150 30 26);
+  --color-status-overdue-edge: rgb(218 56 50);
+
+  --color-status-occupied: rgb(233 240 250);
+  --color-status-occupied-ink: rgb(28 72 133);
+  --color-status-occupied-edge: rgb(48 111 199);
+
+  --color-status-maintenance: rgb(237 239 243);
+  --color-status-maintenance-ink: rgb(70 78 92);
+  --color-status-maintenance-edge: rgb(138 147 161);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-surface-muted);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible keyboard focus. The floor plan is fully keyboard navigable. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-blue);
+  outline-offset: 2px;
+}
+
+/* The spec asks for information density over motion; keep transitions short. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
