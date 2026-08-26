@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "db:push": "tsx scripts/db-push.ts",
     "seed": "tsx scripts/seed.ts",
-    "sql": "tsx scripts/sql.ts"
+    "sql": "tsx scripts/sql.ts",
+    "create-user": "tsx scripts/create-user.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

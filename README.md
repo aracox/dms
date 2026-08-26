@@ -21,17 +21,26 @@ npm run seed                   # 21 real rooms + T01, tenants, invoices, payment
 npm run dev                    # http://localhost:3000 -> redirects to /th
 ```
 
-Then create your login: sign up is not exposed in the UI, so add the user in the
-Supabase dashboard (**Authentication → Users → Add user**), and promote them:
+Then create your login. Sign-up is deliberately not exposed in the UI — this is a
+private tool for one dormitory:
+
+```powershell
+$env:NEW_USER_PASSWORD = "choose-a-real-password"
+npm run create-user -- you@example.com owner
+```
+
+The password comes from the environment, not an argument, so it stays out of
+shell history. Supabase requires at least 6 characters and the script checks
+before calling the API.
+
+Or do it by hand in the dashboard (**Authentication → Users → Add user**), then
+promote the account — a trigger creates the `profiles` row at `staff` on sign-up:
 
 ```sql
 update profiles
 set role = 'owner', full_name = 'Dormitory Owner'
 where id = (select id from auth.users where email = 'you@example.com');
 ```
-
-A trigger creates the `profiles` row automatically on sign-up, defaulting to the
-`staff` role.
 
 ### Node on Windows
 
@@ -58,6 +67,8 @@ $env:PATH = "D:\Users\boitsaret\AppData\Local\Microsoft\WinGet\Packages\OpenJS.N
 | `npm run test:watch` | Vitest, watch mode |
 | `npm run db:push` | Apply pending migrations (tracked in `schema_migrations`) |
 | `npm run seed` | Apply `supabase/seed.sql` and verify test-data exclusion |
+| `npm run sql -- "select ..."` | Ad-hoc query for inspection. Bypasses RLS |
+| `npm run create-user -- <email> <role>` | Create an auth user and set its role |
 
 Run one test file, or one test by name:
 
