@@ -51,8 +51,13 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={notoSansThai.variable}>
-      <body className="font-sans antialiased">
+    // suppressHydrationWarning on html/body only: browser extensions inject
+    // attributes onto these two elements before React hydrates (ColorZilla adds
+    // cz-shortcut-listen, Grammarly adds data-gr-*), which React otherwise
+    // reports as a mismatch. It suppresses the warning for these elements'
+    // own attributes, not for the tree inside them.
+    <html lang={locale} className={notoSansThai.variable} suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>

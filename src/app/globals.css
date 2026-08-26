@@ -32,9 +32,14 @@
   --color-ink-muted: rgb(96 106 122);
   --color-ink-subtle: rgb(138 147 161);
 
+  /*
+   * Must reference the next/font variable, not the family name: naming
+   * 'Noto Sans Thai' as a string only picks it up if the user happens to have
+   * it installed locally, silently bypassing the self-hosted, subsetted font.
+   * The variable is set on <html> in [locale]/layout.tsx.
+   */
   --font-sans:
-    'Noto Sans Thai', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
-    sans-serif;
+    var(--font-noto-sans-thai), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 /*
