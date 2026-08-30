@@ -16,6 +16,7 @@
     "payments": "Payments",
     "maintenance": "Maintenance",
     "reports": "Reports",
+    "profile": "Profile",
     "settings": "Settings",
     "testMode": "Test Mode",
     "operations": "Operations",
@@ -67,7 +68,17 @@
     "noProfile": "This account has not been granted access. Please contact the owner.",
     "signedInAs": "Signed in as",
     "accessDenied": "You do not have access to this page",
-    "accessDeniedDetail": "Requires the {role} role or higher"
+    "accessDeniedDetail": "Requires the {role} role or higher",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "changePassword": "Change password",
+    "changingPassword": "Changing password...",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordMismatch": "Passwords do not match",
+    "passwordChangeFailed": "Could not change the password. Please try again.",
+    "mustChangePasswordTitle": "Set a new password",
+    "mustChangePasswordSubtitle": "You must set your own password before continuing.",
+    "passwordChangedSignInAgain": "Password changed. Please sign in again."
   },
   "roles": {
     "owner": "Owner",
@@ -382,6 +393,9 @@
     "defaultPaymentDueDay": "Default payment due day",
     "ownerOnly": "Only the owner can change settings",
     "saved": "Settings saved"
+  },
+  "profile": {
+    "title": "Profile"
   },
   "testMode": {
     "title": "Test Mode",

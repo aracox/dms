@@ -5,8 +5,15 @@ import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
 
 import { LoginForm } from './LoginForm';
 
-export default async function LoginPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function LoginPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ passwordChanged?: string }>;
+}) {
   const { locale } = await params;
+  const { passwordChanged } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations();
 
@@ -22,6 +29,11 @@ export default async function LoginPage({ params }: { params: Promise<{ locale: 
         </div>
 
         <div className="border-border bg-surface rounded-lg border p-5">
+          {passwordChanged ? (
+            <p className="border-brand-green bg-brand-green-soft text-brand-green-deep mb-4 rounded border px-3 py-2 text-xs">
+              {t('auth.passwordChangedSignInAgain')}
+            </p>
+          ) : null}
           <LoginForm />
         </div>
 

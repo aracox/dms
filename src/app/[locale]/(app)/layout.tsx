@@ -30,6 +30,14 @@ export default async function AppLayout({
     return null;
   }
 
+  // A Server Action's own redirect() lands here before the client picks up the
+  // freshly-set session cookie on a fresh request, so this cannot be enforced
+  // in middleware alone -- it must be re-checked on every render under (app).
+  if (profile.must_change_password) {
+    redirect({ href: '/change-password', locale });
+    return null;
+  }
+
   return (
     <AppShell
       profile={{

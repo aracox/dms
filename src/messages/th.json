@@ -16,6 +16,7 @@
     "payments": "การชำระเงิน",
     "maintenance": "งานซ่อมบำรุง",
     "reports": "รายงาน",
+    "profile": "โปรไฟล์",
     "settings": "ตั้งค่า",
     "testMode": "โหมดทดสอบ",
     "operations": "งานประจำวัน",
@@ -67,7 +68,17 @@
     "noProfile": "บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน กรุณาติดต่อเจ้าของหอพัก",
     "signedInAs": "เข้าสู่ระบบในชื่อ",
     "accessDenied": "คุณไม่มีสิทธิ์เข้าถึงหน้านี้",
-    "accessDeniedDetail": "ต้องมีสิทธิ์ระดับ {role} ขึ้นไป"
+    "accessDeniedDetail": "ต้องมีสิทธิ์ระดับ {role} ขึ้นไป",
+    "newPassword": "รหัสผ่านใหม่",
+    "confirmPassword": "ยืนยันรหัสผ่านใหม่",
+    "changePassword": "เปลี่ยนรหัสผ่าน",
+    "changingPassword": "กำลังเปลี่ยนรหัสผ่าน...",
+    "passwordTooShort": "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร",
+    "passwordMismatch": "รหัสผ่านไม่ตรงกัน",
+    "passwordChangeFailed": "ไม่สามารถเปลี่ยนรหัสผ่านได้ กรุณาลองใหม่อีกครั้ง",
+    "mustChangePasswordTitle": "ตั้งรหัสผ่านใหม่",
+    "mustChangePasswordSubtitle": "คุณต้องตั้งรหัสผ่านของตัวเองก่อนใช้งานต่อ",
+    "passwordChangedSignInAgain": "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว กรุณาเข้าสู่ระบบอีกครั้ง"
   },
   "roles": {
     "owner": "เจ้าของ",
@@ -382,6 +393,9 @@
     "defaultPaymentDueDay": "กำหนดชำระเริ่มต้น (วันที่)",
     "ownerOnly": "เฉพาะเจ้าของหอพักเท่านั้นที่แก้ไขการตั้งค่าได้",
     "saved": "บันทึกการตั้งค่าแล้ว"
+  },
+  "profile": {
+    "title": "โปรไฟล์"
   },
   "testMode": {
     "title": "โหมดทดสอบ",

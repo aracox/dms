@@ -7,7 +7,8 @@ export interface NavItem {
   labelKey: string;
   /** Lucide icon name, resolved in Sidebar. */
   icon: string;
-  permission: Permission;
+  /** Omit for a personal item every signed-in user can see, regardless of role. */
+  permission?: Permission;
 }
 
 export interface NavSection {
@@ -65,6 +66,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     labelKey: 'system',
     items: [
+      { href: '/profile', labelKey: 'profile', icon: 'User' },
       { href: '/settings', labelKey: 'settings', icon: 'Settings', permission: 'settings:read' },
       { href: '/test', labelKey: 'testMode', icon: 'FlaskConical', permission: 'test-mode:use' },
     ],

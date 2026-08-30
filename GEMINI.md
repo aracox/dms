@@ -1,4 +1,10 @@
-<!-- The behavioral guidelines below are kept identical in CLAUDE.md and GEMINI.md. Edit all three together. -->
+# GEMINI.md
+
+This file provides guidance to Gemini / Antigravity when working with code in this repository.
+
+<!-- The behavioral guidelines below are kept identical in CLAUDE.md and AGENTS.md. Edit all three together. -->
+
+---
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
@@ -120,31 +126,21 @@ Never commit secrets, API keys, or local `.env` files. Provide safe placeholders
 
 The template ships read-only consultation skills that let each assistant get an independent second opinion from another. All shell out to locally installed, authenticated CLIs and stay **read-only** (no editing, commits, or secrets in prompts).
 
-For **Claude Code** (under `.claude/skills/`) and **Antigravity / Gemini** (under `.gemini/skills/`):
+For **Antigravity / Gemini** (under `.gemini/skills/`) and **Claude Code** (under `.claude/skills/`):
 
-- `.gemini/skills/consult-codex/scripts/consult-codex.sh "<request>"` — asks the OpenAI **Codex** CLI (`codex exec`, read-only sandbox, high reasoning). Prints Codex's final answer on stdout. See `.gemini/skills/consult-codex/SKILL.md` (or `.claude/skills/consult-codex/SKILL.md`).
+- `.gemini/skills/consult-codex/scripts/consult-codex.sh "<request>"` — asks the OpenAI **Codex** CLI (`codex exec`, read-only sandbox, high reasoning). Prints Codex's final answer on stdout. See `.gemini/skills/consult-codex/SKILL.md`.
 - `.gemini/skills/consult-claude/scripts/consult-claude.sh "<request>"` — asks the **Claude Code** CLI (`claude -p`, read-only plan mode, high effort). Prints Claude's answer on stdout. See `.gemini/skills/consult-claude/SKILL.md`.
 
-For the **Codex CLI** (under `.codex/skills/`, not read by Claude Code) — an orchestration system that routes tasks to other models:
+For the **Codex CLI** (under `.codex/skills/`, not read by Gemini) — an orchestration system that routes tasks to other models:
 
 - `.codex/skills/consult-claude/scripts/consult-claude.sh "<request>"` — runs `claude -p` in plan mode (`--model sonnet --effort high --max-turns 30`, JSON output).
 - `.codex/skills/consult-antigravity/scripts/consult-antigravity.sh "<request>"` — runs the `agy` CLI in plan/print mode.
 
-## Orchestration skills (Claude Code)
+## Orchestration skills (Gemini / Antigravity)
 
-`.claude/skills/` also ships two skills that route work between Claude and the consult-* CLIs above. Claude Code should invoke them proactively when the trigger applies, not wait to be told:
+`.gemini/skills/` also ships two skills that route work between Antigravity and the consult-* CLIs above. Antigravity should invoke them proactively when the trigger applies, not wait to be told:
 
-- **`orchestrator`** — invoke when the user says the literal phrase "do think". Classifies the task, then routes: very complex/ambiguous/cross-cutting work stays with Claude itself; bounded complex work (focused review, implementation plan) goes to `consult-codex` for advice first; generic/simple work goes to `consult-antigravity` for advice first. Claude always does the actual implementation. See `.claude/skills/orchestrator/SKILL.md`.
-- **`looping-engineer`** — invoke when the user asks to complete a goal end to end (or explicitly names the skill). Runs a full define-done → route-work → execute-until-verified → deliver loop, delegating only analysis/review to `consult-codex` or `consult-antigravity` while Claude remains the implementation owner. See `.claude/skills/looping-engineer/SKILL.md`.
+- **`orchestrator`** — invoke when the user says the literal phrase "do think". Classifies the task, then routes: very complex/ambiguous/cross-cutting work stays with Antigravity itself; bounded complex work (focused review, implementation plan) goes to `consult-codex` for advice first; generic/simple work goes to `consult-claude` for advice first. Antigravity always does the actual implementation. See `.gemini/skills/orchestrator/SKILL.md`.
+- **`looping-engineer`** — invoke when the user asks to complete a goal end to end (or explicitly names the skill). Runs a full define-done → route-work → execute-until-verified → deliver loop, delegating only analysis/review to `consult-codex` or `consult-claude` while Antigravity remains the implementation owner. See `.gemini/skills/looping-engineer/SKILL.md`.
 
-Mirrors of both exist under `.gemini/skills/` (Antigravity as owner) and `.codex/skills/` (Codex as owner) for their respective CLIs.
-
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+Mirrors of both exist under `.claude/skills/` (Claude as owner) and `.codex/skills/` (Codex as owner) for their respective CLIs.

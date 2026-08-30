@@ -11,6 +11,7 @@ import {
   Map,
   ReceiptText,
   Settings,
+  User,
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
@@ -35,6 +36,7 @@ const ICONS: Record<string, LucideIcon> = {
   ChartColumn,
   Settings,
   FlaskConical,
+  User,
 };
 
 export function Sidebar({ role }: { role: AppRole | null }) {
@@ -44,7 +46,9 @@ export function Sidebar({ role }: { role: AppRole | null }) {
   return (
     <nav aria-label={t('dashboard')} className="space-y-5">
       {NAV_SECTIONS.map((section, sectionIndex) => {
-        const visible = section.items.filter((item) => can(role, item.permission as Permission));
+        const visible = section.items.filter(
+          (item) => !item.permission || can(role, item.permission as Permission),
+        );
         if (visible.length === 0) return null;
 
         return (

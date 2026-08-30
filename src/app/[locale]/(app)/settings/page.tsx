@@ -3,7 +3,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PageHeader } from '@/components/layout/AppShell';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
 import { ComingSoon } from '@/components/ui/ComingSoon';
-import type { Locale } from '@/i18n/routing';
 import { can } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 
@@ -60,24 +59,6 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
               <Field
                 label={t('settings.cardReplacementFee')}
                 value={value('card_replacement_fee')}
-              />
-            </FieldGrid>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader title={t('auth.signedInAs')} />
-          <CardBody>
-            <FieldGrid>
-              <Field label={t('tenant.fullName')} value={profile?.full_name || '-'} />
-              <Field label={t('auth.email')} value={profile?.email ?? '-'} />
-              <Field
-                label={t('common.status')}
-                value={profile ? t(`roles.${profile.role}`) : '-'}
-              />
-              <Field
-                label={t('common.language')}
-                value={(locale as Locale) === 'th' ? 'ไทย' : 'English'}
               />
             </FieldGrid>
           </CardBody>

@@ -58,6 +58,7 @@ export type ProfileRow = {
   full_name: string;
   role: AppRole;
   is_active: boolean;
+  must_change_password: boolean;
   created_at: string;
   updated_at: string;
 };

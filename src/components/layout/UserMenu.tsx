@@ -3,6 +3,7 @@
 import { LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { Link } from '@/i18n/navigation';
 import { signOutAction } from '@/lib/auth/actions';
 import type { AppRole } from '@/types/database';
 
@@ -19,10 +20,10 @@ export function UserMenu({
 
   return (
     <div className="flex items-center gap-3">
-      <div className="hidden text-right sm:block">
+      <Link href="/profile" className="hidden text-right sm:block sm:hover:opacity-75">
         <p className="text-ink text-xs font-medium">{name || email}</p>
         <p className="text-ink-subtle text-[11px]">{t(`roles.${role}`)}</p>
-      </div>
+      </Link>
 
       <form action={signOutAction}>
         <button
