@@ -13,6 +13,13 @@ import { z } from 'zod';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const THAI_PHONE = /^0\d{8,9}$/;
+// Structural check only. z.uuid() enforces RFC 4122 version/variant bits, but
+// seed_uuid() (md5(...)::uuid in supabase/seed.sql) doesn't set them, so every
+// seeded id would fail that stricter check. Postgres's own `uuid` column
+// accepts any 8-4-4-4-12 hex value regardless of those bits; this matches that.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const uuid = z.string().regex(UUID, 'errors.generic');
 
 const isoDate = z.string().regex(ISO_DATE, 'validation.date.format');
 
@@ -66,8 +73,8 @@ export type TenantInput = z.infer<typeof tenantSchema>;
 
 export const contractSchema = z
   .object({
-    room_id: z.uuid(),
-    tenant_id: z.uuid(),
+    room_id: uuid,
+    tenant_id: uuid,
     start_date: isoDate,
     end_date: isoDate,
     monthly_rent: money,
@@ -91,7 +98,7 @@ export type ContractInput = z.infer<typeof contractSchema>;
 // --- Access cards ----------------------------------------------------------
 
 export const accessCardSchema = z.object({
-  room_id: z.uuid(),
+  room_id: uuid,
   /** Must be <room_number>-A or <room_number>-B; the database enforces the pairing. */
   card_number: z
     .string()
@@ -106,7 +113,7 @@ export const accessCardSchema = z.object({
 });
 
 export const cardActionSchema = z.object({
-  card_id: z.uuid(),
+  card_id: uuid,
   action: z.enum(['activate', 'disable', 'report_lost', 'replace', 'return', 'mark_damaged']),
   replacement_fee: money.optional(),
   note: z.string().trim().max(500).optional(),
@@ -118,7 +125,7 @@ export type CardActionInput = z.infer<typeof cardActionSchema>;
 
 export const meterReadingSchema = z
   .object({
-    room_id: z.uuid(),
+    room_id: uuid,
     meter_type: z.enum(['electricity', 'water']),
     billing_month: billingMonth,
     previous_reading: money,
@@ -144,8 +151,8 @@ export const invoiceItemSchema = z.object({
 });
 
 export const invoiceSchema = z.object({
-  room_id: z.uuid(),
-  contract_id: z.uuid().nullable().optional(),
+  room_id: uuid,
+  contract_id: uuid.nullable().optional(),
   billing_month: billingMonth,
   issue_date: isoDate.nullable().optional(),
   due_date: isoDate,
@@ -158,7 +165,7 @@ export type InvoiceInput = z.infer<typeof invoiceSchema>;
 // --- Payments --------------------------------------------------------------
 
 export const paymentSchema = z.object({
-  invoice_id: z.uuid(),
+  invoice_id: uuid,
   payment_date: isoDate,
   amount: positiveMoney,
   payment_method: z.enum(['cash', 'bank_transfer', 'promptpay']),
@@ -174,7 +181,7 @@ export type PaymentInput = z.infer<typeof paymentSchema>;
 
 export const maintenanceSchema = z.object({
   /** Null for a common-area ticket. */
-  room_id: z.uuid().nullable().optional(),
+  room_id: uuid.nullable().optional(),
   category: z.string().trim().min(1, 'validation.required').max(60),
   description: z.string().trim().min(1, 'validation.required').max(2000),
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
@@ -194,7 +201,10 @@ export const settingsSchema = z.object({
   internet_fee: money,
   parking_fee: money,
   card_replacement_fee: money,
-  default_payment_due_day: z.int().min(1).max(28),
+  default_payment_due_day: z
+    .int()
+    .min(1, 'validation.contract.dueDayRange')
+    .max(28, 'validation.contract.dueDayRange'),
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;
@@ -207,13 +217,16 @@ export type SettingsInput = z.infer<typeof settingsSchema>;
  */
 export const moveInSchema = z
   .object({
-    room_id: z.uuid(),
+    room_id: uuid,
     tenant: tenantSchema,
     start_date: isoDate,
     end_date: isoDate,
     monthly_rent: money,
     deposit: money,
-    payment_due_day: z.int().min(1).max(28),
+    payment_due_day: z
+      .int()
+      .min(1, 'validation.contract.dueDayRange')
+      .max(28, 'validation.contract.dueDayRange'),
     occupant_count: z.int().min(1, 'validation.contract.occupantsMin').max(20),
     activate_cards: z.boolean().default(true),
   })
@@ -225,7 +238,7 @@ export const moveInSchema = z
 export type MoveInInput = z.infer<typeof moveInSchema>;
 
 export const moveOutSchema = z.object({
-  contract_id: z.uuid(),
+  contract_id: uuid,
   terminated_at: isoDate,
   termination_reason: z.string().trim().max(500).optional(),
   return_cards: z.boolean().default(true),

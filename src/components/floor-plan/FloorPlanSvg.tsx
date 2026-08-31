@@ -65,11 +65,10 @@ export function FloorPlanSvg({
         </pattern>
       </defs>
 
-      {/* Building footprint: the L-shaped outline. */}
+      {/* Building footprint. */}
       <polygon
         points={layout.outline.map(([x, y]) => `${x},${y}`).join(' ')}
-        className="fill-surface stroke-border-strong"
-        strokeWidth="2"
+        className="fill-surface"
       />
 
       {layout.decorations.map((decoration, index) => (
@@ -189,7 +188,7 @@ export function FloorPlanSvg({
             <text
               x={roomLayout.x + 10}
               y={roomLayout.y + 26}
-              className={cn(style.text, 'text-[17px] font-bold')}
+              className={cn(style.text, 'text-[15px] font-bold')}
             >
               {room.room_number}
             </text>
@@ -207,24 +206,20 @@ export function FloorPlanSvg({
             <text
               x={roomLayout.x + 10}
               y={roomLayout.y + 46}
-              className={cn(style.text, 'text-[10px] font-medium')}
+              className={cn(style.text, 'text-[8px] font-medium')}
             >
-              {truncate(statusLabel, 22)}
+              {truncate(statusLabel, 26)}
             </text>
 
-            <text
-              x={roomLayout.x + 10}
-              y={roomLayout.y + 68}
-              className="fill-ink-muted text-[10px]"
-            >
-              {truncate(tenantLabel, 20)}
+            <text x={roomLayout.x + 10} y={roomLayout.y + 68} className="fill-ink-muted text-[8px]">
+              {truncate(tenantLabel, 22)}
             </text>
 
             {room.occupant_count ? (
               <text
                 x={roomLayout.x + 10}
                 y={roomLayout.y + 84}
-                className="fill-ink-subtle text-[10px]"
+                className="fill-ink-subtle text-[8px]"
               >
                 {t('room.occupantsValue', { count: room.occupant_count })}
               </text>
@@ -235,7 +230,7 @@ export function FloorPlanSvg({
                 x={roomLayout.x + roomLayout.width - 10}
                 y={roomLayout.y + roomLayout.height - 10}
                 textAnchor="end"
-                className={cn(style.text, 'text-[11px] font-semibold tabular-nums')}
+                className={cn(style.text, 'text-[9px] font-semibold tabular-nums')}
               >
                 {formatAmount(room.outstanding, locale)}
               </text>

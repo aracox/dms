@@ -1,29 +1,25 @@
 {
   "floor": 1,
   "provisional": true,
-  "note": "PROVISIONAL geometry. The real dormitory plan has not been supplied. Room numbers 101-107 assume 7 rooms per floor (7 x 3 = 21). When the real plan arrives, remap x/y/width/height here only -- no component changes are needed.",
-  "viewBox": "0 0 700 730",
+  "note": "Topology confirmed by the owner: the building is a plain rectangle (not L-shaped), all 7 rooms sit in a single row (101 on the left through 107 on the right), with a corridor below them and the stairs right past the 107 end. Exact wall measurements were not supplied, so room/corridor sizes here are still placeholder -- only x/y/width/height need remapping once real dimensions arrive.",
+  "viewBox": "0 0 700 280",
   "outline": [
-    [50, 50],
-    [650, 50],
-    [650, 290],
-    [300, 290],
-    [300, 680],
-    [50, 680]
+    [50, 30],
+    [650, 30],
+    [650, 260],
+    [50, 260]
   ],
   "decorations": [
-    { "type": "corridor", "x": 70, "y": 200, "width": 560, "height": 70 },
-    { "type": "corridor", "x": 210, "y": 270, "width": 70, "height": 390 },
-    { "type": "stairs", "x": 545, "y": 208, "width": 75, "height": 54 },
-    { "type": "entrance", "x": 212, "y": 662, "width": 66, "height": 16 }
+    { "type": "corridor", "x": 50, "y": 180, "width": 600, "height": 70 },
+    { "type": "stairs", "x": 560, "y": 180, "width": 85, "height": 70 }
   ],
   "rooms": [
-    { "roomNumber": "101", "x": 70, "y": 70, "width": 140, "height": 130 },
-    { "roomNumber": "102", "x": 210, "y": 70, "width": 140, "height": 130 },
-    { "roomNumber": "103", "x": 350, "y": 70, "width": 140, "height": 130 },
-    { "roomNumber": "104", "x": 490, "y": 70, "width": 140, "height": 130 },
-    { "roomNumber": "105", "x": 70, "y": 270, "width": 140, "height": 130 },
-    { "roomNumber": "106", "x": 70, "y": 400, "width": 140, "height": 130 },
-    { "roomNumber": "107", "x": 70, "y": 530, "width": 140, "height": 130 }
+    { "roomNumber": "101", "x": 50, "y": 50, "width": 85, "height": 130 },
+    { "roomNumber": "102", "x": 135, "y": 50, "width": 85, "height": 130 },
+    { "roomNumber": "103", "x": 220, "y": 50, "width": 85, "height": 130 },
+    { "roomNumber": "104", "x": 305, "y": 50, "width": 85, "height": 130 },
+    { "roomNumber": "105", "x": 390, "y": 50, "width": 85, "height": 130 },
+    { "roomNumber": "106", "x": 475, "y": 50, "width": 85, "height": 130 },
+    { "roomNumber": "107", "x": 560, "y": 50, "width": 85, "height": 130 }
   ]
 }

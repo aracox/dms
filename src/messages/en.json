@@ -217,8 +217,6 @@
     "subtitle": "Click a room to see its details",
     "floor": "Floor {floor}",
     "legend": "Legend",
-    "provisional": "This layout is provisional",
-    "provisionalDetail": "Room positions will be mapped to the real building plan once it is supplied. Edit src/config/floor-layout/ to update them.",
     "corridor": "Corridor",
     "stairs": "Stairs",
     "entrance": "Entrance",
@@ -290,18 +288,25 @@
     "nationality": "Nationality",
     "emergencyContact": "Emergency contact",
     "emergencyPhone": "Emergency phone",
-    "singleTenantNotice": "One main tenant is registered per room, and is the contact person for that room."
+    "singleTenantNotice": "One main tenant is registered per room, and is the contact person for that room.",
+    "documents": "ID card / passport copy",
+    "documentsHint": "JPG, PNG, WEBP, or PDF, up to 5MB each. You can add more later.",
+    "noDocuments": "No documents uploaded",
+    "addDocuments": "Add document",
+    "uploadedOn": "Uploaded {date}"
   },
   "contract": {
     "title": "Contract",
     "startDate": "Start date",
     "endDate": "End date",
     "moveIn": "Move in",
+    "activateCards": "Activate the room's access cards",
     "renew": "Renew contract",
     "moveOut": "Move out",
     "terminate": "Terminate contract",
     "terminatedAt": "Terminated on",
-    "terminationReason": "Termination reason"
+    "terminationReason": "Termination reason",
+    "roomAlreadyOccupied": "This room already has an active contract. Refresh the page."
   },
   "cards": {
     "title": "Access Cards",
@@ -465,6 +470,9 @@
     },
     "payment": {
       "exceedsTotal": "Amount exceeds the outstanding balance"
+    },
+    "document": {
+      "invalid": "No valid file was uploaded. Only JPG, PNG, WEBP, or PDF up to 5MB are allowed."
     }
   },
   "errors": {

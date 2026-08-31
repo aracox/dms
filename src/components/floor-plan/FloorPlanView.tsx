@@ -1,6 +1,5 @@
 'use client';
 
-import { Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
@@ -40,14 +39,12 @@ export function FloorPlanView({
 
   const layout = FLOOR_LAYOUTS.find((candidate) => candidate.floor === floor);
   const selectedRoom = selectedRoomNumber ? roomsByNumber.get(selectedRoomNumber) : undefined;
-  const anyProvisional = FLOOR_LAYOUTS.some((candidate) => candidate.provisional);
 
   return (
     <div className="space-y-4">
       <div role="tablist" aria-label={t('floorPlan.title')} className="flex gap-1">
         {FLOOR_LAYOUTS.map((candidate) => {
           const isActive = candidate.floor === floor;
-          const roomCount = candidate.rooms.length;
 
           return (
             <button
@@ -64,28 +61,13 @@ export function FloorPlanView({
               )}
             >
               {t('floorPlan.floor', { floor: candidate.floor })}
-              <span
-                className={cn('ml-1.5 text-xs', isActive ? 'text-white/80' : 'text-ink-subtle')}
-              >
-                {roomCount}
-              </span>
             </button>
           );
         })}
       </div>
 
-      {anyProvisional ? (
-        <div className="border-brand-yellow bg-brand-yellow-soft text-brand-yellow-deep flex gap-2 rounded-md border px-3 py-2 text-xs">
-          <Info size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
-          <p>
-            <strong className="font-semibold">{t('floorPlan.provisional')}</strong>{' '}
-            {t('floorPlan.provisionalDetail')}
-          </p>
-        </div>
-      ) : null}
-
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
-        <div className="border-border bg-surface rounded-lg border p-3">
+        <div className="bg-surface rounded-lg p-3">
           {layout ? (
             <FloorPlanSvg
               layout={layout}
@@ -99,11 +81,9 @@ export function FloorPlanView({
           )}
         </div>
 
-        <aside className="border-border bg-surface rounded-lg border p-3">
+        <aside className="bg-surface rounded-lg p-3">
           <StatusLegend />
-          <p className="border-border text-ink-subtle mt-4 border-t pt-3 text-xs">
-            {t('floorPlan.subtitle')}
-          </p>
+          <p className="text-ink-subtle mt-4 pt-3 text-xs">{t('floorPlan.subtitle')}</p>
         </aside>
       </div>
 

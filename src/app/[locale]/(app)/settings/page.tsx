@@ -1,12 +1,11 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { PageHeader } from '@/components/layout/AppShell';
+import { SettingsForm } from '@/components/settings/SettingsForm';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
-import { ComingSoon } from '@/components/ui/ComingSoon';
 import { can } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 
-/** Read-only for now. Editing is owner-only and lands with Phase 11. */
 export default async function SettingsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -17,53 +16,64 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
 
   const { data: settings } = await supabase.from('settings').select('key, value, description');
 
-  const value = (key: string) => {
-    const found = settings?.find((row) => row.key === key)?.value;
+  const raw = (key: string) => settings?.find((row) => row.key === key)?.value;
+
+  const display = (key: string) => {
+    const found = raw(key);
     return found === undefined || found === null ? t('common.notAvailable') : String(found);
   };
+
+  const canWrite = can(profile?.role, 'settings:write');
 
   return (
     <>
       <PageHeader
         title={t('settings.title')}
-        description={can(profile?.role, 'settings:write') ? undefined : t('settings.ownerOnly')}
+        description={canWrite ? undefined : t('settings.ownerOnly')}
       />
 
-      <div className="mb-4">
-        <ComingSoon>
-          {t('settings.title')} — {t('common.edit')}
-        </ComingSoon>
-      </div>
+      {canWrite ? (
+        <SettingsForm
+          values={{
+            electricity_rate: Number(raw('electricity_rate') ?? 0),
+            water_rate: Number(raw('water_rate') ?? 0),
+            internet_fee: Number(raw('internet_fee') ?? 0),
+            parking_fee: Number(raw('parking_fee') ?? 0),
+            card_replacement_fee: Number(raw('card_replacement_fee') ?? 0),
+            default_payment_due_day: Number(raw('default_payment_due_day') ?? 1),
+          }}
+        />
+      ) : (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader title={t('settings.utilityRates')} description={t('meters.title')} />
+            <CardBody>
+              <FieldGrid>
+                <Field label={t('meters.electricityRate')} value={display('electricity_rate')} />
+                <Field label={t('meters.waterRate')} value={display('water_rate')} />
+                <Field
+                  label={t('settings.defaultPaymentDueDay')}
+                  value={display('default_payment_due_day')}
+                />
+              </FieldGrid>
+            </CardBody>
+          </Card>
 
-      <div className="space-y-4">
-        <Card>
-          <CardHeader title={t('settings.utilityRates')} description={t('meters.title')} />
-          <CardBody>
-            <FieldGrid>
-              <Field label={t('meters.electricityRate')} value={value('electricity_rate')} />
-              <Field label={t('meters.waterRate')} value={value('water_rate')} />
-              <Field
-                label={t('settings.defaultPaymentDueDay')}
-                value={value('default_payment_due_day')}
-              />
-            </FieldGrid>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader title={t('settings.fees')} />
-          <CardBody>
-            <FieldGrid>
-              <Field label={t('settings.internetFee')} value={value('internet_fee')} />
-              <Field label={t('settings.parkingFee')} value={value('parking_fee')} />
-              <Field
-                label={t('settings.cardReplacementFee')}
-                value={value('card_replacement_fee')}
-              />
-            </FieldGrid>
-          </CardBody>
-        </Card>
-      </div>
+          <Card>
+            <CardHeader title={t('settings.fees')} />
+            <CardBody>
+              <FieldGrid>
+                <Field label={t('settings.internetFee')} value={display('internet_fee')} />
+                <Field label={t('settings.parkingFee')} value={display('parking_fee')} />
+                <Field
+                  label={t('settings.cardReplacementFee')}
+                  value={display('card_replacement_fee')}
+                />
+              </FieldGrid>
+            </CardBody>
+          </Card>
+        </div>
+      )}
     </>
   );
 }

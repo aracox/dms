@@ -217,8 +217,6 @@
     "subtitle": "คลิกที่ห้องเพื่อดูรายละเอียด",
     "floor": "ชั้น {floor}",
     "legend": "สัญลักษณ์",
-    "provisional": "ผังนี้เป็นผังชั่วคราว",
-    "provisionalDetail": "ตำแหน่งห้องจะถูกปรับให้ตรงกับผังอาคารจริงเมื่อได้รับแบบแปลน แก้ไขได้ที่ src/config/floor-layout/",
     "corridor": "ทางเดิน",
     "stairs": "บันได",
     "entrance": "ทางเข้า",
@@ -290,18 +288,25 @@
     "nationality": "สัญชาติ",
     "emergencyContact": "ผู้ติดต่อฉุกเฉิน",
     "emergencyPhone": "เบอร์ติดต่อฉุกเฉิน",
-    "singleTenantNotice": "ระบบบันทึกผู้เช่าหลัก 1 คนต่อห้อง โดยเป็นผู้ติดต่อของห้องนั้น"
+    "singleTenantNotice": "ระบบบันทึกผู้เช่าหลัก 1 คนต่อห้อง โดยเป็นผู้ติดต่อของห้องนั้น",
+    "documents": "สำเนาบัตรประชาชน / พาสปอร์ต",
+    "documentsHint": "ไฟล์ JPG, PNG, WEBP หรือ PDF ขนาดไม่เกิน 5MB ต่อไฟล์ เพิ่มเติมได้ในภายหลัง",
+    "noDocuments": "ยังไม่มีเอกสารที่อัปโหลด",
+    "addDocuments": "เพิ่มเอกสาร",
+    "uploadedOn": "อัปโหลดเมื่อ {date}"
   },
   "contract": {
     "title": "สัญญาเช่า",
     "startDate": "วันเริ่มสัญญา",
     "endDate": "วันสิ้นสุดสัญญา",
     "moveIn": "ทำสัญญาเข้าพัก",
+    "activateCards": "เปิดใช้งานคีย์การ์ดของห้อง",
     "renew": "ต่อสัญญา",
     "moveOut": "แจ้งย้ายออก",
     "terminate": "ยกเลิกสัญญา",
     "terminatedAt": "วันที่ยกเลิก",
-    "terminationReason": "เหตุผลการยกเลิก"
+    "terminationReason": "เหตุผลการยกเลิก",
+    "roomAlreadyOccupied": "ห้องนี้มีสัญญาที่ใช้งานอยู่แล้ว กรุณารีเฟรชหน้านี้"
   },
   "cards": {
     "title": "คีย์การ์ด",
@@ -465,6 +470,9 @@
     },
     "payment": {
       "exceedsTotal": "จำนวนเงินเกินยอดคงค้าง"
+    },
+    "document": {
+      "invalid": "ไม่มีไฟล์ที่ถูกต้องถูกอัปโหลด รองรับเฉพาะ JPG, PNG, WEBP หรือ PDF ขนาดไม่เกิน 5MB"
     }
   },
   "errors": {

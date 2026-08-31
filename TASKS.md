@@ -152,8 +152,9 @@ Recorded here rather than blocking development.
 1. **Room numbering** — 101–107 / 201–207 / 301–307 (7 per floor × 3 = 21). Change in
    `src/config/floor-layout/*.json` and `supabase/seed.sql` together if the real numbering differs.
 2. **Floor plan geometry is provisional** — the real plan was not supplied (spec §39). The JSON files
-   are marked `"provisional": true` with an L-shaped placeholder. Only these files change when the
-   real plan arrives.
+   are marked `"provisional": true`. Topology is now confirmed (rectangular building, 7 rooms in a
+   single row per floor, stairs past the last room); exact wall measurements are still a placeholder.
+   Only these files change when real dimensions arrive.
 3. **T01 is on floor 0** — needed a floor value that a CHECK constraint can exclude from production
    plans without special-casing every query.
 4. **`is_test` on every operational table**, kept consistent with the parent room by trigger. A

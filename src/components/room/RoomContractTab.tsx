@@ -1,14 +1,45 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
+import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
+import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
+import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { daysBetween, formatDate } from '@/lib/utils/date';
 import type { ContractStatus } from '@/types/database';
+
+import { TenantDocumentsCard, type TenantDocumentView } from './TenantDocumentsCard';
+
+/** Admin+ only: matches the tenant_documents RLS and the storage bucket's own policy. */
+async function loadTenantDocuments(tenantId: string): Promise<TenantDocumentView[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('tenant_documents')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .order('created_at', { ascending: false });
+
+  const rows = data ?? [];
+  const withUrls = await Promise.all(
+    rows.map(async (row) => {
+      const { data: signed } = await supabase.storage
+        .from('tenant-documents')
+        .createSignedUrl(row.storage_path, 3600);
+      return {
+        id: row.id,
+        file_name: row.file_name,
+        created_at: row.created_at,
+        url: signed?.signedUrl ?? null,
+      };
+    }),
+  );
+  return withUrls;
+}
 
 const CONTRACT_TONE: Record<ContractStatus, BadgeTone> = {
   draft: 'neutral',
@@ -17,7 +48,7 @@ const CONTRACT_TONE: Record<ContractStatus, BadgeTone> = {
   terminated: 'neutral',
 };
 
-export function RoomContractTab({
+export async function RoomContractTab({
   detail,
   locale,
   today,
@@ -26,10 +57,14 @@ export function RoomContractTab({
   locale: Locale;
   today: string;
 }) {
-  const t = useTranslations();
+  const t = await getTranslations();
   const { contract, tenant, contractHistory } = detail;
 
   const daysRemaining = contract ? daysBetween(today, contract.end_date) : null;
+  const profile = await getCurrentProfile();
+  const canMoveIn = !contract && can(profile?.role, 'contracts:write');
+  const canManageDocuments = can(profile?.role, 'tenants:write');
+  const documents = tenant && canManageDocuments ? await loadTenantDocuments(tenant.id) : null;
 
   return (
     <div className="space-y-4">
@@ -42,6 +77,13 @@ export function RoomContractTab({
               <Badge tone={CONTRACT_TONE[contract.status]}>
                 {t(`contractStatus.${contract.status}`)}
               </Badge>
+            ) : canMoveIn ? (
+              <Link
+                href={`/rooms/${detail.room.id}/move-in`}
+                className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-3 py-1.5 text-xs font-semibold text-white"
+              >
+                {t('contract.moveIn')}
+              </Link>
             ) : null
           }
         />
@@ -88,6 +130,15 @@ export function RoomContractTab({
           )}
         </CardBody>
       </Card>
+
+      {tenant && documents ? (
+        <TenantDocumentsCard
+          tenantId={tenant.id}
+          roomId={detail.room.id}
+          documents={documents}
+          locale={locale}
+        />
+      ) : null}
 
       {contractHistory.length > 1 ? (
         <Card>

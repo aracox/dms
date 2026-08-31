@@ -71,6 +71,16 @@ export type SettingRow = {
   updated_by: string | null;
 };
 
+/** Written only by the `on_settings_value_changed` trigger. Audit/reference only. */
+export type SettingsHistoryRow = {
+  id: string;
+  key: string;
+  old_value: Json | null;
+  new_value: Json;
+  changed_by: string | null;
+  changed_at: string;
+};
+
 export type RoomRow = {
   id: string;
   room_number: string;
@@ -99,6 +109,16 @@ export type TenantRow = {
   is_test: boolean;
   created_at: string;
   updated_at: string;
+};
+
+/** Tracks files under the tenant-documents storage bucket (0008). */
+export type TenantDocumentRow = {
+  id: string;
+  tenant_id: string;
+  storage_path: string;
+  file_name: string;
+  uploaded_by: string | null;
+  created_at: string;
 };
 
 export type ContractRow = {
@@ -441,6 +461,15 @@ export type Database = {
         Partial<Writable<TenantRow, 'id'>> & { full_name: string; phone: string },
         Partial<Writable<TenantRow, 'id'>>
       >;
+      tenant_documents: TableDef<
+        TenantDocumentRow,
+        Partial<Omit<TenantDocumentRow, 'id' | 'created_at'>> & {
+          tenant_id: string;
+          storage_path: string;
+          file_name: string;
+        },
+        NoWrites
+      >;
       contracts: TableDef<
         ContractRow,
         Partial<Writable<ContractRow, 'id'>> & {
@@ -520,6 +549,7 @@ export type Database = {
         },
         NoWrites
       >;
+      settings_history: TableDef<SettingsHistoryRow, NoWrites, NoWrites>;
     };
     Views: {
       v_room_board: ViewDef<RoomBoardRow>;
@@ -540,6 +570,26 @@ export type Database = {
       recalc_invoice: { Args: { p_invoice_id: string }; Returns: undefined };
       mark_overdue_invoices: { Args: Record<string, never>; Returns: number };
       current_app_role: { Args: Record<string, never>; Returns: AppRole };
+      move_in_room: {
+        Args: {
+          p_room_id: string;
+          p_full_name: string;
+          p_phone: string;
+          p_email: string | null;
+          p_id_card_or_passport: string | null;
+          p_nationality: string | null;
+          p_emergency_contact: string | null;
+          p_emergency_phone: string | null;
+          p_start_date: string;
+          p_end_date: string;
+          p_monthly_rent: number;
+          p_deposit: number;
+          p_payment_due_day: number;
+          p_occupant_count: number;
+          p_activate_cards: boolean;
+        };
+        Returns: { contract_id: string; tenant_id: string }[];
+      };
     };
     Enums: {
       app_role: AppRole;

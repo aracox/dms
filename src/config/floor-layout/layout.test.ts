@@ -59,10 +59,9 @@ describe('floor layouts', () => {
     }
   });
 
-  it('form an L-shaped outline rather than a rectangle', () => {
+  it('form a rectangular outline', () => {
     for (const layout of FLOOR_LAYOUTS) {
-      // A rectangle needs 4 points; an L needs 6.
-      expect(layout.outline.length).toBe(6);
+      expect(layout.outline.length).toBe(4);
     }
   });
 

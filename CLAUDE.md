@@ -78,8 +78,9 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ## What this is
 
 A bilingual (Thai / English) dormitory management system for a single real dormitory in Thailand:
-**21 real rooms, 3 floors, L-shaped building, 2 access cards per room.** The primary user is the
-dormitory owner/admin. Deploys to Vercel free tier against Supabase free tier PostgreSQL.
+**21 real rooms, 3 floors, rectangular building (7 rooms in a single row per floor), 2 access cards
+per room.** The primary user is the dormitory owner/admin. Deploys to Vercel free tier against
+Supabase free tier PostgreSQL.
 
 The main navigation entry point is an **interactive SVG floor plan**, not a room list.
 
