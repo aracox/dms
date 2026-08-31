@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { RoomStatusBadge } from '@/components/status/RoomStatusBadge';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
+import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
 import { can } from '@/lib/permissions';
@@ -18,6 +19,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
   const { room, board, contract, tenant } = detail;
   const profile = await getCurrentProfile();
   const canEditTenant = can(profile?.role, 'tenants:write');
+  const canMoveIn = !contract && can(profile?.role, 'contracts:write');
 
   const latestElectricity = detail.meterReadings.find(
     (reading) => reading.meter_type === 'electricity',
@@ -59,7 +61,20 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
         />
       ) : (
         <Card>
-          <CardHeader title={t('room.mainTenant')} description={t('tenant.singleTenantNotice')} />
+          <CardHeader
+            title={t('room.mainTenant')}
+            description={t('tenant.singleTenantNotice')}
+            action={
+              canMoveIn ? (
+                <Link
+                  href={`/rooms/${room.id}/move-in`}
+                  className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-3 py-1.5 text-xs font-semibold text-white"
+                >
+                  {t('contract.moveIn')}
+                </Link>
+              ) : null
+            }
+          />
           <CardBody>
             <p className="text-ink-subtle text-sm">{t('room.noTenant')}</p>
           </CardBody>
