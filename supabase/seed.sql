@@ -5,8 +5,8 @@
 --
 -- Contents
 --   settings ............. utility rates and fees
---   rooms ................ 21 real (floors 1-3) + T01 (floor 0, is_test)
---   access_cards ......... 44 cards, <room>-A / <room>-B for all 22 rooms
+--   rooms ................ 24 real (21 dorm rooms floors 1-3 + 3 houses on floor 1) + T01 (floor 0, is_test)
+--   access_cards ......... 50 cards, <room>-A / <room>-B for all 25 rooms
 --   tenants/contracts .... 9 real tenants + 1 test tenant
 --   meter_readings ....... electricity + water for 2026-08
 --   invoices/items ....... one per occupied room for 2026-08
@@ -17,11 +17,11 @@
 -- 08x000nnnn and card UIDs are UID-<room>-<slot>.
 --
 -- Expected dashboard state (REAL rooms only -- T01 must not appear in any of it):
---   rooms 21 | occupied 9 | vacant 10 | reserved 1 | maintenance 1
---   occupancy 42.9% | expected rent 52,500 | invoiced Aug 63,140
+--   rooms 24 | occupied 9 | vacant 13 | reserved 1 | maintenance 1
+--   occupancy 37.5% | expected rent 52,500 | invoiced Aug 63,140
 --   collected Aug 46,760 | outstanding 16,380 | overdue 9,040
 --
--- If T01 leaked in, collected would read 54,420 and rooms would read 22.
+-- If T01 leaked in, collected would read 54,420 and rooms would read 25.
 -- src/lib/reporting/exclusion.test.ts asserts exactly this.
 
 begin;
@@ -44,7 +44,7 @@ insert into settings (key, value, description) values
   ('default_payment_due_day', '5'::jsonb,  'Day of month rent falls due'),
   ('late_fee_per_day',      '0'::jsonb,    'Not charged in v1'),
   ('currency',              '"THB"'::jsonb, 'Display currency'),
-  ('dormitory', '{"name_th":"หอพักตัวอย่าง","name_en":"Sample Dormitory","floors":3,"real_rooms":21}'::jsonb,
+  ('dormitory', '{"name_th":"หอพักตัวอย่าง","name_en":"Sample Dormitory","floors":3,"real_rooms":24}'::jsonb,
     'Property identity shown in headers and on invoices')
 on conflict (key) do update
   set value = excluded.value,
@@ -52,7 +52,8 @@ on conflict (key) do update
       updated_at = now();
 
 -- ===========================================================================
--- Rooms -- 21 real. x01-x03 air conditioned (6,000), x04-x07 standard (4,500).
+-- Rooms -- 24 real. x01-x03 air conditioned (6,000), x04-x07 standard (4,500),
+-- H101-H103 houses (8,500) with no floor of their own (placed on floor 1).
 -- ===========================================================================
 insert into rooms (id, room_number, floor, room_type, monthly_rent, deposit, status, size_sqm, is_test)
 select
@@ -86,7 +87,10 @@ from (values
   ('304', 3, 'standard',        4500,  9000, 'vacant',      22.0),
   ('305', 3, 'standard',        4500,  9000, 'vacant',      22.0),
   ('306', 3, 'standard',        4500,  9000, 'vacant',      22.0),
-  ('307', 3, 'standard',        4500,  9000, 'vacant',      22.0)
+  ('307', 3, 'standard',        4500,  9000, 'vacant',      22.0),
+  ('H101', 1, 'house',          8500, 17000, 'vacant',      45.0),
+  ('H102', 1, 'house',          8500, 17000, 'vacant',      45.0),
+  ('H103', 1, 'house',          8500, 17000, 'vacant',      45.0)
 ) as v(room_number, floor, room_type, rent, deposit, status, sqm)
 on conflict (room_number) do nothing;
 
@@ -107,7 +111,7 @@ values (
 on conflict (room_number) do nothing;
 
 -- ===========================================================================
--- Access cards -- exactly 2 per room for all 22 rooms.
+-- Access cards -- exactly 2 per room for all 25 rooms.
 --
 -- Inserted as 'available', then activated by UPDATE so the
 -- log_access_card_event trigger writes real history instead of us faking it.
@@ -147,7 +151,9 @@ where card_number = '203-B';
 -- Tenants -- the ONE registered person per room (main tenant = contact person).
 -- Additional occupants exist only as contracts.occupant_count.
 -- ===========================================================================
-insert into tenants (id, full_name, phone, email, nationality, emergency_contact, emergency_phone, is_test)
+insert into tenants (
+  id, full_name, phone, email, nationality, emergency_contact, emergency_phone, line_id, is_test
+)
 select
   seed_uuid('tenant', v.room_number),
   v.full_name,
@@ -156,18 +162,19 @@ select
   'Thai',
   v.emergency_contact,
   v.emergency_phone,
+  v.line_id,
   false
 from (values
-  ('101', 'สมชาย ใจดี',        '0810000101', 'somchai.j@example.test',  'สมหญิง ใจดี',     '0810009101'),
-  ('102', 'นารี สุขสันต์',      '0810000102', 'naree.s@example.test',    'ประยุทธ สุขสันต์', '0810009102'),
-  ('103', 'ประเสริฐ ทองดี',    '0810000103', 'prasert.t@example.test',  'วันดี ทองดี',      '0810009103'),
-  ('104', 'มาลี พงษ์ไทย',      '0810000104', null,                      'สุชาติ พงษ์ไทย',   '0810009104'),
-  ('201', 'วิชัย ศรีสุข',       '0810000201', 'wichai.s@example.test',   'อารีย์ ศรีสุข',    '0810009201'),
-  ('202', 'อรุณี แสงทอง',      '0810000202', null,                      'บุญมา แสงทอง',     '0810009202'),
-  ('203', 'ธนกร รัตนชัย',      '0810000203', 'thanakorn.r@example.test','ปราณี รัตนชัย',    '0810009203'),
-  ('301', 'กมล วัฒนา',         '0810000301', null,                      'สมพร วัฒนา',       '0810009301'),
-  ('302', 'สุดา จันทร์เพ็ญ',    '0810000302', 'suda.c@example.test',     'ชัยวัฒน์ จันทร์เพ็ญ','0810009302')
-) as v(room_number, full_name, phone, email, emergency_contact, emergency_phone)
+  ('101', 'สมชาย ใจดี',        '0810000101', 'somchai.j@example.test',  'สมหญิง ใจดี',     '0810009101', 'somchai_j'),
+  ('102', 'นารี สุขสันต์',      '0810000102', 'naree.s@example.test',    'ประยุทธ สุขสันต์', '0810009102', null),
+  ('103', 'ประเสริฐ ทองดี',    '0810000103', 'prasert.t@example.test',  'วันดี ทองดี',      '0810009103', null),
+  ('104', 'มาลี พงษ์ไทย',      '0810000104', null,                      'สุชาติ พงษ์ไทย',   '0810009104', 'malee.p'),
+  ('201', 'วิชัย ศรีสุข',       '0810000201', 'wichai.s@example.test',   'อารีย์ ศรีสุข',    '0810009201', null),
+  ('202', 'อรุณี แสงทอง',      '0810000202', null,                      'บุญมา แสงทอง',     '0810009202', null),
+  ('203', 'ธนกร รัตนชัย',      '0810000203', 'thanakorn.r@example.test','ปราณี รัตนชัย',    '0810009203', null),
+  ('301', 'กมล วัฒนา',         '0810000301', null,                      'สมพร วัฒนา',       '0810009301', null),
+  ('302', 'สุดา จันทร์เพ็ญ',    '0810000302', 'suda.c@example.test',     'ชัยวัฒน์ จันทร์เพ็ญ','0810009302', null)
+) as v(room_number, full_name, phone, email, emergency_contact, emergency_phone, line_id)
 on conflict (id) do nothing;
 
 insert into tenants (id, full_name, phone, email, nationality, is_test, notes)

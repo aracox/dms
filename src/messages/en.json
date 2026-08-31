@@ -109,7 +109,8 @@
   "roomType": {
     "standard": "Standard",
     "air_conditioned": "Air conditioned",
-    "studio": "Studio"
+    "studio": "Studio",
+    "house": "House"
   },
   "contractStatus": {
     "draft": "Draft",
@@ -288,6 +289,7 @@
     "nationality": "Nationality",
     "emergencyContact": "Emergency contact",
     "emergencyPhone": "Emergency phone",
+    "lineId": "LINE ID",
     "singleTenantNotice": "One main tenant is registered per room, and is the contact person for that room.",
     "documents": "ID card / passport copy",
     "documentsHint": "JPG, PNG, WEBP, or PDF, up to 5MB each. You can add more later.",
@@ -300,6 +302,7 @@
     "startDate": "Start date",
     "endDate": "End date",
     "moveIn": "Move in",
+    "downloadPdf": "Download PDF",
     "activateCards": "Activate the room's access cards",
     "renew": "Renew contract",
     "moveOut": "Move out",

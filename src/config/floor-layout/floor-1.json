@@ -1,8 +1,8 @@
 {
   "floor": 1,
   "provisional": true,
-  "note": "Topology confirmed by the owner: the building is a plain rectangle (not L-shaped), all 7 rooms sit in a single row (101 on the left through 107 on the right), with a corridor below them and the stairs right past the 107 end. Exact wall measurements were not supplied, so room/corridor sizes here are still placeholder -- only x/y/width/height need remapping once real dimensions arrive.",
-  "viewBox": "0 0 700 280",
+  "note": "Topology confirmed by the owner: the building is a plain rectangle (not L-shaped), all 7 rooms sit in a single row (101 on the left through 107 on the right), with a corridor below them and the stairs right past the 107 end. Exact wall measurements were not supplied, so room/corridor sizes here are still placeholder -- only x/y/width/height need remapping once real dimensions arrive. Houses H101-H103 have no floor of their own, so they are placed here, below the main building, and only appear when floor 1 is selected.",
+  "viewBox": "0 0 700 440",
   "outline": [
     [50, 30],
     [650, 30],
@@ -20,6 +20,9 @@
     { "roomNumber": "104", "x": 305, "y": 50, "width": 85, "height": 130 },
     { "roomNumber": "105", "x": 390, "y": 50, "width": 85, "height": 130 },
     { "roomNumber": "106", "x": 475, "y": 50, "width": 85, "height": 130 },
-    { "roomNumber": "107", "x": 560, "y": 50, "width": 85, "height": 130 }
+    { "roomNumber": "107", "x": 560, "y": 50, "width": 85, "height": 130 },
+    { "roomNumber": "H101", "x": 390, "y": 330, "width": 85, "height": 100 },
+    { "roomNumber": "H102", "x": 475, "y": 330, "width": 85, "height": 100 },
+    { "roomNumber": "H103", "x": 560, "y": 330, "width": 85, "height": 100 }
   ]
 }

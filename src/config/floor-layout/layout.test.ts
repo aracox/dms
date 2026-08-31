@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { FLOOR_LAYOUTS, getFloorLayout, layoutRoomCount, layoutRoomNumbers } from './index';
 
 describe('floor layouts', () => {
-  it('describe exactly the 21 real rooms', () => {
-    expect(layoutRoomCount()).toBe(21);
+  it('describe exactly the 24 real rooms', () => {
+    expect(layoutRoomCount()).toBe(24);
   });
 
   it('cover floors 1 to 3 and nothing else', () => {
@@ -14,7 +14,7 @@ describe('floor layouts', () => {
 
   it('never place the T01 test room', () => {
     expect(layoutRoomNumbers()).not.toContain('T01');
-    expect(layoutRoomNumbers().every((room) => /^[123]0[1-7]$/.test(room))).toBe(true);
+    expect(layoutRoomNumbers().every((room) => /^([123]0[1-7]|H10[1-3])$/.test(room))).toBe(true);
   });
 
   it('use unique room numbers across every floor', () => {

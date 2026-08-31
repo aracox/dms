@@ -60,7 +60,7 @@ export function getFloorLayout(floor: number): FloorLayout | undefined {
   return FLOOR_LAYOUTS.find((layout) => layout.floor === floor);
 }
 
-/** Total rooms the layout files describe. Must be 21. */
+/** Total rooms the layout files describe. Must be 24 (21 dorm rooms + 3 houses). */
 export function layoutRoomCount(): number {
   return FLOOR_LAYOUTS.reduce((total, layout) => total + layout.rooms.length, 0);
 }

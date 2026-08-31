@@ -43,7 +43,7 @@ export function FloorPlanSvg({
       viewBox={layout.viewBox}
       role="group"
       aria-label={t('floorPlan.floor', { floor: layout.floor })}
-      className="h-auto w-full select-none"
+      className="block h-full max-h-full w-full max-w-full select-none"
     >
       <defs>
         {/* Hatch for maintenance, so the status survives without colour. */}

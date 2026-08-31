@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { RequiredMark } from '@/components/ui/RequiredMark';
 import { changePasswordAction, type ChangePasswordState } from '@/lib/auth/actions';
 
 const INITIAL_STATE: ChangePasswordState = { error: null };
@@ -16,6 +17,7 @@ export function ChangePasswordForm() {
       <div>
         <label htmlFor="password" className="text-ink-muted block text-xs font-medium">
           {t('auth.newPassword')}
+          <RequiredMark />
         </label>
         <input
           id="password"
@@ -31,6 +33,7 @@ export function ChangePasswordForm() {
       <div>
         <label htmlFor="confirmPassword" className="text-ink-muted block text-xs font-medium">
           {t('auth.confirmPassword')}
+          <RequiredMark />
         </label>
         <input
           id="confirmPassword"

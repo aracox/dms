@@ -78,9 +78,10 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ## What this is
 
 A bilingual (Thai / English) dormitory management system for a single real dormitory in Thailand:
-**21 real rooms, 3 floors, rectangular building (7 rooms in a single row per floor), 2 access cards
-per room.** The primary user is the dormitory owner/admin. Deploys to Vercel free tier against
-Supabase free tier PostgreSQL.
+**24 real rooms — 21 dorm rooms across 3 floors, rectangular building (7 rooms in a single row per
+floor) — plus 3 standalone houses (H101-H103, no floor of their own, shown on the floor 1 view), 2
+access cards per room/house.** The primary user is the dormitory owner/admin. Deploys to Vercel
+free tier against Supabase free tier PostgreSQL.
 
 The main navigation entry point is an **interactive SVG floor plan**, not a room list.
 
@@ -170,8 +171,8 @@ These are the ones that will bite you. They are load-bearing.
 
 ### 1. Test data must never reach production reporting
 
-The database holds **22 rooms**: 21 real + one mock room `T01`. Every reporting number the owner
-sees must come from the 21.
+The database holds **25 rooms**: 24 real (21 dorm rooms + 3 houses) + one mock room `T01`. Every
+reporting number the owner sees must come from the 24.
 
 - Every operational table carries `is_test boolean not null default false`.
 - A DB trigger forces a child row's `is_test` to match its parent room, so it cannot drift.
@@ -259,7 +260,9 @@ Status colors come from the CP AXTRA / Lotus's palette, defined once as CSS vari
 
 `src/config/floor-layout/floor-{1,2,3}.json` currently hold **provisional** geometry
 (`"provisional": true`) — the real dormitory plan has not been supplied yet. Room numbers
-101–107 / 201–207 / 301–307 are an assumption (7 per floor × 3 = 21).
+101–107 / 201–207 / 301–307 are an assumption (7 per floor × 3 = 21). Houses H101-H103 have no
+floor of their own and live in `floor-1.json` alongside rooms 101-107, so they only appear when
+floor 1 is selected.
 
 When the real plan arrives: edit only these JSON files, remapping `x/y/width/height/rotation` and
 room numbers. No component change should be needed. Keep geometry out of the database — it is

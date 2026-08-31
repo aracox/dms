@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { RequiredMark } from '@/components/ui/RequiredMark';
 import { moveInAction, type MoveInState } from '@/lib/rooms/actions';
 
 const INITIAL_STATE: MoveInState = { error: null };
@@ -33,6 +34,7 @@ function TextField({
     <div>
       <label htmlFor={name} className={LABEL_CLASS}>
         {label}
+        {required ? <RequiredMark /> : null}
       </label>
       <input
         id={name}
@@ -81,6 +83,7 @@ export function MoveInForm({
             <TextField name="nationality" label={t('tenant.nationality')} />
             <TextField name="emergency_contact" label={t('tenant.emergencyContact')} />
             <TextField name="emergency_phone" label={t('tenant.emergencyPhone')} />
+            <TextField name="line_id" label={t('tenant.lineId')} />
           </div>
 
           <div className="mt-4">

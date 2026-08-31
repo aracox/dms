@@ -37,7 +37,7 @@ const positiveMoney = z.number().finite().positive('validation.money.notPositive
 export const roomSchema = z.object({
   room_number: z.string().trim().min(1, 'validation.required').max(10),
   floor: z.int().min(1, 'validation.room.floorRange').max(3, 'validation.room.floorRange'),
-  room_type: z.enum(['standard', 'air_conditioned', 'studio']),
+  room_type: z.enum(['standard', 'air_conditioned', 'studio', 'house']),
   monthly_rent: money,
   deposit: money,
   status: z.enum(['vacant', 'occupied', 'reserved', 'maintenance']),
@@ -64,10 +64,29 @@ export const tenantSchema = z.object({
     .union([z.literal(''), z.string().trim().regex(THAI_PHONE, 'validation.phone.format')])
     .nullable()
     .optional(),
+  line_id: z.string().trim().max(100).nullable().optional(),
   notes: z.string().trim().max(1000).nullable().optional(),
 });
 
 export type TenantInput = z.infer<typeof tenantSchema>;
+
+/**
+ * The subset of tenant fields editable after move-in: contact details, not
+ * identity. full_name / id_card_or_passport / nationality stay fixed once the
+ * tenant is registered.
+ */
+export const tenantContactSchema = z.object({
+  tenant_id: uuid,
+  phone: z.string().trim().regex(THAI_PHONE, 'validation.phone.format'),
+  line_id: z.string().trim().max(100).nullable().optional(),
+  emergency_contact: z.string().trim().max(200).nullable().optional(),
+  emergency_phone: z
+    .union([z.literal(''), z.string().trim().regex(THAI_PHONE, 'validation.phone.format')])
+    .nullable()
+    .optional(),
+});
+
+export type TenantContactInput = z.infer<typeof tenantContactSchema>;
 
 // --- Contracts -------------------------------------------------------------
 

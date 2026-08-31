@@ -1,3 +1,4 @@
+import { Download } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
@@ -74,9 +75,18 @@ export async function RoomContractTab({
           description={t('tenant.singleTenantNotice')}
           action={
             contract ? (
-              <Badge tone={CONTRACT_TONE[contract.status]}>
-                {t(`contractStatus.${contract.status}`)}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge tone={CONTRACT_TONE[contract.status]}>
+                  {t(`contractStatus.${contract.status}`)}
+                </Badge>
+                <Link
+                  href={`/rooms/${detail.room.id}/contract`}
+                  className="border-border text-ink hover:bg-surface-sunken flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium"
+                >
+                  <Download size={12} aria-hidden="true" />
+                  {t('contract.downloadPdf')}
+                </Link>
+              </div>
             ) : canMoveIn ? (
               <Link
                 href={`/rooms/${detail.room.id}/move-in`}
@@ -96,6 +106,7 @@ export async function RoomContractTab({
                 label={t('tenant.idCard')}
                 value={tenant.id_card_or_passport ?? t('common.notAvailable')}
               />
+              <Field label={t('tenant.lineId')} value={tenant.line_id ?? t('common.notAvailable')} />
               <Field
                 label={t('contract.startDate')}
                 value={formatDate(contract.start_date, locale)}

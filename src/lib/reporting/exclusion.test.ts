@@ -26,10 +26,10 @@ const readRepoFile = (relative: string) =>
 
 describe('the seed fixture actually contains test data', () => {
   // Without this, every assertion below would pass trivially.
-  it('includes exactly one test room and 21 real rooms', () => {
+  it('includes exactly one test room and 24 real rooms', () => {
     expect(seedRooms.filter((room) => room.is_test)).toHaveLength(1);
-    expect(seedRooms.filter((room) => !room.is_test)).toHaveLength(21);
-    expect(seedRooms).toHaveLength(22);
+    expect(seedRooms.filter((room) => !room.is_test)).toHaveLength(24);
+    expect(seedRooms).toHaveLength(25);
   });
 
   it('gives the test room a contract, an invoice and a payment', () => {
@@ -42,26 +42,26 @@ describe('the seed fixture actually contains test data', () => {
 describe('room reporting excludes T01', () => {
   const summary = roomSummary(seedRooms);
 
-  it('counts 21 rooms, not 22', () => {
-    expect(summary.total_rooms).toBe(21);
+  it('counts 24 rooms, not 25', () => {
+    expect(summary.total_rooms).toBe(24);
   });
 
   it('reports occupancy over the real rooms only', () => {
     expect(summary.occupied).toBe(9);
-    expect(summary.vacant).toBe(10);
+    expect(summary.vacant).toBe(13);
     expect(summary.reserved).toBe(1);
     expect(summary.maintenance).toBe(1);
-    expect(summary.occupied + summary.vacant + summary.reserved + summary.maintenance).toBe(21);
+    expect(summary.occupied + summary.vacant + summary.reserved + summary.maintenance).toBe(24);
   });
 
-  it('computes the occupancy rate from 21', () => {
-    // 9 / 21 = 42.86%. Over 22 rooms it would read 45.45%.
-    expect(summary.occupancy_rate).toBeCloseTo(42.86, 2);
+  it('computes the occupancy rate from 24', () => {
+    // 9 / 24 = 37.5%. Over 25 rooms it would read 36%.
+    expect(summary.occupancy_rate).toBeCloseTo(37.5, 2);
   });
 
   it('would report different numbers if T01 leaked in', () => {
     const leaked = roomSummary(seedRooms.map((room) => ({ ...room, is_test: false })));
-    expect(leaked.total_rooms).toBe(22);
+    expect(leaked.total_rooms).toBe(25);
     expect(leaked.occupied).toBe(10);
     expect(leaked.total_rooms).not.toBe(summary.total_rooms);
   });
@@ -143,14 +143,16 @@ describe('T01 is kept off the production floor plan', () => {
 
   it('leaves floors 1-3 holding only real rooms', () => {
     const onRealFloors = seedRooms.filter((room) => room.floor >= 1 && room.floor <= 3);
-    expect(onRealFloors).toHaveLength(21);
+    expect(onRealFloors).toHaveLength(24);
     expect(onRealFloors.every((room) => !room.is_test)).toBe(true);
   });
 
-  it('spreads the 21 real rooms 7 per floor', () => {
-    for (const floor of [1, 2, 3]) {
+  it('spreads the 21 dorm rooms 7 per floor, plus 3 houses on floor 1', () => {
+    for (const floor of [2, 3]) {
       expect(seedRooms.filter((room) => room.floor === floor)).toHaveLength(7);
     }
+    // Floor 1 holds its own 7 dorm rooms plus the 3 houses (H101-H103).
+    expect(seedRooms.filter((room) => room.floor === 1)).toHaveLength(10);
   });
 });
 

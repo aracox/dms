@@ -1,17 +1,23 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 import { RoomStatusBadge } from '@/components/status/RoomStatusBadge';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
+import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
+import { getCurrentProfile } from '@/lib/supabase/server';
 import { formatBillingMonth, formatDate } from '@/lib/utils/date';
 
+import { TenantContactCard } from './TenantContactCard';
+
 /** Everything the spec asks a room click to reveal, on one panel. */
-export function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; locale: Locale }) {
-  const t = useTranslations();
+export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; locale: Locale }) {
+  const t = await getTranslations();
   const { room, board, contract, tenant } = detail;
+  const profile = await getCurrentProfile();
+  const canEditTenant = can(profile?.role, 'tenants:write');
 
   const latestElectricity = detail.meterReadings.find(
     (reading) => reading.meter_type === 'electricity',
@@ -43,45 +49,22 @@ export function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; locale
         </CardBody>
       </Card>
 
-      <Card>
-        <CardHeader title={t('room.mainTenant')} description={t('tenant.singleTenantNotice')} />
-        <CardBody>
-          {tenant && contract ? (
-            <FieldGrid>
-              <Field label={t('tenant.fullName')} value={tenant.full_name} />
-              <Field
-                label={t('room.phone')}
-                value={
-                  <a href={`tel:${tenant.phone}`} className="text-brand-blue-deep underline">
-                    {tenant.phone}
-                  </a>
-                }
-              />
-              <Field
-                label={t('room.occupants')}
-                value={t('room.occupantsValue', { count: contract.occupant_count })}
-                hint={
-                  contract.occupant_count > 1
-                    ? t('room.additionalOccupants', { count: contract.occupant_count - 1 })
-                    : t('room.occupantsHint')
-                }
-              />
-              <Field
-                label={t('room.contractPeriod')}
-                value={`${formatDate(contract.start_date, locale)} — ${formatDate(contract.end_date, locale)}`}
-              />
-              <Field label={t('room.paymentDueDay')} value={contract.payment_due_day} />
-              <Field
-                label={t('tenant.emergencyContact')}
-                value={tenant.emergency_contact ?? t('common.notAvailable')}
-                hint={tenant.emergency_phone ?? undefined}
-              />
-            </FieldGrid>
-          ) : (
+      {tenant && contract ? (
+        <TenantContactCard
+          roomId={room.id}
+          tenant={tenant}
+          contract={contract}
+          locale={locale}
+          canEdit={canEditTenant}
+        />
+      ) : (
+        <Card>
+          <CardHeader title={t('room.mainTenant')} description={t('tenant.singleTenantNotice')} />
+          <CardBody>
             <p className="text-ink-subtle text-sm">{t('room.noTenant')}</p>
-          )}
-        </CardBody>
-      </Card>
+          </CardBody>
+        </Card>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { RequiredMark } from '@/components/ui/RequiredMark';
 import { updateSettingsAction, type SettingsState } from '@/lib/settings/actions';
 
 const INITIAL_STATE: SettingsState = { message: null, error: null };
@@ -32,6 +33,7 @@ function NumberField({
     <div>
       <label htmlFor={name} className="text-ink-muted block text-xs font-medium">
         {label}
+        <RequiredMark />
       </label>
       <input
         id={name}

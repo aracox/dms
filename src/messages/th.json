@@ -109,7 +109,8 @@
   "roomType": {
     "standard": "ห้องธรรมดา",
     "air_conditioned": "ห้องแอร์",
-    "studio": "สตูดิโอ"
+    "studio": "สตูดิโอ",
+    "house": "บ้าน"
   },
   "contractStatus": {
     "draft": "ฉบับร่าง",
@@ -288,6 +289,7 @@
     "nationality": "สัญชาติ",
     "emergencyContact": "ผู้ติดต่อฉุกเฉิน",
     "emergencyPhone": "เบอร์ติดต่อฉุกเฉิน",
+    "lineId": "LINE ID",
     "singleTenantNotice": "ระบบบันทึกผู้เช่าหลัก 1 คนต่อห้อง โดยเป็นผู้ติดต่อของห้องนั้น",
     "documents": "สำเนาบัตรประชาชน / พาสปอร์ต",
     "documentsHint": "ไฟล์ JPG, PNG, WEBP หรือ PDF ขนาดไม่เกิน 5MB ต่อไฟล์ เพิ่มเติมได้ในภายหลัง",
@@ -300,6 +302,7 @@
     "startDate": "วันเริ่มสัญญา",
     "endDate": "วันสิ้นสุดสัญญา",
     "moveIn": "ทำสัญญาเข้าพัก",
+    "downloadPdf": "ดาวน์โหลด PDF",
     "activateCards": "เปิดใช้งานคีย์การ์ดของห้อง",
     "renew": "ต่อสัญญา",
     "moveOut": "แจ้งย้ายออก",

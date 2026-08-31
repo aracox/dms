@@ -24,7 +24,7 @@ export interface SeedRoom {
   monthly_rent: number;
 }
 
-/** 21 real rooms on floors 1-3, plus T01 on floor 0. */
+/** 24 real rooms (21 dorm rooms across floors 1-3 + 3 houses on floor 1), plus T01 on floor 0. */
 export const seedRooms: SeedRoom[] = [
   { room_number: '101', floor: 1, is_test: false, room_status: 'occupied', monthly_rent: 6000 },
   { room_number: '102', floor: 1, is_test: false, room_status: 'occupied', monthly_rent: 6000 },
@@ -47,6 +47,10 @@ export const seedRooms: SeedRoom[] = [
   { room_number: '305', floor: 3, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
   { room_number: '306', floor: 3, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
   { room_number: '307', floor: 3, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
+  // Houses have no floor of their own; placed on floor 1 by convention.
+  { room_number: 'H101', floor: 1, is_test: false, room_status: 'vacant', monthly_rent: 8500 },
+  { room_number: 'H102', floor: 1, is_test: false, room_status: 'vacant', monthly_rent: 8500 },
+  { room_number: 'H103', floor: 1, is_test: false, room_status: 'vacant', monthly_rent: 8500 },
   // The mock room. Floor 0, never on a production floor plan.
   { room_number: 'T01', floor: 0, is_test: true, room_status: 'occupied', monthly_rent: 6500 },
 ];

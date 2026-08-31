@@ -48,7 +48,7 @@ async function main() {
     console.log(`  contracts     ${counts.contracts}`);
     console.log(`  invoices      ${counts.invoices}`);
 
-    // The invariant the whole design protects: reports see 21, not 22.
+    // The invariant the whole design protects: reports see 24, not 25.
     const { rows: reportRows } = await client.query<{
       total_rooms: number;
       occupancy_rate: string;
@@ -57,18 +57,18 @@ async function main() {
 
     if (!report) throw new Error('report_room_summary returned no rows');
 
-    console.log(`\nreport_room_summary.total_rooms = ${report.total_rooms} (must be 21)`);
+    console.log(`\nreport_room_summary.total_rooms = ${report.total_rooms} (must be 24)`);
     console.log(`report_room_summary.occupancy_rate = ${report.occupancy_rate}%`);
 
-    if (Number(report.total_rooms) !== 21) {
+    if (Number(report.total_rooms) !== 24) {
       throw new Error(
         `Test data has leaked into reporting: report_room_summary.total_rooms is ` +
-          `${report.total_rooms}, expected 21.`,
+          `${report.total_rooms}, expected 24.`,
       );
     }
 
-    if (Number(counts.real_rooms) !== 21) {
-      throw new Error(`Expected 21 real rooms, found ${counts.real_rooms}.`);
+    if (Number(counts.real_rooms) !== 24) {
+      throw new Error(`Expected 24 real rooms, found ${counts.real_rooms}.`);
     }
 
     console.log('\nTest-data exclusion verified.');

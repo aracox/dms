@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { RequiredMark } from '@/components/ui/RequiredMark';
 import { signInAction, type SignInState } from '@/lib/auth/actions';
 
 const INITIAL_STATE: SignInState = { error: null };
@@ -16,6 +17,7 @@ export function LoginForm() {
       <div>
         <label htmlFor="email" className="text-ink-muted block text-xs font-medium">
           {t('auth.email')}
+          <RequiredMark />
         </label>
         <input
           id="email"
@@ -30,6 +32,7 @@ export function LoginForm() {
       <div>
         <label htmlFor="password" className="text-ink-muted block text-xs font-medium">
           {t('auth.password')}
+          <RequiredMark />
         </label>
         <input
           id="password"

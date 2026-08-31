@@ -16,7 +16,7 @@ import { StatusLegend } from './StatusLegend';
 /**
  * The interactive floor plan.
  *
- * All 21 rooms arrive from the server in one payload, so switching floors and
+ * All 24 rooms arrive from the server in one payload, so switching floors and
  * opening a room are instant and need no further requests.
  */
 export function FloorPlanView({
@@ -41,8 +41,8 @@ export function FloorPlanView({
   const selectedRoom = selectedRoomNumber ? roomsByNumber.get(selectedRoomNumber) : undefined;
 
   return (
-    <div className="space-y-4">
-      <div role="tablist" aria-label={t('floorPlan.title')} className="flex gap-1">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
+      <div role="tablist" aria-label={t('floorPlan.title')} className="flex shrink-0 gap-1">
         {FLOOR_LAYOUTS.map((candidate) => {
           const isActive = candidate.floor === floor;
 
@@ -66,8 +66,8 @@ export function FloorPlanView({
         })}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
-        <div className="bg-surface rounded-lg p-3">
+      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
+        <div className="bg-surface flex min-h-0 items-center justify-center rounded-lg p-3">
           {layout ? (
             <FloorPlanSvg
               layout={layout}
@@ -81,7 +81,7 @@ export function FloorPlanView({
           )}
         </div>
 
-        <aside className="bg-surface rounded-lg p-3">
+        <aside className="bg-surface min-h-0 overflow-y-auto rounded-lg p-3">
           <StatusLegend />
           <p className="text-ink-subtle mt-4 pt-3 text-xs">{t('floorPlan.subtitle')}</p>
         </aside>

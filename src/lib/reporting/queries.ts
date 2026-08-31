@@ -37,7 +37,7 @@ const EMPTY_ROOM_SUMMARY: RoomSummaryRow = {
   occupancy_rate: 0,
 };
 
-/** Room counts and occupancy rate across the 21 real rooms. */
+/** Room counts and occupancy rate across the 24 real rooms. */
 export async function getRoomSummary(): Promise<RoomSummaryRow> {
   const supabase = await createClient();
   const { data } = await supabase.from('report_room_summary').select('*').maybeSingle();
@@ -67,7 +67,7 @@ export async function getTenantSummary(): Promise<TenantSummaryRow> {
   return data ?? { registered_tenants: 0, total_occupants: 0 };
 }
 
-/** All 21 real rooms with contract, tenant and financial state. */
+/** All 24 real rooms with contract, tenant and financial state. */
 export async function getReportRooms(): Promise<RoomBoardRow[]> {
   const supabase = await createClient();
   const { data } = await supabase.from('report_rooms').select('*').order('room_number');

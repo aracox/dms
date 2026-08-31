@@ -21,7 +21,7 @@ export type AppRole = 'owner' | 'admin' | 'staff';
 
 export type RoomStatus = 'vacant' | 'occupied' | 'reserved' | 'maintenance';
 
-export type RoomType = 'standard' | 'air_conditioned' | 'studio';
+export type RoomType = 'standard' | 'air_conditioned' | 'studio' | 'house';
 
 export type ContractStatus = 'draft' | 'active' | 'expired' | 'terminated';
 
@@ -105,6 +105,7 @@ export type TenantRow = {
   nationality: string | null;
   emergency_contact: string | null;
   emergency_phone: string | null;
+  line_id: string | null;
   notes: string | null;
   is_test: boolean;
   created_at: string;
