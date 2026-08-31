@@ -97,17 +97,9 @@ PowerShell here is **Windows PowerShell 5.1** — no `&&`, no ternary, no `??`.
 
 ## Commands
 
-```powershell
-npm run dev              # dev server on :3000
-npm run build            # production build (run before declaring work done)
-npm run start            # serve the production build
-npm run lint             # eslint
-npm run typecheck        # tsc --noEmit
-npm run format           # prettier --write
-npm run test             # vitest run
-npm run test:watch       # vitest watch
-npm run seed             # apply supabase/seed.sql via service role (needs .env.local)
-```
+`npm run seed` applies `supabase/seed.sql` via the service role and needs `.env.local`. The rest of
+the scripts (`dev`, `build`, `lint`, `typecheck`, `format`, `test`, …) are the standard ones in
+`package.json`.
 
 Run a single test file or a single test:
 
@@ -278,27 +270,3 @@ static configuration, not business data.
 Accounting/GL, AI chatbot, smart meters, physical access-control hardware, bank APIs, automatic
 reconciliation, inventory, CRM, mobile app, multi-property. Keep module boundaries clean enough
 that these can be added later, but do not build seams for them now.
-
-## Cross-assistant consultation skills
-
-The template ships read-only consultation skills that let each assistant get an independent second opinion from another. All shell out to locally installed, authenticated CLIs and stay **read-only** (no editing, commits, or secrets in prompts).
-
-For **Claude Code** (under `.claude/skills/`) and **Antigravity / Gemini** (under `.gemini/skills/`):
-
-- `.gemini/skills/consult-codex/scripts/consult-codex.sh "<request>"` — asks the OpenAI **Codex** CLI (`codex exec`, read-only sandbox, high reasoning). Prints Codex's final answer on stdout. See `.gemini/skills/consult-codex/SKILL.md` (or `.claude/skills/consult-codex/SKILL.md`).
-- `.gemini/skills/consult-claude/scripts/consult-claude.sh "<request>"` — asks the **Claude Code** CLI (`claude -p`, read-only plan mode, high effort). Prints Claude's answer on stdout. See `.gemini/skills/consult-claude/SKILL.md`.
-- `.claude/skills/consult-antigravity/scripts/consult-antigravity.sh "<request>"` — asks the **Antigravity** CLI (`agy`, Gemini models, plan/print mode). Prints Antigravity's answer on stdout. See `.claude/skills/consult-antigravity/SKILL.md`.
-
-For the **Codex CLI** (under `.codex/skills/`, not read by Claude Code) — an orchestration system that routes tasks to other models:
-
-- `.codex/skills/consult-claude/scripts/consult-claude.sh "<request>"` — runs `claude -p` in plan mode (`--model sonnet --effort high --max-turns 30`, JSON output).
-- `.codex/skills/consult-antigravity/scripts/consult-antigravity.sh "<request>"` — runs the `agy` CLI in plan/print mode.
-
-## Orchestration skills (Claude Code)
-
-`.claude/skills/` also ships two skills that route work between Claude and the consult-* CLIs above. Claude Code should invoke them proactively when the trigger applies, not wait to be told:
-
-- **`orchestrator`** — invoke when the user says the literal phrase "do think". Classifies the task, then routes: very complex/ambiguous/cross-cutting work stays with Claude itself; bounded complex work (focused review, implementation plan) goes to `consult-codex` for advice first; generic/simple work goes to `consult-antigravity` for advice first. Claude always does the actual implementation. See `.claude/skills/orchestrator/SKILL.md`.
-- **`looping-engineer`** — invoke when the user asks to complete a goal end to end (or explicitly names the skill). Runs a full define-done → route-work → execute-until-verified → deliver loop, delegating only analysis/review to `consult-codex` or `consult-antigravity` while Claude remains the implementation owner. See `.claude/skills/looping-engineer/SKILL.md`.
-
-Mirrors of both exist under `.gemini/skills/` (Antigravity as owner) and `.codex/skills/` (Codex as owner) for their respective CLIs.
