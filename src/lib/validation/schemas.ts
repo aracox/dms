@@ -47,6 +47,27 @@ export const roomSchema = z.object({
 
 export type RoomInput = z.infer<typeof roomSchema>;
 
+/**
+ * Sets a room's status among the three a room can be in without a tenant:
+ * vacant, reserved, or under maintenance. 'occupied' is exclusively managed
+ * by move-in/move-out, never through this.
+ */
+export const roomStatusOverrideSchema = z.object({
+  room_id: uuid,
+  status: z.enum(['vacant', 'reserved', 'maintenance']),
+});
+
+export type RoomStatusOverrideInput = z.infer<typeof roomStatusOverrideSchema>;
+
+/** At most 1 car + 1 motorcycle per room -- enforced by the columns being scalar, not a list. */
+export const roomVehiclesSchema = z.object({
+  room_id: uuid,
+  car_plate: z.string().trim().max(20).nullable().optional(),
+  motorcycle_plate: z.string().trim().max(20).nullable().optional(),
+});
+
+export type RoomVehiclesInput = z.infer<typeof roomVehiclesSchema>;
+
 // --- Tenants ---------------------------------------------------------------
 
 /** The single registered person per room: main tenant and contact in one record. */
@@ -113,6 +134,14 @@ export const contractSchema = z
   });
 
 export type ContractInput = z.infer<typeof contractSchema>;
+
+/** Corrects the rent an active contract bills, without touching its other terms. */
+export const contractRentSchema = z.object({
+  contract_id: uuid,
+  monthly_rent: money,
+});
+
+export type ContractRentInput = z.infer<typeof contractRentSchema>;
 
 // --- Access cards ----------------------------------------------------------
 
@@ -181,6 +210,18 @@ export const invoiceSchema = z.object({
 
 export type InvoiceInput = z.infer<typeof invoiceSchema>;
 
+/**
+ * Generates a room's monthly invoice: rent + that month's recorded meter
+ * usage (if any) + whichever optional extra fees the caller ticks. The extra
+ * fee keys are validated against the known settings keys in the action.
+ */
+export const generateInvoiceSchema = z.object({
+  room_id: uuid,
+  billing_month: billingMonth,
+});
+
+export type GenerateInvoiceInput = z.infer<typeof generateInvoiceSchema>;
+
 // --- Payments --------------------------------------------------------------
 
 export const paymentSchema = z.object({
@@ -221,7 +262,14 @@ export const settingsSchema = z.object({
   parking_fee_car: money,
   parking_fee_motorcycle: money,
   card_replacement_fee: money,
+  netflix_fee: money,
+  youtube_fee: money,
+  disney_fee: money,
+  viu_fee: money,
+  hbo_fee: money,
+  amazon_prime_fee: money,
   default_monthly_rent: money,
+  default_deposit: money,
   default_payment_due_day: z
     .int()
     .min(1, 'validation.contract.dueDayRange')

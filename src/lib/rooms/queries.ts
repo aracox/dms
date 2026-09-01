@@ -19,6 +19,7 @@ import type {
   ContractRow,
   InvoiceItemRow,
   InvoiceRow,
+  Json,
   MaintenanceTicketRow,
   MeterReadingRow,
   PaymentRow,
@@ -26,6 +27,23 @@ import type {
   RoomRow,
   TenantRow,
 } from '@/types/database';
+
+/** Settings the room detail page's forms need: utility rates and the optional extra fees. */
+const ROOM_DETAIL_SETTINGS_KEYS = [
+  'electricity_rate',
+  'water_rate',
+  'internet_fee',
+  'parking_fee_car',
+  'parking_fee_motorcycle',
+  'card_replacement_fee',
+  'netflix_fee',
+  'youtube_fee',
+  'disney_fee',
+  'viu_fee',
+  'hbo_fee',
+  'amazon_prime_fee',
+  'default_payment_due_day',
+] as const;
 
 export interface RoomBoardOptions {
   floor?: number;
@@ -82,6 +100,8 @@ export interface RoomDetail {
   meterReadings: MeterReadingRow[];
   invoices: InvoiceWithItems[];
   tickets: MaintenanceTicketRow[];
+  /** Utility rates and optional extra fees, keyed by settings.key. See ROOM_DETAIL_SETTINGS_KEYS. */
+  settings: Record<string, Json>;
 }
 
 /**
@@ -94,33 +114,35 @@ export async function getRoomDetail(roomId: string): Promise<RoomDetail | null> 
   const { data: room } = await supabase.from('rooms').select('*').eq('id', roomId).maybeSingle();
   if (!room) return null;
 
-  const [board, contracts, cards, meterReadings, invoices, tickets] = await Promise.all([
-    getRoomBoardRow(roomId),
-    supabase
-      .from('contracts')
-      .select('*')
-      .eq('room_id', roomId)
-      .order('start_date', { ascending: false }),
-    supabase.from('access_cards').select('*').eq('room_id', roomId).order('card_number'),
-    supabase
-      .from('meter_readings')
-      .select('*')
-      .eq('room_id', roomId)
-      .order('billing_month', { ascending: false })
-      .limit(24),
-    supabase
-      .from('invoices')
-      .select('*')
-      .eq('room_id', roomId)
-      .order('billing_month', { ascending: false })
-      .limit(12),
-    supabase
-      .from('maintenance_tickets')
-      .select('*')
-      .eq('room_id', roomId)
-      .order('created_at', { ascending: false })
-      .limit(20),
-  ]);
+  const [board, contracts, cards, meterReadings, invoices, tickets, settingsRows] =
+    await Promise.all([
+      getRoomBoardRow(roomId),
+      supabase
+        .from('contracts')
+        .select('*')
+        .eq('room_id', roomId)
+        .order('start_date', { ascending: false }),
+      supabase.from('access_cards').select('*').eq('room_id', roomId).order('card_number'),
+      supabase
+        .from('meter_readings')
+        .select('*')
+        .eq('room_id', roomId)
+        .order('billing_month', { ascending: false })
+        .limit(24),
+      supabase
+        .from('invoices')
+        .select('*')
+        .eq('room_id', roomId)
+        .order('billing_month', { ascending: false })
+        .limit(12),
+      supabase
+        .from('maintenance_tickets')
+        .select('*')
+        .eq('room_id', roomId)
+        .order('created_at', { ascending: false })
+        .limit(20),
+      supabase.from('settings').select('key, value').in('key', ROOM_DETAIL_SETTINGS_KEYS),
+    ]);
 
   const contractRows = contracts.data ?? [];
   const activeContract = contractRows.find((contract) => contract.status === 'active') ?? null;
@@ -174,6 +196,7 @@ export async function getRoomDetail(roomId: string): Promise<RoomDetail | null> 
       payments: paymentRows.filter((payment) => payment.invoice_id === invoice.id),
     })),
     tickets: tickets.data ?? [],
+    settings: Object.fromEntries((settingsRows.data ?? []).map((row) => [row.key, row.value])),
   };
 }
 

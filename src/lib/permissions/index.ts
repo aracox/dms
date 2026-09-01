@@ -29,8 +29,10 @@ export type Permission =
   | 'meters:read'
   | 'meters:record'
   | 'meters:correct'
+  | 'meters:delete'
   | 'invoices:read'
   | 'invoices:write'
+  | 'invoices:delete'
   | 'payments:read'
   | 'payments:record'
   | 'payments:delete'
@@ -60,9 +62,13 @@ const REQUIRED_ROLE: Record<Permission, AppRole> = {
   'meters:read': 'staff',
   'meters:record': 'staff',
   'meters:correct': 'admin',
+  // Deleting a reading destroys billing history.
+  'meters:delete': 'owner',
 
   'invoices:read': 'staff',
   'invoices:write': 'admin',
+  // Deleting an invoice destroys billing history; cancelling (invoices:write) is the reversible option.
+  'invoices:delete': 'owner',
 
   'payments:read': 'staff',
   'payments:record': 'staff',

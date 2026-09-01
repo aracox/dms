@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
@@ -7,9 +7,15 @@ import { TD, TH, Table } from '@/components/ui/Table';
 import type { Locale } from '@/i18n/routing';
 import { confirmedPaid, outstanding } from '@/lib/billing/calc';
 import { formatTHB } from '@/lib/billing/money';
+import { INVOICE_EXTRA_FEE_KEYS } from '@/lib/invoices/fees';
+import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
+import { getCurrentProfile } from '@/lib/supabase/server';
 import { formatBillingMonth, formatDate } from '@/lib/utils/date';
 import type { InvoiceStatus } from '@/types/database';
+
+import { GenerateInvoiceForm } from './GenerateInvoiceForm';
+import { InvoiceActions } from './InvoiceActions';
 
 export const INVOICE_TONE: Record<InvoiceStatus, BadgeTone> = {
   draft: 'neutral',
@@ -20,17 +26,45 @@ export const INVOICE_TONE: Record<InvoiceStatus, BadgeTone> = {
   cancelled: 'neutral',
 };
 
-export function RoomBillingTab({ detail, locale }: { detail: RoomDetail; locale: Locale }) {
-  const t = useTranslations();
+export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; locale: Locale }) {
+  const t = await getTranslations();
+  const profile = await getCurrentProfile();
 
-  if (detail.invoices.length === 0) {
-    return <EmptyState message={t('room.noInvoice')} />;
-  }
+  const canGenerate = can(profile?.role, 'invoices:write') && Boolean(detail.contract);
+  const canCancel = can(profile?.role, 'invoices:write');
+  const canDeleteInvoices = can(profile?.role, 'invoices:delete');
+
+  const liveInvoiceMonths = detail.invoices
+    .filter((invoice) => invoice.status !== 'cancelled')
+    .map((invoice) => invoice.billing_month);
+
+  const fees = Object.fromEntries(
+    INVOICE_EXTRA_FEE_KEYS.map((key) => [
+      key,
+      typeof detail.settings[key] === 'number' ? (detail.settings[key] as number) : 0,
+    ]),
+  );
 
   return (
     <div className="space-y-4">
+      {canGenerate ? (
+        <Card>
+          <CardBody>
+            <GenerateInvoiceForm
+              roomId={detail.room.id}
+              fees={fees}
+              liveInvoiceMonths={liveInvoiceMonths}
+              locale={locale}
+            />
+          </CardBody>
+        </Card>
+      ) : null}
+
+      {detail.invoices.length === 0 ? <EmptyState message={t('room.noInvoice')} /> : null}
+
       {detail.invoices.map((invoice) => {
         const paid = confirmedPaid(invoice.payments);
+        const hasPayments = invoice.payments.length > 0;
 
         return (
           <Card key={invoice.id}>
@@ -38,9 +72,17 @@ export function RoomBillingTab({ detail, locale }: { detail: RoomDetail; locale:
               title={`${invoice.invoice_number} · ${formatBillingMonth(invoice.billing_month, locale)}`}
               description={`${t('billing.dueDate')} ${formatDate(invoice.due_date, locale)}`}
               action={
-                <Badge tone={INVOICE_TONE[invoice.status]}>
-                  {t(`invoiceStatus.${invoice.status}`)}
-                </Badge>
+                <div className="flex items-center gap-3">
+                  <Badge tone={INVOICE_TONE[invoice.status]}>
+                    {t(`invoiceStatus.${invoice.status}`)}
+                  </Badge>
+                  <InvoiceActions
+                    roomId={detail.room.id}
+                    invoiceId={invoice.id}
+                    canCancel={canCancel && invoice.status !== 'cancelled'}
+                    canDelete={canDeleteInvoices && !hasPayments}
+                  />
+                </div>
               }
             />
 

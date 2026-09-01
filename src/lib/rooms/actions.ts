@@ -7,10 +7,112 @@ import { redirect } from '@/i18n/navigation';
 import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { uploadTenantDocuments } from '@/lib/tenant-documents/upload';
-import { moveInSchema } from '@/lib/validation/schemas';
+import {
+  moveInSchema,
+  moveOutSchema,
+  roomStatusOverrideSchema,
+  roomVehiclesSchema,
+} from '@/lib/validation/schemas';
 
 export interface MoveInState {
   error: string | null;
+}
+
+export interface MoveOutState {
+  error: string | null;
+}
+
+export interface UpdateRoomVehiclesState {
+  error: string | null;
+}
+
+export interface UpdateRoomStatusState {
+  error: string | null;
+}
+
+const NON_OCCUPIED_STATUSES = ['vacant', 'reserved', 'maintenance'] as const;
+
+/**
+ * Sets a room's status among vacant / reserved / under maintenance. Refused
+ * unless the room is currently one of those three -- an occupied room isn't
+ * touched here, since move-in/move-out exclusively own that transition.
+ */
+export async function updateRoomStatusAction(
+  _previous: UpdateRoomStatusState,
+  formData: FormData,
+): Promise<UpdateRoomStatusState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'rooms:write');
+
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const parsed = roomStatusOverrideSchema.safeParse({
+    room_id: roomId,
+    status: String(formData.get('status') ?? ''),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  const supabase = await createClient();
+  const { data: room } = await supabase
+    .from('rooms')
+    .select('status')
+    .eq('id', parsed.data.room_id)
+    .maybeSingle();
+
+  const nonOccupiedStatuses: readonly string[] = NON_OCCUPIED_STATUSES;
+  if (!room || !nonOccupiedStatuses.includes(room.status)) {
+    return { error: 'room.statusChangeNotAllowed' };
+  }
+
+  const { error } = await supabase
+    .from('rooms')
+    .update({ status: parsed.data.status })
+    .eq('id', parsed.data.room_id);
+
+  if (error) return { error: 'errors.generic' };
+
+  revalidatePath(`/rooms/${roomId}`);
+  revalidatePath('/rooms');
+  revalidatePath('/floor-plan');
+  return { error: null };
+}
+
+/** Updates the room's registered car/motorcycle plates -- at most one of each. */
+export async function updateRoomVehiclesAction(
+  _previous: UpdateRoomVehiclesState,
+  formData: FormData,
+): Promise<UpdateRoomVehiclesState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'rooms:write');
+
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const parsed = roomVehiclesSchema.safeParse({
+    room_id: roomId,
+    car_plate: String(formData.get('car_plate') ?? '').trim() || null,
+    motorcycle_plate: String(formData.get('motorcycle_plate') ?? '').trim() || null,
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('rooms')
+    .update({
+      car_plate: parsed.data.car_plate ?? null,
+      motorcycle_plate: parsed.data.motorcycle_plate ?? null,
+    })
+    .eq('id', parsed.data.room_id);
+
+  if (error) return { error: 'errors.generic' };
+
+  revalidatePath(`/rooms/${roomId}`);
+  return { error: null };
 }
 
 /**
@@ -101,5 +203,46 @@ export async function moveInAction(
 
   // redirect() throws. This return exists only because next-intl does not type
   // it as `never`.
+  return { error: null };
+}
+
+/**
+ * Terminates the active contract, vacates the room, and (if requested)
+ * returns its active access cards -- all in one transaction via the
+ * move_out_room function (0018), the counterpart to move_in_room.
+ */
+export async function moveOutAction(
+  _previous: MoveOutState,
+  formData: FormData,
+): Promise<MoveOutState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'contracts:write');
+
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const parsed = moveOutSchema.safeParse({
+    contract_id: String(formData.get('contract_id') ?? ''),
+    terminated_at: String(formData.get('terminated_at') ?? ''),
+    termination_reason: String(formData.get('termination_reason') ?? '').trim() || undefined,
+    return_cards: formData.get('return_cards') === 'on',
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('move_out_room', {
+    p_contract_id: parsed.data.contract_id,
+    p_terminated_at: parsed.data.terminated_at,
+    p_termination_reason: parsed.data.termination_reason ?? null,
+    p_return_cards: parsed.data.return_cards,
+  });
+
+  if (error) return { error: 'errors.generic' };
+
+  revalidatePath('/rooms');
+  revalidatePath('/floor-plan');
+  revalidatePath(`/rooms/${roomId}`);
   return { error: null };
 }

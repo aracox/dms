@@ -91,6 +91,8 @@ export type RoomRow = {
   status: RoomStatus;
   size_sqm: number | null;
   notes: string | null;
+  car_plate: string | null;
+  motorcycle_plate: string | null;
   is_test: boolean;
   created_at: string;
   updated_at: string;
@@ -590,6 +592,15 @@ export type Database = {
           p_activate_cards: boolean;
         };
         Returns: { contract_id: string; tenant_id: string }[];
+      };
+      move_out_room: {
+        Args: {
+          p_contract_id: string;
+          p_terminated_at: string;
+          p_termination_reason: string | null;
+          p_return_cards: boolean;
+        };
+        Returns: undefined;
       };
     };
     Enums: {

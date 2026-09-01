@@ -14,6 +14,7 @@ import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { daysBetween, formatDate } from '@/lib/utils/date';
 import type { ContractStatus } from '@/types/database';
 
+import { ContractRentField } from './ContractRentField';
 import { TenantDocumentsCard, type TenantDocumentView } from './TenantDocumentsCard';
 
 /** Admin+ only: matches the tenant_documents RLS and the storage bucket's own policy. */
@@ -64,6 +65,7 @@ export async function RoomContractTab({
   const daysRemaining = contract ? daysBetween(today, contract.end_date) : null;
   const profile = await getCurrentProfile();
   const canMoveIn = !contract && can(profile?.role, 'contracts:write');
+  const canEditContract = can(profile?.role, 'contracts:write');
   const canManageDocuments = can(profile?.role, 'tenants:write');
   const documents = tenant && canManageDocuments ? await loadTenantDocuments(tenant.id) : null;
 
@@ -132,10 +134,18 @@ export async function RoomContractTab({
                 value={t('room.occupantsValue', { count: contract.occupant_count })}
                 hint={t('room.occupantsHint')}
               />
-              <Field
-                label={t('room.monthlyRent')}
-                value={formatTHB(contract.monthly_rent, locale)}
-              />
+              {canEditContract ? (
+                <ContractRentField
+                  contractId={contract.id}
+                  roomId={detail.room.id}
+                  monthlyRent={contract.monthly_rent}
+                />
+              ) : (
+                <Field
+                  label={t('room.monthlyRent')}
+                  value={formatTHB(contract.monthly_rent, locale)}
+                />
+              )}
               <Field label={t('room.deposit')} value={formatTHB(contract.deposit, locale)} />
               <Field label={t('room.paymentDueDay')} value={contract.payment_due_day} />
             </FieldGrid>

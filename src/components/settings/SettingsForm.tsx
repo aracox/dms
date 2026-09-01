@@ -16,7 +16,14 @@ export interface SettingsValues {
   parking_fee_car: number;
   parking_fee_motorcycle: number;
   card_replacement_fee: number;
+  netflix_fee: number;
+  youtube_fee: number;
+  disney_fee: number;
+  viu_fee: number;
+  hbo_fee: number;
+  amazon_prime_fee: number;
   default_monthly_rent: number;
+  default_deposit: number;
   default_payment_due_day: number;
   payment_grace_days: number;
 }
@@ -78,6 +85,11 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
               defaultValue={values.default_monthly_rent}
             />
             <NumberField
+              name="default_deposit"
+              label={t('settings.defaultDeposit')}
+              defaultValue={values.default_deposit}
+            />
+            <NumberField
               name="default_payment_due_day"
               label={t('settings.defaultPaymentDueDay')}
               defaultValue={values.default_payment_due_day}
@@ -90,14 +102,6 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
               step="1"
             />
           </div>
-          <p className="text-ink-subtle mt-3 text-xs">{t('settings.defaultMonthlyRentHint')}</p>
-          <p className="text-ink-subtle mt-1 text-xs">
-            {t('settings.paymentGraceDaysHint', {
-              dueDay: values.default_payment_due_day,
-              graceDays: values.payment_grace_days,
-              lateDay: values.default_payment_due_day + values.payment_grace_days,
-            })}
-          </p>
         </CardBody>
       </Card>
 
@@ -124,6 +128,44 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
               name="card_replacement_fee"
               label={t('settings.cardReplacementFee')}
               defaultValue={values.card_replacement_fee}
+            />
+          </div>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader title={t('settings.streamingServices')} />
+        <CardBody>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <NumberField
+              name="netflix_fee"
+              label={t('settings.netflixFee')}
+              defaultValue={values.netflix_fee}
+            />
+            <NumberField
+              name="youtube_fee"
+              label={t('settings.youtubeFee')}
+              defaultValue={values.youtube_fee}
+            />
+            <NumberField
+              name="disney_fee"
+              label={t('settings.disneyFee')}
+              defaultValue={values.disney_fee}
+            />
+            <NumberField
+              name="viu_fee"
+              label={t('settings.viuFee')}
+              defaultValue={values.viu_fee}
+            />
+            <NumberField
+              name="hbo_fee"
+              label={t('settings.hboFee')}
+              defaultValue={values.hbo_fee}
+            />
+            <NumberField
+              name="amazon_prime_fee"
+              label={t('settings.amazonPrimeFee')}
+              defaultValue={values.amazon_prime_fee}
             />
           </div>
         </CardBody>

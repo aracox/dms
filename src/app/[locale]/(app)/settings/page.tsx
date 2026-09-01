@@ -41,7 +41,14 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             parking_fee_car: Number(raw('parking_fee_car') ?? 0),
             parking_fee_motorcycle: Number(raw('parking_fee_motorcycle') ?? 0),
             card_replacement_fee: Number(raw('card_replacement_fee') ?? 0),
+            netflix_fee: Number(raw('netflix_fee') ?? 0),
+            youtube_fee: Number(raw('youtube_fee') ?? 0),
+            disney_fee: Number(raw('disney_fee') ?? 0),
+            viu_fee: Number(raw('viu_fee') ?? 0),
+            hbo_fee: Number(raw('hbo_fee') ?? 0),
+            amazon_prime_fee: Number(raw('amazon_prime_fee') ?? 0),
             default_monthly_rent: Number(raw('default_monthly_rent') ?? 0),
+            default_deposit: Number(raw('default_deposit') ?? 0),
             default_payment_due_day: Number(raw('default_payment_due_day') ?? 1),
             payment_grace_days: Number(raw('payment_grace_days') ?? 0),
           }}
@@ -58,6 +65,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
                   label={t('settings.defaultMonthlyRent')}
                   value={display('default_monthly_rent')}
                 />
+                <Field label={t('settings.defaultDeposit')} value={display('default_deposit')} />
                 <Field
                   label={t('settings.defaultPaymentDueDay')}
                   value={display('default_payment_due_day')}
@@ -84,6 +92,20 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
                   label={t('settings.cardReplacementFee')}
                   value={display('card_replacement_fee')}
                 />
+              </FieldGrid>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader title={t('settings.streamingServices')} />
+            <CardBody>
+              <FieldGrid>
+                <Field label={t('settings.netflixFee')} value={display('netflix_fee')} />
+                <Field label={t('settings.youtubeFee')} value={display('youtube_fee')} />
+                <Field label={t('settings.disneyFee')} value={display('disney_fee')} />
+                <Field label={t('settings.viuFee')} value={display('viu_fee')} />
+                <Field label={t('settings.hboFee')} value={display('hbo_fee')} />
+                <Field label={t('settings.amazonPrimeFee')} value={display('amazon_prime_fee')} />
               </FieldGrid>
             </CardBody>
           </Card>

@@ -9,8 +9,12 @@ import { formatTHB } from '@/lib/billing/money';
 import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
-import { formatBillingMonth, formatDate } from '@/lib/utils/date';
+import { bangkokToday, formatBillingMonth, formatDate } from '@/lib/utils/date';
 
+import { ContractRentField } from './ContractRentField';
+import { MoveOutForm } from './MoveOutForm';
+import { RoomStatusButtons } from './RoomStatusButtons';
+import { RoomVehiclesCard } from './RoomVehiclesCard';
 import { TenantContactCard } from './TenantContactCard';
 
 /** Everything the spec asks a room click to reveal, on one panel. */
@@ -19,6 +23,8 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
   const { room, board, contract, tenant } = detail;
   const profile = await getCurrentProfile();
   const canEditTenant = can(profile?.role, 'tenants:write');
+  const canEditRoom = can(profile?.role, 'rooms:write');
+  const canEditContract = can(profile?.role, 'contracts:write');
   const canMoveIn = !contract && can(profile?.role, 'contracts:write');
 
   const latestElectricity = detail.meterReadings.find(
@@ -44,12 +50,59 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
         />
         <CardBody>
           <FieldGrid>
-            <Field label={t('room.monthlyRent')} value={formatTHB(room.monthly_rent, locale)} />
-            <Field label={t('room.deposit')} value={formatTHB(room.deposit, locale)} />
+            {contract && canEditContract ? (
+              <ContractRentField
+                contractId={contract.id}
+                roomId={room.id}
+                monthlyRent={contract.monthly_rent}
+              />
+            ) : (
+              <Field
+                label={t('room.monthlyRent')}
+                value={formatTHB(board?.monthly_rent ?? contract?.monthly_rent ?? 0, locale)}
+              />
+            )}
+            <Field
+              label={t('room.deposit')}
+              value={formatTHB(board?.deposit ?? contract?.deposit ?? 0, locale)}
+            />
             <Field label={t('room.status')} value={t(`roomStatus.${room.status}`)} />
           </FieldGrid>
+
+          {canEditRoom &&
+          (room.status === 'vacant' ||
+            room.status === 'reserved' ||
+            room.status === 'maintenance') ? (
+            <div className="border-border mt-3 border-t pt-3">
+              <RoomStatusButtons roomId={room.id} status={room.status} />
+            </div>
+          ) : null}
+
+          {canMoveIn ? (
+            <div className="border-border mt-3 border-t pt-3">
+              <Link
+                href={`/rooms/${room.id}/move-in`}
+                className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-3 py-1.5 text-xs font-semibold text-white"
+              >
+                {t('contract.moveIn')}
+              </Link>
+            </div>
+          ) : null}
+
+          {contract && contract.status === 'active' && canEditContract ? (
+            <div className="border-border mt-3 border-t pt-3">
+              <MoveOutForm contractId={contract.id} roomId={room.id} today={bangkokToday()} />
+            </div>
+          ) : null}
         </CardBody>
       </Card>
+
+      <RoomVehiclesCard
+        roomId={room.id}
+        carPlate={room.car_plate}
+        motorcyclePlate={room.motorcycle_plate}
+        canEdit={canEditRoom}
+      />
 
       {tenant && contract ? (
         <TenantContactCard
@@ -61,20 +114,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
         />
       ) : (
         <Card>
-          <CardHeader
-            title={t('room.mainTenant')}
-            description={t('tenant.singleTenantNotice')}
-            action={
-              canMoveIn ? (
-                <Link
-                  href={`/rooms/${room.id}/move-in`}
-                  className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-3 py-1.5 text-xs font-semibold text-white"
-                >
-                  {t('contract.moveIn')}
-                </Link>
-              ) : null
-            }
-          />
+          <CardHeader title={t('room.mainTenant')} description={t('tenant.singleTenantNotice')} />
           <CardBody>
             <p className="text-ink-subtle text-sm">{t('room.noTenant')}</p>
           </CardBody>
