@@ -218,12 +218,18 @@ export const settingsSchema = z.object({
   electricity_rate: money,
   water_rate: money,
   internet_fee: money,
-  parking_fee: money,
+  parking_fee_car: money,
+  parking_fee_motorcycle: money,
   card_replacement_fee: money,
+  default_monthly_rent: money,
   default_payment_due_day: z
     .int()
     .min(1, 'validation.contract.dueDayRange')
     .max(28, 'validation.contract.dueDayRange'),
+  payment_grace_days: z
+    .int()
+    .min(0, 'validation.settings.graceDaysRange')
+    .max(30, 'validation.settings.graceDaysRange'),
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;

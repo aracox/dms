@@ -13,9 +13,12 @@ export interface SettingsValues {
   electricity_rate: number;
   water_rate: number;
   internet_fee: number;
-  parking_fee: number;
+  parking_fee_car: number;
+  parking_fee_motorcycle: number;
   card_replacement_fee: number;
+  default_monthly_rent: number;
   default_payment_due_day: number;
+  payment_grace_days: number;
 }
 
 function NumberField({
@@ -70,12 +73,31 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
               defaultValue={values.water_rate}
             />
             <NumberField
+              name="default_monthly_rent"
+              label={t('settings.defaultMonthlyRent')}
+              defaultValue={values.default_monthly_rent}
+            />
+            <NumberField
               name="default_payment_due_day"
               label={t('settings.defaultPaymentDueDay')}
               defaultValue={values.default_payment_due_day}
               step="1"
             />
+            <NumberField
+              name="payment_grace_days"
+              label={t('settings.paymentGraceDays')}
+              defaultValue={values.payment_grace_days}
+              step="1"
+            />
           </div>
+          <p className="text-ink-subtle mt-3 text-xs">{t('settings.defaultMonthlyRentHint')}</p>
+          <p className="text-ink-subtle mt-1 text-xs">
+            {t('settings.paymentGraceDaysHint', {
+              dueDay: values.default_payment_due_day,
+              graceDays: values.payment_grace_days,
+              lateDay: values.default_payment_due_day + values.payment_grace_days,
+            })}
+          </p>
         </CardBody>
       </Card>
 
@@ -89,9 +111,14 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
               defaultValue={values.internet_fee}
             />
             <NumberField
-              name="parking_fee"
-              label={t('settings.parkingFee')}
-              defaultValue={values.parking_fee}
+              name="parking_fee_car"
+              label={t('settings.parkingFeeCar')}
+              defaultValue={values.parking_fee_car}
+            />
+            <NumberField
+              name="parking_fee_motorcycle"
+              label={t('settings.parkingFeeMotorcycle')}
+              defaultValue={values.parking_fee_motorcycle}
             />
             <NumberField
               name="card_replacement_fee"

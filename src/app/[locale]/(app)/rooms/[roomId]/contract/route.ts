@@ -6,10 +6,7 @@ import { getCurrentProfile } from '@/lib/supabase/server';
 import { bangkokToday } from '@/lib/utils/date';
 
 /** Downloads the active contract for a room as a PDF (สัญญาเช่า). */
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ roomId: string }> },
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ roomId: string }> }) {
   const profile = await getCurrentProfile();
   if (!can(profile?.role, 'contracts:read')) {
     return new Response('Forbidden', { status: 403 });

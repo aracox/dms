@@ -10,7 +10,7 @@
  */
 
 import type { FinancialStatus, InvoiceItemType, InvoiceStatus } from '@/types/database';
-import { bangkokToday, type IsoDate } from '@/lib/utils/date';
+import { bangkokToday, isPastDue, type IsoDate } from '@/lib/utils/date';
 
 import { multiplyMoney, round2, subtractMoney, sumMoney } from './money';
 
@@ -98,8 +98,10 @@ export function deriveInvoiceStatus(input: {
   paid: number;
   dueDate: IsoDate;
   today?: IsoDate;
+  /** Days past due_date before the invoice counts as overdue. Mirrors payment_grace_days(). */
+  graceDays?: number;
 }): InvoiceStatus {
-  const { currentStatus, total, paid, dueDate } = input;
+  const { currentStatus, total, paid, dueDate, graceDays = 0 } = input;
   const today = input.today ?? bangkokToday();
 
   // Drafts and cancelled invoices keep their status; only totals refresh.
@@ -109,7 +111,7 @@ export function deriveInvoiceStatus(input: {
 
   if (total > 0 && paid >= total) return 'paid';
   if (paid > 0) return 'partially_paid';
-  if (dueDate < today) return 'overdue';
+  if (isPastDue(dueDate, today, graceDays)) return 'overdue';
   return 'issued';
 }
 
@@ -118,14 +120,16 @@ export function deriveFinancialStatus(input: {
   invoiceStatus: InvoiceStatus | null;
   dueDate: IsoDate | null;
   today?: IsoDate;
+  /** Days past due_date before the invoice counts as overdue. Mirrors payment_grace_days(). */
+  graceDays?: number;
 }): FinancialStatus {
-  const { invoiceStatus, dueDate } = input;
+  const { invoiceStatus, dueDate, graceDays = 0 } = input;
   const today = input.today ?? bangkokToday();
 
   if (!invoiceStatus || !dueDate) return 'none';
   if (invoiceStatus === 'paid') return 'paid';
   if (invoiceStatus === 'cancelled' || invoiceStatus === 'draft') return 'none';
-  return dueDate < today ? 'overdue' : 'payment_due';
+  return isPastDue(dueDate, today, graceDays) ? 'overdue' : 'payment_due';
 }
 
 /**

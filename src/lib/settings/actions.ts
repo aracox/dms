@@ -34,9 +34,12 @@ export async function updateSettingsAction(
     electricity_rate: Number(formData.get('electricity_rate')),
     water_rate: Number(formData.get('water_rate')),
     internet_fee: Number(formData.get('internet_fee')),
-    parking_fee: Number(formData.get('parking_fee')),
+    parking_fee_car: Number(formData.get('parking_fee_car')),
+    parking_fee_motorcycle: Number(formData.get('parking_fee_motorcycle')),
     card_replacement_fee: Number(formData.get('card_replacement_fee')),
+    default_monthly_rent: Number(formData.get('default_monthly_rent')),
     default_payment_due_day: Number(formData.get('default_payment_due_day')),
+    payment_grace_days: Number(formData.get('payment_grace_days')),
   });
 
   if (!parsed.success) {

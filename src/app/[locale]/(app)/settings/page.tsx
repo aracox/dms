@@ -38,9 +38,12 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             electricity_rate: Number(raw('electricity_rate') ?? 0),
             water_rate: Number(raw('water_rate') ?? 0),
             internet_fee: Number(raw('internet_fee') ?? 0),
-            parking_fee: Number(raw('parking_fee') ?? 0),
+            parking_fee_car: Number(raw('parking_fee_car') ?? 0),
+            parking_fee_motorcycle: Number(raw('parking_fee_motorcycle') ?? 0),
             card_replacement_fee: Number(raw('card_replacement_fee') ?? 0),
+            default_monthly_rent: Number(raw('default_monthly_rent') ?? 0),
             default_payment_due_day: Number(raw('default_payment_due_day') ?? 1),
+            payment_grace_days: Number(raw('payment_grace_days') ?? 0),
           }}
         />
       ) : (
@@ -52,8 +55,16 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
                 <Field label={t('meters.electricityRate')} value={display('electricity_rate')} />
                 <Field label={t('meters.waterRate')} value={display('water_rate')} />
                 <Field
+                  label={t('settings.defaultMonthlyRent')}
+                  value={display('default_monthly_rent')}
+                />
+                <Field
                   label={t('settings.defaultPaymentDueDay')}
                   value={display('default_payment_due_day')}
+                />
+                <Field
+                  label={t('settings.paymentGraceDays')}
+                  value={display('payment_grace_days')}
                 />
               </FieldGrid>
             </CardBody>
@@ -64,7 +75,11 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
             <CardBody>
               <FieldGrid>
                 <Field label={t('settings.internetFee')} value={display('internet_fee')} />
-                <Field label={t('settings.parkingFee')} value={display('parking_fee')} />
+                <Field label={t('settings.parkingFeeCar')} value={display('parking_fee_car')} />
+                <Field
+                  label={t('settings.parkingFeeMotorcycle')}
+                  value={display('parking_fee_motorcycle')}
+                />
                 <Field
                   label={t('settings.cardReplacementFee')}
                   value={display('card_replacement_fee')}

@@ -396,9 +396,14 @@
     "utilityRates": "Utility rates",
     "fees": "Other fees",
     "internetFee": "Internet fee (THB per month)",
-    "parkingFee": "Parking fee (THB per month)",
+    "parkingFeeCar": "Parking fee, car (THB per month)",
+    "parkingFeeMotorcycle": "Parking fee, motorcycle (THB per month)",
     "cardReplacementFee": "Card replacement fee (THB)",
+    "defaultMonthlyRent": "Default monthly rent (THB)",
+    "defaultMonthlyRentHint": "Prefills the monthly rent on move-in when a room has no rent of its own set. Rooms with their own rent are unaffected.",
     "defaultPaymentDueDay": "Default payment due day",
+    "paymentGraceDays": "Payment grace period (days)",
+    "paymentGraceDaysHint": "Rent is due on day {dueDay} of the month. With a {graceDays}-day grace period, an invoice only counts as late after day {lateDay}.",
     "ownerOnly": "Only the owner can change settings",
     "saved": "Settings saved"
   },
@@ -461,6 +466,9 @@
       "dueDayRange": "Payment due day must be between 1 and 28",
       "occupantsMin": "There must be at least 1 occupant",
       "endBeforeStart": "The end date must be after the start date"
+    },
+    "settings": {
+      "graceDaysRange": "Grace period must be between 0 and 30 days"
     },
     "card": {
       "slot": "Card number must end in -A or -B"

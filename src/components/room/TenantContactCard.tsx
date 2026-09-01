@@ -157,10 +157,7 @@ export function TenantContactCard({
     emergency_phone: tenant.emergency_phone ?? '',
   });
 
-  async function commitField(
-    field: keyof typeof contact,
-    value: string,
-  ): Promise<string | null> {
+  async function commitField(field: keyof typeof contact, value: string): Promise<string | null> {
     const next = { ...contact, [field]: value };
 
     const formData = new FormData();

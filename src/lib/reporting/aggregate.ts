@@ -11,7 +11,7 @@
 
 import type { InvoiceStatus, RoomStatus } from '@/types/database';
 import { round2, subtractMoney, sumMoney } from '@/lib/billing/money';
-import { bangkokToday, billingMonthOf, type IsoDate } from '@/lib/utils/date';
+import { bangkokToday, billingMonthOf, isPastDue, type IsoDate } from '@/lib/utils/date';
 
 /**
  * Drop test rows. This is the ONLY place TypeScript decides what "real" means.
@@ -75,6 +75,8 @@ export interface FinanceAggregateInput {
     status: string;
   }[];
   today?: IsoDate;
+  /** Days past due_date before an invoice counts as overdue. Mirrors payment_grace_days(). */
+  graceDays?: number;
 }
 
 export interface FinanceSummary {
@@ -89,6 +91,7 @@ export interface FinanceSummary {
 /** Mirrors report_finance_summary. */
 export function financeSummary(input: FinanceAggregateInput): FinanceSummary {
   const today = input.today ?? bangkokToday();
+  const graceDays = input.graceDays ?? 0;
   const month = billingMonthOf(today);
 
   const contracts = excludeTest(input.contracts);
@@ -119,7 +122,9 @@ export function financeSummary(input: FinanceAggregateInput): FinanceSummary {
   const outstanding = sumMoney(open.map((i) => subtractMoney(i.total, i.paid_amount)));
 
   const overdue = sumMoney(
-    open.filter((i) => i.due_date < today).map((i) => subtractMoney(i.total, i.paid_amount)),
+    open
+      .filter((i) => isPastDue(i.due_date, today, graceDays))
+      .map((i) => subtractMoney(i.total, i.paid_amount)),
   );
 
   return {

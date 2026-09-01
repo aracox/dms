@@ -175,6 +175,16 @@ describe('invoice status', () => {
   it('treats a zero-total invoice as unpaid rather than paid', () => {
     expect(deriveInvoiceStatus({ ...base, total: 0, paid: 0 })).toBe('overdue');
   });
+
+  it('holds off overdue while a grace period is still running', () => {
+    // Due 2026-08-05 + 5 days grace = late only after 2026-08-10.
+    expect(
+      deriveInvoiceStatus({ ...base, today: '2026-08-10', total: 6720, paid: 0, graceDays: 5 }),
+    ).toBe('issued');
+    expect(
+      deriveInvoiceStatus({ ...base, today: '2026-08-11', total: 6720, paid: 0, graceDays: 5 }),
+    ).toBe('overdue');
+  });
 });
 
 describe('floor plan financial status', () => {
@@ -209,5 +219,24 @@ describe('floor plan financial status', () => {
     expect(
       deriveFinancialStatus({ invoiceStatus: 'cancelled', dueDate: '2026-08-05', today }),
     ).toBe('none');
+  });
+
+  it('holds off overdue while a grace period is still running', () => {
+    expect(
+      deriveFinancialStatus({
+        invoiceStatus: 'issued',
+        dueDate: '2026-08-05',
+        today: '2026-08-10',
+        graceDays: 5,
+      }),
+    ).toBe('payment_due');
+    expect(
+      deriveFinancialStatus({
+        invoiceStatus: 'issued',
+        dueDate: '2026-08-05',
+        today: '2026-08-11',
+        graceDays: 5,
+      }),
+    ).toBe('overdue');
   });
 });

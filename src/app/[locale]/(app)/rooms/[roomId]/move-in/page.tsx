@@ -33,12 +33,17 @@ export default async function MoveInPage({
   }
 
   const supabase = await createClient();
-  const { data: dueDaySetting } = await supabase
+  const { data: moveInSettings } = await supabase
     .from('settings')
-    .select('value')
-    .eq('key', 'default_payment_due_day')
-    .maybeSingle();
-  const defaultDueDay = typeof dueDaySetting?.value === 'number' ? dueDaySetting.value : 5;
+    .select('key, value')
+    .in('key', ['default_payment_due_day', 'default_monthly_rent']);
+
+  const settingValue = (key: string) => moveInSettings?.find((row) => row.key === key)?.value;
+  const dueDaySetting = settingValue('default_payment_due_day');
+  const rentSetting = settingValue('default_monthly_rent');
+
+  const defaultDueDay = typeof dueDaySetting === 'number' ? dueDaySetting : 5;
+  const defaultRent = room.monthly_rent || (typeof rentSetting === 'number' ? rentSetting : 0);
 
   const startDate = bangkokToday();
   const [year, month, day] = startDate.split('-').map(Number);
@@ -61,7 +66,7 @@ export default async function MoveInPage({
 
       <MoveInForm
         roomId={room.id}
-        defaultRent={room.monthly_rent}
+        defaultRent={defaultRent}
         defaultDeposit={room.deposit}
         defaultDueDay={defaultDueDay}
         startDate={startDate}

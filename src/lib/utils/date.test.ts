@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  addDays,
   addMonths,
   bangkokToday,
   billingMonthOf,
@@ -56,6 +57,22 @@ describe('due dates', () => {
     expect(isPastDue('2026-08-05', '2026-08-26')).toBe(true);
     expect(isPastDue('2026-08-28', '2026-08-26')).toBe(false);
     expect(isPastDue('2026-08-26', '2026-08-26')).toBe(false);
+  });
+
+  it('shifts a date forward by whole days, spanning a month boundary', () => {
+    expect(addDays('2026-08-05', 5)).toBe('2026-08-10');
+    expect(addDays('2026-08-28', 5)).toBe('2026-09-02');
+  });
+
+  it('applies a grace period before counting as past due -- due day 5 + 5 days grace = late after day 10', () => {
+    expect(isPastDue('2026-08-05', '2026-08-09', 5)).toBe(false);
+    expect(isPastDue('2026-08-05', '2026-08-10', 5)).toBe(false);
+    expect(isPastDue('2026-08-05', '2026-08-11', 5)).toBe(true);
+  });
+
+  it('defaults the grace period to zero, matching the no-grace behaviour', () => {
+    expect(isPastDue('2026-08-05', '2026-08-06')).toBe(true);
+    expect(isPastDue('2026-08-05', '2026-08-06', 0)).toBe(true);
   });
 });
 

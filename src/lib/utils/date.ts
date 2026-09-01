@@ -54,9 +54,24 @@ export function daysBetween(from: IsoDate, to: IsoDate): number {
   return Math.round((Date.parse(`${to}T12:00:00Z`) - Date.parse(`${from}T12:00:00Z`)) / MS_PER_DAY);
 }
 
-/** True when `dueDate` is strictly before `today`. Mirrors recalc_invoice(). */
-export function isPastDue(dueDate: IsoDate, today: IsoDate = bangkokToday()): boolean {
-  return dueDate < today;
+/** Shift a calendar date by whole days. `addDays('2026-08-05', 5)` -> '2026-08-10'. */
+export function addDays(date: IsoDate, days: number): IsoDate {
+  const shifted = new Date(`${date}T12:00:00Z`);
+  shifted.setUTCDate(shifted.getUTCDate() + days);
+  return shifted.toISOString().slice(0, 10);
+}
+
+/**
+ * True when `dueDate`, plus an optional grace period, is strictly before
+ * `today`. Mirrors recalc_invoice() / payment_grace_days().
+ */
+export function isPastDue(
+  dueDate: IsoDate,
+  today: IsoDate = bangkokToday(),
+  graceDays = 0,
+): boolean {
+  const cutoff = graceDays > 0 ? addDays(dueDate, graceDays) : dueDate;
+  return cutoff < today;
 }
 
 /** Due date for a billing month, clamping to the last day of short months. */

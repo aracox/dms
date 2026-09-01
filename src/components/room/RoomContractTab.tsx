@@ -106,7 +106,10 @@ export async function RoomContractTab({
                 label={t('tenant.idCard')}
                 value={tenant.id_card_or_passport ?? t('common.notAvailable')}
               />
-              <Field label={t('tenant.lineId')} value={tenant.line_id ?? t('common.notAvailable')} />
+              <Field
+                label={t('tenant.lineId')}
+                value={tenant.line_id ?? t('common.notAvailable')}
+              />
               <Field
                 label={t('contract.startDate')}
                 value={formatDate(contract.start_date, locale)}
