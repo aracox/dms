@@ -23,12 +23,12 @@ function ReadOnlyField({
 }) {
   return (
     <div className="py-2">
-      <dt className="text-ink-subtle flex items-center gap-1 text-xs">
+      <dt className="text-ink-subtle text-caption flex items-center gap-1">
         <Lock size={11} aria-hidden="true" />
         {label}
       </dt>
       <dd className="text-ink mt-0.5 text-sm font-medium">{value}</dd>
-      {hint ? <p className="text-ink-subtle mt-0.5 text-xs">{hint}</p> : null}
+      {hint ? <p className="text-ink-subtle text-caption mt-0.5">{hint}</p> : null}
     </div>
   );
 }

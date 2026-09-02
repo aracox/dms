@@ -42,7 +42,7 @@ export function StatTile({
   return (
     <div
       className={cn(
-        'border-border bg-surface relative overflow-hidden rounded-lg border p-4',
+        'border-border bg-surface relative overflow-hidden rounded-xl border p-4 shadow-sm',
         className,
       )}
     >
@@ -51,11 +51,11 @@ export function StatTile({
         aria-hidden="true"
       />
       <div className="flex items-start justify-between gap-2">
-        <p className="text-ink-muted text-xs font-medium">{label}</p>
+        <p className="text-ink-muted text-caption font-medium">{label}</p>
         {icon ? <span className="text-ink-subtle">{icon}</span> : null}
       </div>
       <p className={cn('mt-1.5 text-2xl font-semibold tabular-nums', TONE_ACCENT[tone])}>{value}</p>
-      {hint ? <p className="text-ink-subtle mt-0.5 text-xs">{hint}</p> : null}
+      {hint ? <p className="text-ink-subtle text-caption mt-0.5">{hint}</p> : null}
     </div>
   );
 }

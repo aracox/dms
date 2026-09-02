@@ -101,7 +101,7 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
                   <TD>
                     <span className="font-medium">{t(`invoiceItemType.${item.type}`)}</span>
                     {item.description ? (
-                      <span className="text-ink-subtle block text-xs">{item.description}</span>
+                      <span className="text-ink-subtle text-caption block">{item.description}</span>
                     ) : null}
                   </TD>
                   <TD numeric>{item.quantity}</TD>

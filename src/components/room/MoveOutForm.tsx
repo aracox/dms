@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { useActionState, useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { moveOutAction, type MoveOutState } from '@/lib/rooms/actions';
 
 const INITIAL_STATE: MoveOutState = { error: null };
@@ -23,13 +25,9 @@ export function MoveOutForm({
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="border-border text-ink hover:bg-surface-sunken rounded-md border px-2.5 py-1 text-xs font-medium"
-      >
+      <Button type="button" variant="secondary" size="sm" onClick={() => setOpen(true)}>
         {t('contract.moveOut')}
-      </button>
+      </Button>
     );
   }
 
@@ -39,53 +37,43 @@ export function MoveOutForm({
       <input type="hidden" name="room_id" value={roomId} />
 
       <div>
-        <label className="text-ink-muted block text-xs font-medium">
+        <label className="text-ink text-body-sm block font-medium">
           {t('contract.terminatedAt')}
         </label>
-        <input
-          name="terminated_at"
-          type="date"
-          defaultValue={today}
-          required
-          className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-2 py-1 text-sm"
-        />
+        <Input name="terminated_at" type="date" defaultValue={today} required className="mt-1" />
       </div>
 
       <div>
-        <label className="text-ink-muted block text-xs font-medium">
+        <label className="text-ink text-body-sm block font-medium">
           {t('contract.terminationReason')}
         </label>
-        <input
-          name="termination_reason"
-          type="text"
-          maxLength={500}
-          className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-2 py-1 text-sm"
-        />
+        <Input name="termination_reason" type="text" maxLength={500} className="mt-1" />
       </div>
 
-      <label className="text-ink flex items-center gap-2 text-xs">
-        <input type="checkbox" name="return_cards" defaultChecked className="accent-brand-blue" />
+      <label className="text-ink text-body-sm flex items-center gap-2">
+        <input
+          type="checkbox"
+          name="return_cards"
+          defaultChecked
+          className="accent-brand-blue size-5 rounded-sm"
+        />
         {t('cards.returnOnMoveOut')}
       </label>
 
       <div className="flex items-center gap-2 pt-1">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="bg-brand-red hover:bg-brand-red-deep rounded-md px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
-        >
+        <Button type="submit" variant="destructive" size="sm" disabled={isPending}>
           {isPending ? t('common.loading') : t('contract.terminate')}
-        </button>
+        </Button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-ink-subtle text-xs underline"
+          className="text-ink-subtle text-caption underline"
         >
           {t('common.close')}
         </button>
       </div>
 
-      {state.error ? <p className="text-brand-red-deep text-xs">{t(state.error)}</p> : null}
+      {state.error ? <p className="text-brand-red-deep text-caption">{t(state.error)}</p> : null}
     </form>
   );
 }

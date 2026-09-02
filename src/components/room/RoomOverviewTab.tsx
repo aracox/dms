@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { RoomStatusBadge } from '@/components/status/RoomStatusBadge';
 import { Badge } from '@/components/ui/Badge';
+import { buttonClasses } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
@@ -80,10 +81,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
 
           {canMoveIn ? (
             <div className="border-border mt-3 border-t pt-3">
-              <Link
-                href={`/rooms/${room.id}/move-in`}
-                className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-3 py-1.5 text-xs font-semibold text-white"
-              >
+              <Link href={`/rooms/${room.id}/move-in`} className={buttonClasses('primary', 'sm')}>
                 {t('contract.moveIn')}
               </Link>
             </div>
@@ -116,7 +114,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
         <Card>
           <CardHeader title={t('room.mainTenant')} description={t('tenant.singleTenantNotice')} />
           <CardBody>
-            <p className="text-ink-subtle text-sm">{t('room.noTenant')}</p>
+            <p className="text-ink-subtle text-body-sm">{t('room.noTenant')}</p>
           </CardBody>
         </Card>
       )}
@@ -192,7 +190,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
                 <Field label={t('billing.invoiceNumber')} value={currentInvoice.invoice_number} />
               </FieldGrid>
             ) : (
-              <p className="text-ink-subtle text-sm">{t('room.noInvoice')}</p>
+              <p className="text-ink-subtle text-body-sm">{t('room.noInvoice')}</p>
             )}
           </CardBody>
         </Card>

@@ -20,21 +20,21 @@ export default function AppError({
   const isPermissionError = error.name === 'PermissionError';
 
   return (
-    <div className="border-border bg-surface mx-auto max-w-md rounded-lg border px-5 py-8 text-center">
+    <div className="border-border bg-surface mx-auto max-w-md rounded-xl border px-5 py-8 text-center shadow-md">
       <span className="bg-brand-red-soft text-brand-red-deep mx-auto flex size-10 items-center justify-center rounded-full">
         <TriangleAlert size={20} aria-hidden="true" />
       </span>
 
-      <h1 className="text-ink mt-3 text-base font-semibold">
+      <h1 className="text-ink font-display text-h4 mt-3 font-semibold">
         {isPermissionError ? t('auth.accessDenied') : t('errors.generic')}
       </h1>
 
       {isPermissionError ? (
-        <p className="text-ink-muted mt-1 text-sm">{t('errors.permissionDenied')}</p>
+        <p className="text-ink-muted text-body-sm mt-1">{t('errors.permissionDenied')}</p>
       ) : null}
 
       {error.digest ? (
-        <p className="text-ink-subtle mt-2 font-mono text-[11px]">{error.digest}</p>
+        <p className="text-ink-subtle text-caption mt-2 font-mono">{error.digest}</p>
       ) : null}
 
       {!isPermissionError ? (

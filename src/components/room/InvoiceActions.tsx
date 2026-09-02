@@ -46,7 +46,7 @@ export function InvoiceActions({
           <button
             type="submit"
             disabled={isCancelling}
-            className="text-ink-muted text-xs underline disabled:opacity-60"
+            className="text-ink-muted text-caption underline disabled:opacity-60"
           >
             {isCancelling ? t('common.loading') : t('billing.cancelInvoice')}
           </button>
@@ -60,7 +60,7 @@ export function InvoiceActions({
           <button
             type="submit"
             disabled={isDeleting}
-            className="text-brand-red-deep text-xs underline disabled:opacity-60"
+            className="text-brand-red-deep text-caption underline disabled:opacity-60"
           >
             {isDeleting ? t('common.loading') : t('common.delete')}
           </button>
@@ -68,10 +68,10 @@ export function InvoiceActions({
       ) : null}
 
       {cancelState.error ? (
-        <p className="text-brand-red-deep text-xs">{t(cancelState.error)}</p>
+        <p className="text-brand-red-deep text-caption">{t(cancelState.error)}</p>
       ) : null}
       {deleteState.error ? (
-        <p className="text-brand-red-deep text-xs">{t(deleteState.error)}</p>
+        <p className="text-brand-red-deep text-caption">{t(deleteState.error)}</p>
       ) : null}
     </div>
   );

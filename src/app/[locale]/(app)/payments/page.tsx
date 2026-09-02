@@ -58,7 +58,7 @@ export default async function PaymentsPage({ params }: { params: Promise<{ local
             >
               {outstanding.map((invoice) => (
                 <tr key={invoice.invoice_id}>
-                  <TD className="text-xs">{invoice.invoice_number}</TD>
+                  <TD className="text-caption font-mono">{invoice.invoice_number}</TD>
                   <TD>
                     <Link
                       href={`/rooms/${invoice.room_id}`}

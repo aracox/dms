@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 
 import { RoomStatusBadge } from '@/components/status/RoomStatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { FormField, Input, Select } from '@/components/ui/Input';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { FLOORS } from '@/config/floor-layout';
 import { Link } from '@/i18n/navigation';
@@ -38,43 +39,35 @@ export function RoomsTable({ rooms, locale }: { rooms: RoomBoardRow[]; locale: L
     });
   }, [rooms, query, floor, status]);
 
-  const selectClass = 'rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm text-ink';
-
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-56 flex-1">
-          <label htmlFor="room-search" className="text-ink-muted block text-xs font-medium">
-            {t('common.search')}
-          </label>
-          <div className="relative mt-1">
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-end gap-4">
+        <FormField label={t('common.search')} htmlFor="room-search" className="min-w-56 flex-1">
+          <div className="relative">
             <Search
               size={14}
-              className="text-ink-subtle absolute top-1/2 left-2.5 -translate-y-1/2"
+              className="text-ink-subtle pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
               aria-hidden="true"
             />
-            <input
+            <Input
               id="room-search"
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t('rooms.searchPlaceholder')}
-              className="border-border bg-surface text-ink w-full rounded-md border py-1.5 pr-3 pl-8 text-sm"
+              className="pl-9"
             />
           </div>
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="room-floor" className="text-ink-muted block text-xs font-medium">
-            {t('rooms.filterByFloor')}
-          </label>
-          <select
+        <FormField label={t('rooms.filterByFloor')} htmlFor="room-floor">
+          <Select
             id="room-floor"
             value={String(floor)}
             onChange={(event) =>
               setFloor(event.target.value === 'all' ? 'all' : Number(event.target.value))
             }
-            className={`mt-1 ${selectClass}`}
+            className="w-auto"
           >
             <option value="all">{t('rooms.allFloors')}</option>
             {FLOORS.map((candidate) => (
@@ -82,18 +75,15 @@ export function RoomsTable({ rooms, locale }: { rooms: RoomBoardRow[]; locale: L
                 {t('floorPlan.floor', { floor: candidate })}
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </FormField>
 
-        <div>
-          <label htmlFor="room-status" className="text-ink-muted block text-xs font-medium">
-            {t('rooms.filterByStatus')}
-          </label>
-          <select
+        <FormField label={t('rooms.filterByStatus')} htmlFor="room-status">
+          <Select
             id="room-status"
             value={status}
             onChange={(event) => setStatus(event.target.value as RoomStatus | 'all')}
-            className={`mt-1 ${selectClass}`}
+            className="w-auto"
           >
             <option value="all">{t('rooms.allStatuses')}</option>
             {STATUSES.map((candidate) => (
@@ -101,10 +91,10 @@ export function RoomsTable({ rooms, locale }: { rooms: RoomBoardRow[]; locale: L
                 {t(`roomStatus.${candidate}`)}
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </FormField>
 
-        <p className="text-ink-subtle ml-auto text-xs" aria-live="polite">
+        <p className="text-ink-subtle text-caption ml-auto" aria-live="polite">
           {t('rooms.resultCount', { count: filtered.length })}
         </p>
       </div>
@@ -112,7 +102,7 @@ export function RoomsTable({ rooms, locale }: { rooms: RoomBoardRow[]; locale: L
       {filtered.length === 0 ? (
         <EmptyState message={t('rooms.noResults')} />
       ) : (
-        <div className="border-border bg-surface rounded-lg border">
+        <div className="border-border bg-surface rounded-md border shadow-sm">
           <Table
             head={
               <tr>
@@ -149,7 +139,7 @@ export function RoomsTable({ rooms, locale }: { rooms: RoomBoardRow[]; locale: L
                     <span className="text-ink-subtle">{t('room.noTenant')}</span>
                   )}
                   {room.tenant_phone ? (
-                    <span className="text-ink-subtle block text-xs">{room.tenant_phone}</span>
+                    <span className="text-ink-subtle text-caption block">{room.tenant_phone}</span>
                   ) : null}
                 </TD>
                 <TD numeric>{room.occupant_count ?? '-'}</TD>

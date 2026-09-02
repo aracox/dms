@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import { updateRoomStatusAction, type UpdateRoomStatusState } from '@/lib/rooms/actions';
 import type { RoomStatus } from '@/types/database';
 
@@ -25,15 +26,13 @@ function StatusButton({
       <form action={formAction}>
         <input type="hidden" name="room_id" value={roomId} />
         <input type="hidden" name="status" value={status} />
-        <button
-          type="submit"
-          disabled={isPending}
-          className="border-border text-ink hover:bg-surface-sunken rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-60"
-        >
+        <Button type="submit" variant="secondary" size="sm" disabled={isPending}>
           {isPending ? t('common.loading') : label}
-        </button>
+        </Button>
       </form>
-      {state.error ? <p className="text-brand-red-deep mt-1 text-xs">{t(state.error)}</p> : null}
+      {state.error ? (
+        <p className="text-brand-red-deep text-caption mt-1">{t(state.error)}</p>
+      ) : null}
     </div>
   );
 }

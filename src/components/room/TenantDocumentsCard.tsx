@@ -4,6 +4,7 @@ import { FileText } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { Locale } from '@/i18n/routing';
@@ -57,7 +58,7 @@ export function TenantDocumentsCard({
                 ) : (
                   <span className="truncate">{doc.file_name}</span>
                 )}
-                <span className="text-ink-subtle shrink-0 text-xs">
+                <span className="text-ink-subtle text-caption shrink-0">
                   {t('tenant.uploadedOn', {
                     date: formatDate(doc.created_at.slice(0, 10), locale),
                   })}
@@ -79,19 +80,15 @@ export function TenantDocumentsCard({
             accept="image/jpeg,image/png,image/webp,application/pdf"
             className="text-ink-muted min-w-0 flex-1 text-sm"
           />
-          <button
-            type="submit"
-            disabled={isPending}
-            className="border-border text-ink-muted hover:bg-surface-sunken hover:text-ink shrink-0 rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-60"
-          >
+          <Button type="submit" variant="secondary" size="sm" disabled={isPending}>
             {t('tenant.addDocuments')}
-          </button>
+          </Button>
         </form>
 
         {state.error ? (
           <p
             role="alert"
-            className="border-brand-red bg-brand-red-soft text-brand-red-deep mt-2 rounded border px-3 py-2 text-xs"
+            className="border-brand-red bg-brand-red-soft text-brand-red-deep text-caption mt-2 rounded-md border px-3 py-2"
           >
             {t(state.error)}
           </p>

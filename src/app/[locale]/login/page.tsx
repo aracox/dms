@@ -24,13 +24,13 @@ export default async function LoginPage({
           <span className="bg-brand-blue mx-auto flex size-11 items-center justify-center rounded-lg text-white">
             <Building2 size={22} aria-hidden="true" />
           </span>
-          <h1 className="text-ink mt-3 text-lg font-semibold">{t('app.name')}</h1>
-          <p className="text-ink-muted mt-0.5 text-sm">{t('auth.signInSubtitle')}</p>
+          <h1 className="text-ink font-display text-h3 mt-3">{t('app.name')}</h1>
+          <p className="text-ink-muted text-body-sm mt-0.5">{t('auth.signInSubtitle')}</p>
         </div>
 
-        <div className="border-border bg-surface rounded-lg border p-5">
+        <div className="border-border bg-surface rounded-xl border p-5 shadow-md">
           {passwordChanged ? (
-            <p className="border-brand-green bg-brand-green-soft text-brand-green-deep mb-4 rounded border px-3 py-2 text-xs">
+            <p className="border-brand-green bg-brand-green-soft text-brand-green-deep text-caption mb-4 rounded-md border px-3 py-2">
               {t('auth.passwordChangedSignInAgain')}
             </p>
           ) : null}

@@ -76,10 +76,11 @@ export function Tabs({
                 }
               }}
               className={cn(
-                '-mb-px flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium',
+                'font-display text-body-sm -mb-px flex items-center gap-1.5 border-b-2 px-4 py-2.5 font-semibold',
+                'transition-colors duration-150',
                 isActive
                   ? 'border-brand-blue text-brand-blue-deep'
-                  : 'text-ink-muted hover:text-ink border-transparent',
+                  : 'text-ink-muted hover:text-ink hover:border-border-strong border-transparent',
               )}
             >
               {tab.label}

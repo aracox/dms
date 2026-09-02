@@ -67,7 +67,7 @@ export function FloorPlanView({
       </div>
 
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
-        <div className="bg-surface flex min-h-0 items-center justify-center rounded-lg p-3">
+        <div className="bg-surface flex min-h-0 items-center justify-center rounded-xl p-3">
           {layout ? (
             <FloorPlanSvg
               layout={layout}
@@ -77,13 +77,15 @@ export function FloorPlanView({
               locale={locale}
             />
           ) : (
-            <p className="text-ink-subtle py-12 text-center text-sm">{t('floorPlan.noRooms')}</p>
+            <p className="text-ink-subtle text-body-sm py-12 text-center">
+              {t('floorPlan.noRooms')}
+            </p>
           )}
         </div>
 
-        <aside className="bg-surface min-h-0 overflow-y-auto rounded-lg p-3">
+        <aside className="bg-surface min-h-0 overflow-y-auto rounded-xl p-3">
           <StatusLegend />
-          <p className="text-ink-subtle mt-4 pt-3 text-xs">{t('floorPlan.subtitle')}</p>
+          <p className="text-ink-subtle text-caption mt-4 pt-3">{t('floorPlan.subtitle')}</p>
         </aside>
       </div>
 

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { RoomStatusBadge } from '@/components/status/RoomStatusBadge';
 import { Badge } from '@/components/ui/Badge';
+import { buttonClasses } from '@/components/ui/Button';
 import { Field } from '@/components/ui/Card';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
@@ -80,7 +81,7 @@ export function RoomQuickView({ room, locale }: { room: RoomBoardRow; locale: Lo
           />
         </dl>
       ) : (
-        <p className="border-border text-ink-subtle rounded border border-dashed px-3 py-4 text-sm">
+        <p className="border-border text-ink-subtle text-body-sm rounded-md border border-dashed px-3 py-4">
           {room.room_status === 'maintenance' ? t('maintenance.title') : t('room.emptyRoomHint')}
         </p>
       )}
@@ -101,10 +102,12 @@ export function RoomQuickView({ room, locale }: { room: RoomBoardRow; locale: Lo
           </dl>
         </div>
       ) : (
-        <p className="border-border text-ink-subtle border-t pt-3 text-sm">{t('room.noInvoice')}</p>
+        <p className="border-border text-ink-subtle text-body-sm border-t pt-3">
+          {t('room.noInvoice')}
+        </p>
       )}
 
-      <div className="border-border flex flex-wrap gap-2 border-t pt-3 text-xs">
+      <div className="border-border text-caption flex flex-wrap gap-2 border-t pt-3">
         <Badge
           tone={room.lost_card_count > 0 ? 'red' : 'neutral'}
           icon={<CreditCard size={11} aria-hidden="true" />}
@@ -118,10 +121,7 @@ export function RoomQuickView({ room, locale }: { room: RoomBoardRow; locale: Lo
         ) : null}
       </div>
 
-      <Link
-        href={`/rooms/${room.room_id}`}
-        className="bg-brand-blue hover:bg-brand-blue-deep inline-flex items-center gap-1.5 rounded px-3 py-2 text-sm font-medium text-white"
-      >
+      <Link href={`/rooms/${room.room_id}`} className={buttonClasses('primary', 'md')}>
         {t('room.openFullPage')}
         <ArrowRight size={14} aria-hidden="true" />
       </Link>

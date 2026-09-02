@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { recordMeterReadingAction, type RecordMeterReadingState } from '@/lib/meters/actions';
 import type { MeterReadingRow, MeterType } from '@/types/database';
 
@@ -46,13 +48,9 @@ export function MeterReadingForm({
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={onOpen}
-        className="border-border text-ink-muted hover:bg-surface-sunken rounded-md border px-3 py-2 text-sm"
-      >
+      <Button type="button" variant="secondary" size="md" onClick={onOpen}>
         + {t('meters.recordReading')}
-      </button>
+      </Button>
     );
   }
 
@@ -69,16 +67,16 @@ export function MeterReadingForm({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <label className="text-ink-muted text-xs font-medium">
+        <label className="text-ink text-body-sm font-medium">
           {t('meters.billingMonth')}
-          <input
+          <Input
             type="month"
             value={month}
             onChange={(event) => onMonthChange(event.target.value)}
-            className="border-border bg-surface text-ink mt-1 block rounded-md border px-3 py-2 text-sm"
+            className="mt-1 block w-auto"
           />
         </label>
-        <button type="button" onClick={onClose} className="text-ink-subtle text-xs underline">
+        <button type="button" onClick={onClose} className="text-ink-subtle text-caption underline">
           {t('common.close')}
         </button>
       </div>
@@ -93,61 +91,59 @@ export function MeterReadingForm({
         <input type="hidden" name="billing_month" value={billingMonth} />
 
         <div>
-          <label className="text-ink-muted block text-xs font-medium">
+          <label className="text-ink text-body-sm block font-medium">
             {t('meters.previousReading')}
           </label>
-          <input
+          <Input
             name="previous_reading"
             type="number"
             min={0}
             step="0.01"
             defaultValue={previousDefault}
             required
-            className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-3 py-2 text-sm"
+            className="mt-1"
           />
         </div>
 
         <div>
-          <label className="text-ink-muted block text-xs font-medium">
+          <label className="text-ink text-body-sm block font-medium">
             {t('meters.currentReading')}
           </label>
-          <input
+          <Input
             name="current_reading"
             type="number"
             min={0}
             step="0.01"
             defaultValue={existing?.current_reading || undefined}
             required
-            className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-3 py-2 text-sm"
+            className="mt-1"
           />
         </div>
 
         <div>
-          <label className="text-ink-muted block text-xs font-medium">{t('common.rate')}</label>
-          <input
+          <label className="text-ink text-body-sm block font-medium">{t('common.rate')}</label>
+          <Input
             name="rate"
             type="number"
             min={0}
             step="0.0001"
             defaultValue={existing?.rate ?? defaultRate}
             required
-            className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-3 py-2 text-sm"
+            className="mt-1"
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={isSaving || !canSave}
-          className="bg-brand-blue hover:bg-brand-blue-deep h-fit rounded-md px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"
-        >
+        <Button type="submit" variant="primary" size="md" disabled={isSaving || !canSave}>
           {isSaving ? t('common.loading') : t('common.save')}
-        </button>
+        </Button>
       </form>
 
       {!canSave ? (
-        <p className="text-brand-red-deep text-xs">{t('meters.correctPermissionRequired')}</p>
+        <p className="text-brand-red-deep text-caption">{t('meters.correctPermissionRequired')}</p>
       ) : null}
-      {saveState.error ? <p className="text-brand-red-deep text-xs">{t(saveState.error)}</p> : null}
+      {saveState.error ? (
+        <p className="text-brand-red-deep text-caption">{t(saveState.error)}</p>
+      ) : null}
     </div>
   );
 }

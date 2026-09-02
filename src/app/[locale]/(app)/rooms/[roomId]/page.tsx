@@ -30,7 +30,7 @@ export default async function RoomDetailPage({
     <>
       <Link
         href="/floor-plan"
-        className="text-ink-muted hover:text-ink mb-3 inline-flex items-center gap-1 text-xs"
+        className="text-ink-muted hover:text-ink text-caption mb-3 inline-flex items-center gap-1"
       >
         <ArrowLeft size={13} aria-hidden="true" />
         {t('floorPlan.title')}

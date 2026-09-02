@@ -7,9 +7,9 @@ import type { ReactNode } from 'react';
  */
 export function ComingSoon({ children }: { children: ReactNode }) {
   return (
-    <div className="border-border bg-surface flex gap-3 rounded-lg border border-dashed px-4 py-6">
+    <div className="border-border bg-surface flex gap-3 rounded-xl border border-dashed px-4 py-6">
       <Construction size={18} className="text-ink-subtle mt-0.5 shrink-0" aria-hidden="true" />
-      <div className="text-ink-muted text-sm">{children}</div>
+      <div className="text-ink-muted text-body-sm">{children}</div>
     </div>
   );
 }

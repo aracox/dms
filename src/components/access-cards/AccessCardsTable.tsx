@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import { CardActions } from '@/components/room/CardActions';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { FormField, Input, Select } from '@/components/ui/Input';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
@@ -60,41 +61,33 @@ export function AccessCardsTable({
     });
   }, [cards, query, room, status]);
 
-  const selectClass = 'rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm text-ink';
-
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-56 flex-1">
-          <label htmlFor="card-search" className="text-ink-muted block text-xs font-medium">
-            {t('common.search')}
-          </label>
-          <div className="relative mt-1">
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-end gap-4">
+        <FormField label={t('common.search')} htmlFor="card-search" className="min-w-56 flex-1">
+          <div className="relative">
             <Search
               size={14}
-              className="text-ink-subtle absolute top-1/2 left-2.5 -translate-y-1/2"
+              className="text-ink-subtle pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
               aria-hidden="true"
             />
-            <input
+            <Input
               id="card-search"
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t('cards.searchPlaceholder')}
-              className="border-border bg-surface text-ink w-full rounded-md border py-1.5 pr-3 pl-8 text-sm"
+              className="pl-9"
             />
           </div>
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="card-room" className="text-ink-muted block text-xs font-medium">
-            {t('cards.filterByRoom')}
-          </label>
-          <select
+        <FormField label={t('cards.filterByRoom')} htmlFor="card-room">
+          <Select
             id="card-room"
             value={room}
             onChange={(event) => setRoom(event.target.value)}
-            className={`mt-1 ${selectClass}`}
+            className="w-auto"
           >
             <option value="all">{t('cards.allRooms')}</option>
             {rooms.map((candidate) => (
@@ -102,18 +95,15 @@ export function AccessCardsTable({
                 {candidate}
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </FormField>
 
-        <div>
-          <label htmlFor="card-status" className="text-ink-muted block text-xs font-medium">
-            {t('cards.filterByStatus')}
-          </label>
-          <select
+        <FormField label={t('cards.filterByStatus')} htmlFor="card-status">
+          <Select
             id="card-status"
             value={status}
             onChange={(event) => setStatus(event.target.value as CardStatus | 'all')}
-            className={`mt-1 ${selectClass}`}
+            className="w-auto"
           >
             <option value="all">{t('cards.allStatuses')}</option>
             {STATUSES.map((candidate) => (
@@ -121,10 +111,10 @@ export function AccessCardsTable({
                 {t(`cardStatus.${candidate}`)}
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </FormField>
 
-        <p className="text-ink-subtle ml-auto text-xs" aria-live="polite">
+        <p className="text-ink-subtle text-caption ml-auto" aria-live="polite">
           {t('cards.resultCount', { count: filtered.length })}
         </p>
       </div>
@@ -157,7 +147,7 @@ export function AccessCardsTable({
                 </Link>
               </TD>
               <TD>{card.card_number}</TD>
-              <TD className="text-ink-muted text-xs">{card.card_uid ?? '-'}</TD>
+              <TD className="text-ink-muted text-caption font-mono">{card.card_uid ?? '-'}</TD>
               <TD>
                 <Badge tone={CARD_TONE[card.status]}>{t(`cardStatus.${card.status}`)}</Badge>
               </TD>

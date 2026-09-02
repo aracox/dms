@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { RequiredMark } from '@/components/ui/RequiredMark';
 import { signInAction, type SignInState } from '@/lib/auth/actions';
 
@@ -15,51 +17,47 @@ export function LoginForm() {
   return (
     <form action={formAction} className="space-y-4">
       <div>
-        <label htmlFor="email" className="text-ink-muted block text-xs font-medium">
+        <label htmlFor="email" className="text-ink text-body-sm block font-medium">
           {t('auth.email')}
           <RequiredMark />
         </label>
-        <input
+        <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           required
-          className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-3 py-2 text-sm"
+          className="mt-1"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="text-ink-muted block text-xs font-medium">
+        <label htmlFor="password" className="text-ink text-body-sm block font-medium">
           {t('auth.password')}
           <RequiredMark />
         </label>
-        <input
+        <Input
           id="password"
           name="password"
           type="password"
           autoComplete="current-password"
           required
-          className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-3 py-2 text-sm"
+          className="mt-1"
         />
       </div>
 
       {state.error ? (
         <p
           role="alert"
-          className="border-brand-red bg-brand-red-soft text-brand-red-deep rounded border px-3 py-2 text-xs"
+          className="border-brand-red bg-brand-red-soft text-brand-red-deep text-caption rounded-md border px-3 py-2"
         >
           {t(state.error)}
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="bg-brand-blue hover:bg-brand-blue-deep w-full rounded-md px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"
-      >
+      <Button variant="primary" size="md" type="submit" disabled={isPending} className="w-full">
         {isPending ? t('auth.signingIn') : t('auth.signIn')}
-      </button>
+      </Button>
     </form>
   );
 }

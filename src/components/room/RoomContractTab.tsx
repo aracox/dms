@@ -2,6 +2,7 @@ import { Download } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
+import { buttonClasses } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
@@ -83,7 +84,7 @@ export async function RoomContractTab({
                 </Badge>
                 <Link
                   href={`/rooms/${detail.room.id}/contract`}
-                  className="border-border text-ink hover:bg-surface-sunken flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium"
+                  className={buttonClasses('secondary', 'sm')}
                 >
                   <Download size={12} aria-hidden="true" />
                   {t('contract.downloadPdf')}
@@ -92,7 +93,7 @@ export async function RoomContractTab({
             ) : canMoveIn ? (
               <Link
                 href={`/rooms/${detail.room.id}/move-in`}
-                className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-3 py-1.5 text-xs font-semibold text-white"
+                className={buttonClasses('primary', 'sm')}
               >
                 {t('contract.moveIn')}
               </Link>

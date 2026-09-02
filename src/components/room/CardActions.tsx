@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 import { useActionState, useState } from 'react';
 
 import { cardActionAction, type CardActionState } from '@/lib/access-cards/actions';
+import { Button } from '@/components/ui/Button';
+import { Input, Select } from '@/components/ui/Input';
 import { TD } from '@/components/ui/Table';
 import type { CardStatus } from '@/types/database';
 
@@ -69,46 +71,35 @@ export function CardActions({
   );
 
   const select = (
-    <select
+    <Select
       name="action"
       value={selected}
       onChange={(event) => setAction(event.target.value as Action)}
-      className="border-border bg-surface text-ink rounded-md border px-2 py-1.5 text-xs"
+      className="w-auto"
     >
       {actions.map((option) => (
         <option key={option} value={option}>
           {t(`cardAction.${option}`)}
         </option>
       ))}
-    </select>
+    </Select>
   );
 
   const replaceInput =
     selected === 'replace' ? (
-      <input
-        name="card_uid"
-        type="text"
-        maxLength={64}
-        placeholder={t('cards.newCardUid')}
-        className="border-border bg-surface text-ink w-full rounded-md border px-2 py-1 text-xs"
-      />
+      <Input name="card_uid" type="text" maxLength={64} placeholder={t('cards.newCardUid')} />
     ) : null;
 
   const errorMessage = state.error ? (
-    <p className="text-brand-red-deep text-xs">{t(state.error)}</p>
+    <p className="text-brand-red-deep text-caption">{t(state.error)}</p>
   ) : null;
 
   // form={formId} lets this button submit the form even when it lives in a
   // separate table cell, outside the <form> element itself.
   const saveButton = (
-    <button
-      type="submit"
-      form={formId}
-      disabled={isPending}
-      className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
-    >
+    <Button type="submit" form={formId} size="sm" disabled={isPending}>
       {isPending ? t('common.loading') : t('common.save')}
-    </button>
+    </Button>
   );
 
   if (asTableCells) {

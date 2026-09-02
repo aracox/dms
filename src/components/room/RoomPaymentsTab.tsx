@@ -50,7 +50,7 @@ export function RoomPaymentsTab({ detail, locale }: { detail: RoomDetail; locale
             <TD>
               {payment.reference ?? t('common.notAvailable')}
               {payment.slip_path ? (
-                <span className="text-ink-subtle ml-1.5 text-xs">({t('payments.slip')})</span>
+                <span className="text-ink-subtle text-caption ml-1.5">({t('payments.slip')})</span>
               ) : null}
             </TD>
             <TD numeric className="font-medium">

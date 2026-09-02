@@ -46,10 +46,13 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       />
 
       <section aria-labelledby="rooms-heading" className="mb-6">
-        <h2 id="rooms-heading" className="text-ink-muted mb-2 text-sm font-semibold">
+        <h2
+          id="rooms-heading"
+          className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase"
+        >
           {t('dashboard.rooms')}
         </h2>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
           <StatTile label={t('dashboard.totalRooms')} value={rooms.total_rooms} tone="blue" />
           <StatTile label={t('dashboard.occupied')} value={rooms.occupied} tone="green" />
           <StatTile
@@ -74,10 +77,13 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       </section>
 
       <section aria-labelledby="finance-heading" className="mb-6">
-        <h2 id="finance-heading" className="text-ink-muted mb-2 text-sm font-semibold">
+        <h2
+          id="finance-heading"
+          className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase"
+        >
           {t('dashboard.finance')}
         </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatTile
             label={t('dashboard.expectedRevenue')}
             value={money(finance.expected_rent)}
@@ -106,10 +112,13 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       </section>
 
       <section aria-labelledby="tenants-heading" className="mb-6">
-        <h2 id="tenants-heading" className="text-ink-muted mb-2 text-sm font-semibold">
+        <h2
+          id="tenants-heading"
+          className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase"
+        >
           {t('tenant.title')}
         </h2>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatTile
             label={t('dashboard.registeredTenants')}
             value={tenants.registered_tenants}
@@ -133,13 +142,15 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         </div>
       </section>
 
-      <h2 className="text-ink-muted mb-2 text-sm font-semibold">{t('dashboard.operations')}</h2>
+      <h2 className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase">
+        {t('dashboard.operations')}
+      </h2>
       <div className="grid gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader
             title={t('dashboard.paymentsDue')}
             action={
-              <Link href="/payments" className="text-brand-blue-deep text-xs underline">
+              <Link href="/payments" className="text-brand-blue-deep text-caption underline">
                 {t('common.viewAll')}
               </Link>
             }
@@ -237,7 +248,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
           <CardHeader
             title={t('dashboard.openTickets')}
             action={
-              <Link href="/maintenance" className="text-brand-blue-deep text-xs underline">
+              <Link href="/maintenance" className="text-brand-blue-deep text-caption underline">
                 {t('common.viewAll')}
               </Link>
             }
@@ -281,7 +292,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
           <CardHeader
             title={t('dashboard.lostCards')}
             action={
-              <Link href="/access-cards" className="text-brand-blue-deep text-xs underline">
+              <Link href="/access-cards" className="text-brand-blue-deep text-caption underline">
                 {t('common.viewAll')}
               </Link>
             }
@@ -305,7 +316,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                 <tr key={card.card_id}>
                   <TD>{card.room_number}</TD>
                   <TD>{card.card_number}</TD>
-                  <TD className="text-ink-muted text-xs">{card.card_uid ?? '-'}</TD>
+                  <TD className="text-ink-muted text-caption font-mono">{card.card_uid ?? '-'}</TD>
                   <TD numeric>{money(card.replacement_fee)}</TD>
                 </tr>
               ))}
@@ -314,7 +325,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         </Card>
       </div>
 
-      <p className="text-ink-subtle mt-5 flex items-center gap-1.5 text-xs">
+      <p className="text-ink-subtle text-caption mt-5 flex items-center gap-1.5">
         <FileWarning size={13} aria-hidden="true" />
         {t('dashboard.testDataExcluded')}
       </p>

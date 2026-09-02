@@ -244,17 +244,50 @@ locale. Status colors are never the only signal — pair them with an icon and a
 `InvoiceView`, …). If you find yourself writing a mock-only variant of a component, that is a bug —
 parameterize the real one instead. Scenarios live in `src/config/test-scenarios/`.
 
+## Design system
+
+The visual system is specified in `design/questui-DESIGN.md`. Its scales — spacing, radius,
+elevation, type ramp, and per-component state specs — are implemented as Tailwind v4 `@theme`
+tokens in `src/app/globals.css`.
+
+Two deliberate deviations from that document, both load-bearing:
+
+1. **Palette.** The doc specifies gold / deep red / royal purple on dark brown. The app keeps the
+   brand hues below instead. Do not introduce the doc's hex values.
+2. **Fonts.** Cinzel and Spectral carry no Thai glyphs, and Thai is the default locale. Every font
+   stack therefore lists `--font-noto-sans-thai` second, so browsers resolve Latin to the display
+   or body face and Thai to Noto, keeping tone-mark positioning correct. Never drop Noto from a
+   stack, and never set a font family that omits it.
+
+Use the tokens, not ad-hoc values:
+
+- Type: `text-display`, `text-h1`–`text-h4`, `text-body-lg`, `text-body`, `text-body-sm`,
+  `text-caption`, `text-code`. Headings and UI labels also take `font-display`.
+- Radius: `rounded-sm` (2px, chips) · `rounded-md` (4px, controls and cards) · `rounded-lg` (6px,
+  overlays) · `rounded-xl` (8px, panels).
+- Elevation: `shadow-sm` → `shadow-xl`, plus `shadow-glow` reserved for active/selected.
+- Spacing: the 8px base unit maps onto Tailwind's default scale (`2` = 8px, `4` = 16px, `6` = 24px).
+
+Controls come from the shared primitives — do not hand-roll a button or an input:
+
+- `components/ui/Button.tsx` — `Button` (primary / secondary / ghost / destructive × sm / md / lg,
+  heights 32 / 40 / 48px) and `buttonClasses()` for the few `<Link>`s styled as buttons.
+  **`Button` defaults to `type="button"`**; pass `type="submit"` explicitly on a form's submit.
+- `components/ui/Input.tsx` — `Input`, `Select`, and `FormField` (label + control + hint/error).
+- `components/ui/Badge.tsx` — the status chip. There is no separate `Chip`; parameterize this one.
+
 ## Brand colors
 
-Status colors come from the CP AXTRA / Lotus's palette, defined once as CSS variables in
-`src/app/globals.css`. Use the semantic tokens, not raw hex.
+Status colors are defined once as CSS variables in `src/app/globals.css`, which is the single
+source of truth for palette values. Use the semantic tokens, never raw hex, so a re-theme stays a
+change to that one file.
 
-| Token            | RGB          | Use                  |
-| ---------------- | ------------ | -------------------- |
-| `--brand-blue`   | 48, 111, 199 | primary, occupied    |
-| `--brand-yellow` | 246, 194, 74 | warning, payment due |
-| `--brand-green`  | 67, 147, 143 | success, paid        |
-| `--brand-red`    | 218, 56, 50  | danger, overdue      |
+| Token            | Use                  |
+| ---------------- | -------------------- |
+| `--brand-blue`   | primary, occupied    |
+| `--brand-yellow` | warning, payment due |
+| `--brand-green`  | success, paid        |
+| `--brand-red`    | danger, overdue      |
 
 ## Floor plan geometry
 

@@ -32,7 +32,7 @@ export default async function MaintenancePage({ params }: { params: Promise<{ lo
         description={`${open.length} ${t('dashboard.openTickets')}`}
       />
 
-      <div className="mb-4">
+      <div className="mb-6">
         <ComingSoon>{t('maintenance.newTicket')}</ComingSoon>
       </div>
 

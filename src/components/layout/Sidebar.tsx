@@ -59,7 +59,7 @@ export function Sidebar({ role }: { role: AppRole | null }) {
         return (
           <div key={section.labelKey ?? `section-${sectionIndex}`} className="shrink-0 lg:shrink">
             {section.labelKey ? (
-              <h2 className="text-ink-subtle hidden px-3 pb-1 text-[11px] font-semibold tracking-wide uppercase lg:block">
+              <h2 className="text-ink-subtle font-display text-caption hidden px-3 pb-1 font-semibold tracking-wide uppercase lg:block">
                 {t(section.labelKey)}
               </h2>
             ) : null}
@@ -76,7 +76,7 @@ export function Sidebar({ role }: { role: AppRole | null }) {
                       href={item.href}
                       aria-current={isActive ? 'page' : undefined}
                       className={cn(
-                        'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm whitespace-nowrap',
+                        'font-display flex items-center gap-2.5 rounded-md px-3 py-2 text-sm whitespace-nowrap',
                         isActive
                           ? 'bg-brand-blue-soft text-brand-blue-deep font-semibold'
                           : 'text-ink-muted hover:bg-surface-sunken hover:text-ink',

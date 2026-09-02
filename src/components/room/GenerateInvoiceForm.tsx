@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { useActionState, useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
 import { generateInvoiceAction, type GenerateInvoiceState } from '@/lib/invoices/actions';
@@ -48,13 +50,9 @@ export function GenerateInvoiceForm({
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="border-border text-ink-muted hover:bg-surface-sunken rounded-md border px-3 py-2 text-sm"
-      >
+      <Button type="button" variant="secondary" size="md" onClick={() => setOpen(true)}>
         + {t('billing.generateInvoice')}
-      </button>
+      </Button>
     );
   }
 
@@ -64,26 +62,26 @@ export function GenerateInvoiceForm({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <label className="text-ink-muted text-xs font-medium">
+        <label className="text-ink text-body-sm font-medium">
           {t('meters.billingMonth')}
-          <input
+          <Input
             type="month"
             value={month}
             onChange={(event) => setMonth(event.target.value)}
-            className="border-border bg-surface text-ink mt-1 block rounded-md border px-3 py-2 text-sm"
+            className="mt-1 block w-auto"
           />
         </label>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-ink-subtle text-xs underline"
+          className="text-ink-subtle text-caption underline"
         >
           {t('common.close')}
         </button>
       </div>
 
       {hasLiveInvoice ? (
-        <p className="text-ink-subtle text-xs">
+        <p className="text-ink-subtle text-caption">
           {t('billing.invoiceAlreadyExistsHint', {
             month: formatBillingMonth(billingMonth, locale),
           })}
@@ -93,26 +91,27 @@ export function GenerateInvoiceForm({
           <input type="hidden" name="room_id" value={roomId} />
           <input type="hidden" name="billing_month" value={billingMonth} />
 
-          <p className="text-ink-muted text-xs">{t('billing.extras')}</p>
+          <p className="text-ink-muted text-caption">{t('billing.extras')}</p>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {INVOICE_EXTRA_FEE_KEYS.map((key) => (
-              <label key={key} className="text-ink flex items-center gap-2 text-sm">
-                <input type="checkbox" name="extra" value={key} className="accent-brand-blue" />
+              <label key={key} className="text-ink text-body-sm flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="extra"
+                  value={key}
+                  className="accent-brand-blue size-5 rounded-sm"
+                />
                 {t(EXTRA_FEE_LABEL_KEY[key])} · {formatTHB(fees[key] ?? 0, locale)}
               </label>
             ))}
           </div>
 
-          <button
-            type="submit"
-            disabled={isPending}
-            className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-          >
+          <Button type="submit" variant="primary" size="md" disabled={isPending}>
             {isPending ? t('common.loading') : t('billing.generateInvoice')}
-          </button>
+          </Button>
 
           {state.error ? (
-            <p role="alert" className="text-brand-red-deep text-xs">
+            <p role="alert" className="text-brand-red-deep text-caption">
               {t(state.error)}
             </p>
           ) : null}

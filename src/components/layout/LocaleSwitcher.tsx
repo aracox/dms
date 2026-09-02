@@ -38,7 +38,7 @@ export function LocaleSwitcher() {
               });
             }}
             className={cn(
-              'rounded px-1.5 py-1 text-xs font-medium',
+              'text-caption rounded px-1.5 py-1 font-medium',
               isActive
                 ? 'bg-brand-blue-soft text-brand-blue-deep'
                 : 'text-ink-muted hover:bg-surface-sunken hover:text-ink',

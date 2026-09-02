@@ -54,7 +54,7 @@ export function RoomVehiclesCard({
             />
           ) : (
             <div className="py-2">
-              <dt className="text-ink-muted text-xs">{t('room.carPlate')}</dt>
+              <dt className="text-ink-muted text-caption">{t('room.carPlate')}</dt>
               <dd className="text-ink mt-0.5 text-sm font-medium">
                 {vehicles.car_plate || t('common.notAvailable')}
               </dd>
@@ -70,7 +70,7 @@ export function RoomVehiclesCard({
             />
           ) : (
             <div className="py-2">
-              <dt className="text-ink-muted text-xs">{t('room.motorcyclePlate')}</dt>
+              <dt className="text-ink-muted text-caption">{t('room.motorcyclePlate')}</dt>
               <dd className="text-ink mt-0.5 text-sm font-medium">
                 {vehicles.motorcycle_plate || t('common.notAvailable')}
               </dd>

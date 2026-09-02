@@ -4,6 +4,7 @@ import { RotateCcw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import { TEST_SCENARIO_IDS, type TestScenarioId } from '@/config/test-scenarios';
 import {
   applyTestScenarioAction,
@@ -39,7 +40,7 @@ export function ScenarioSwitcher({ currentScenario }: { currentScenario: TestSce
               disabled={isApplying || isResetting}
               title={t(`testMode.scenarioDescriptions.${scenario}`)}
               className={cn(
-                'rounded-md border px-2.5 py-1.5 text-xs font-medium disabled:opacity-60',
+                'text-caption rounded-md border px-2.5 py-1.5 font-medium disabled:opacity-60',
                 currentScenario === scenario
                   ? 'border-brand-blue bg-brand-blue text-white'
                   : 'border-border bg-surface text-ink-muted hover:text-ink',
@@ -51,14 +52,16 @@ export function ScenarioSwitcher({ currentScenario }: { currentScenario: TestSce
         ))}
 
         <form action={resetAction} className="ml-auto">
-          <button
+          <Button
             type="submit"
+            variant="secondary"
+            size="sm"
+            className="border-brand-red text-brand-red-deep hover:bg-brand-red-soft"
             disabled={isApplying || isResetting}
-            className="border-brand-red text-brand-red-deep hover:bg-brand-red-soft flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium disabled:opacity-60"
           >
             <RotateCcw size={12} aria-hidden="true" />
             {t('testMode.reset')}
-          </button>
+          </Button>
         </form>
       </div>
 
@@ -66,7 +69,7 @@ export function ScenarioSwitcher({ currentScenario }: { currentScenario: TestSce
         <p
           role="status"
           className={cn(
-            'rounded border px-2.5 py-1.5 text-xs',
+            'text-caption rounded-md border px-2.5 py-1.5',
             isError
               ? 'border-brand-red bg-brand-red-soft text-brand-red-deep'
               : 'border-brand-green bg-brand-green-soft text-brand-green-deep',

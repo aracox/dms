@@ -46,7 +46,7 @@ export default async function ReportsPage({ params }: { params: Promise<{ locale
     <>
       <PageHeader title={t('reports.title')} description={t('reports.subtitle')} />
 
-      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatTile
           label={t('reports.occupancy')}
           value={`${summary.occupancy_rate}%`}
@@ -68,11 +68,11 @@ export default async function ReportsPage({ params }: { params: Promise<{ locale
         />
       </div>
 
-      <div className="mb-4">
+      <div className="mb-6">
         <ComingSoon>{t('reports.export')}</ComingSoon>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <Card>
           <CardHeader
             title={t('reports.occupancy')}

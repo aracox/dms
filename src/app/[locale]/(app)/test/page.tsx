@@ -51,7 +51,7 @@ export default async function TestModePage({ params }: { params: Promise<{ local
         }
       />
 
-      <div className="border-brand-yellow bg-brand-yellow-soft text-brand-yellow-deep mb-4 flex gap-2 rounded-md border px-3 py-2 text-xs">
+      <div className="border-brand-yellow bg-brand-yellow-soft text-brand-yellow-deep text-caption mb-4 flex gap-2 rounded-md border px-3 py-2">
         <Info size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
         <div>
           <p className="font-semibold">{t('testMode.banner')}</p>
@@ -60,18 +60,18 @@ export default async function TestModePage({ params }: { params: Promise<{ local
         </div>
       </div>
 
-      <section className="border-border bg-surface mb-5 rounded-lg border p-3">
-        <h2 className="text-ink mb-2 text-sm font-semibold">
+      <section className="border-border bg-surface mb-5 rounded-xl border p-3">
+        <h2 className="text-ink font-display text-h4 mb-2 font-semibold">
           {t('testMode.scenario')}
           {scenario ? (
-            <span className="text-ink-muted ml-2 text-xs font-normal">
+            <span className="text-ink-muted text-caption ml-2 font-normal">
               {t('testMode.currentScenario')}: {t(`testMode.scenarios.${scenario}`)}
             </span>
           ) : null}
         </h2>
         <ScenarioSwitcher currentScenario={scenario} />
         {scenario ? (
-          <p className="text-ink-subtle mt-2 text-xs">
+          <p className="text-ink-subtle text-caption mt-2">
             {t(`testMode.scenarioDescriptions.${scenario}`)}
           </p>
         ) : null}

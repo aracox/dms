@@ -117,7 +117,7 @@ export function MonthlyExpensesSection({
                       <button
                         type="button"
                         onClick={() => editEntry(entry.category, entry.billing_month!)}
-                        className="text-brand-blue-deep text-xs underline"
+                        className="text-brand-blue-deep text-caption underline"
                       >
                         {t('common.edit')}
                       </button>

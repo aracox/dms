@@ -1,9 +1,9 @@
 @import 'tailwindcss';
 
 /*
- * CP AXTRA / Lotus's palette. Defined once here; components use the semantic
- * tokens (bg-status-paid, text-brand-blue) rather than raw hex, so a rebrand is
- * a change to this file alone.
+ * Palette. Defined once here; components use the semantic tokens
+ * (bg-status-paid, text-brand-blue) rather than raw hex, so a re-theme is a
+ * change to this file alone.
  */
 @theme {
   --color-brand-blue: rgb(48 111 199);
@@ -34,13 +34,96 @@
 
   /*
    * Must reference the next/font variable, not the family name: naming
-   * 'Noto Sans Thai' as a string only picks it up if the user happens to have
-   * it installed locally, silently bypassing the self-hosted, subsetted font.
-   * The variable is set on <html> in [locale]/layout.tsx.
+   * 'Cinzel' as a string only picks it up if the user happens to have it
+   * installed locally, silently bypassing the self-hosted, subsetted font.
+   * The variables are set on <html> in [locale]/layout.tsx.
+   *
+   * Noto Sans Thai sits second in every stack on purpose. Cinzel is Latin-only
+   * and Spectral has no Thai coverage, so Thai glyphs would otherwise fall back
+   * to an arbitrary system font and lose tone-mark positioning. Browsers
+   * resolve font-family per glyph, so Latin renders in the display/body face
+   * and Thai renders in Noto -- both scripts stay correct in one string.
    */
-  --font-sans:
-    var(--font-noto-sans-thai), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: var(--font-cinzel), var(--font-noto-sans-thai), ui-serif, Georgia, serif;
+  --font-sans: var(--font-spectral), var(--font-noto-sans-thai), ui-serif, Georgia, serif;
+  --font-mono: var(--font-fira-code), ui-monospace, 'Cascadia Code', monospace;
 }
+
+/*
+ * Type ramp. Sizes and line heights follow design/questui-DESIGN.md.
+ * Dense surfaces (tables, filter bars, badges) use body-sm and caption -- the
+ * system's own small end -- because this app trades motion for information
+ * density; body/body-lg are for prose and field values.
+ */
+@theme {
+  --text-display: 40px;
+  --text-display--line-height: 1.15;
+  --text-display--font-weight: 700;
+
+  --text-h1: 32px;
+  --text-h1--line-height: 1.2;
+  --text-h1--font-weight: 700;
+
+  --text-h2: 24px;
+  --text-h2--line-height: 1.25;
+  --text-h2--font-weight: 600;
+
+  --text-h3: 20px;
+  --text-h3--line-height: 1.3;
+  --text-h3--font-weight: 600;
+
+  --text-h4: 16px;
+  --text-h4--line-height: 1.35;
+  --text-h4--font-weight: 400;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.7;
+
+  --text-body: 16px;
+  --text-body--line-height: 1.7;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.6;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 1.4;
+  --text-caption--font-weight: 500;
+
+  --text-code: 14px;
+  --text-code--line-height: 1.6;
+}
+
+/*
+ * Radius. Subtle and angular, per the design system: chips 2px, controls and
+ * cards 4px, overlays 6px, panels 8px.
+ */
+@theme {
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+}
+
+/*
+ * Elevation. The design system specifies gold-tinted shadows throughout; on a
+ * light surface a coloured shadow under every card reads as smudge rather than
+ * craft, so the ladder is neutral and the accent glow is kept for the state
+ * the system actually reserves it for -- active/selected (Do #2).
+ */
+@theme {
+  --shadow-sm: 0 1px 3px rgb(24 30 40 / 0.06);
+  --shadow-md: 0 2px 8px rgb(24 30 40 / 0.08);
+  --shadow-lg: 0 4px 16px rgb(24 30 40 / 0.1);
+  --shadow-xl: 0 8px 32px rgb(24 30 40 / 0.14);
+  --shadow-glow: 0 0 0 3px rgb(246 194 74 / 0.35);
+}
+
+/*
+ * Spacing follows the 8px base unit from the design system. No new tokens are
+ * needed -- Tailwind's default scale already lands on it:
+ *   xs 4px = 1 · sm 8px = 2 · md 16px = 4 · lg 24px = 6
+ *   xl 32px = 8 · 2xl 48px = 12 · 3xl 64px = 16
+ */
 
 /*
  * Room status colours. Colour is never the only signal -- every consumer pairs

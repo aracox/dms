@@ -3,7 +3,9 @@
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 import { RequiredMark } from '@/components/ui/RequiredMark';
 import { updateSettingsAction, type SettingsState } from '@/lib/settings/actions';
 
@@ -41,11 +43,11 @@ function NumberField({
 }) {
   return (
     <div>
-      <label htmlFor={name} className="text-ink-muted block text-xs font-medium">
+      <label htmlFor={name} className="text-ink text-body-sm block font-medium">
         {label}
         <RequiredMark />
       </label>
-      <input
+      <Input
         id={name}
         name={name}
         type="number"
@@ -53,7 +55,7 @@ function NumberField({
         step={step}
         defaultValue={defaultValue}
         required
-        className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-3 py-2 text-sm"
+        className="mt-1"
       />
     </div>
   );
@@ -174,7 +176,7 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
       {state.error ? (
         <p
           role="alert"
-          className="border-brand-red bg-brand-red-soft text-brand-red-deep rounded border px-3 py-2 text-xs"
+          className="border-brand-red bg-brand-red-soft text-brand-red-deep text-caption rounded-md border px-3 py-2"
         >
           {t(state.error)}
         </p>
@@ -183,19 +185,15 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
       {state.message ? (
         <p
           role="status"
-          className="border-brand-green bg-brand-green-soft text-brand-green-deep rounded border px-3 py-2 text-xs"
+          className="border-brand-green bg-brand-green-soft text-brand-green-deep text-caption rounded-md border px-3 py-2"
         >
           {t(state.message)}
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-      >
+      <Button variant="primary" size="md" type="submit" disabled={isPending}>
         {isPending ? t('common.loading') : t('common.save')}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -10,17 +10,17 @@ export function StatusLegend({ className }: { className?: string }) {
 
   return (
     <div className={className}>
-      <h3 className="text-ink-muted text-xs font-semibold">{t('floorPlan.legend')}</h3>
+      <h3 className="text-ink-muted text-caption font-semibold">{t('floorPlan.legend')}</h3>
       <ul className="mt-2 space-y-1.5">
         {LEGEND_ORDER.map((status) => {
           const style = STATUS_STYLES[status];
           const Icon = STATUS_ICONS[style.icon];
 
           return (
-            <li key={status} className="text-ink flex items-center gap-2 text-xs">
+            <li key={status} className="text-ink text-caption flex items-center gap-2">
               <span
                 className={cn(
-                  'flex size-5 shrink-0 items-center justify-center rounded border',
+                  'flex size-5 shrink-0 items-center justify-center rounded-md border',
                   style.swatch,
                 )}
               >

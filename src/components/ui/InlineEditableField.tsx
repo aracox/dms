@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 
+import { Input } from './Input';
+
 /**
  * A field that edits in place, DataTables-Editor style: click the value to
  * turn it into an input, Enter/blur commits, Escape reverts. No separate
@@ -73,16 +75,16 @@ export function InlineEditableField({
 
   return (
     <div className="py-2">
-      <dt className="text-ink-muted text-xs">{label}</dt>
+      <dt className="text-ink-muted text-caption">{label}</dt>
       {editing ? (
-        <input
+        <Input
           ref={inputRef}
           value={draft}
           disabled={pending}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="border-brand-blue bg-surface text-ink mt-0.5 w-full rounded-md border px-2 py-1 text-sm outline-none disabled:opacity-60"
+          className="mt-0.5"
         />
       ) : (
         <dd
@@ -92,12 +94,12 @@ export function InlineEditableField({
           onKeyDown={(event) => {
             if (event.key === 'Enter') startEditing();
           }}
-          className="text-ink hover:bg-surface-sunken hover:ring-border -mx-1 mt-0.5 cursor-text rounded px-1 py-0.5 text-sm font-medium ring-1 ring-transparent"
+          className="text-ink hover:bg-surface-sunken hover:ring-border -mx-1 mt-0.5 cursor-text rounded-md px-1 py-0.5 text-sm font-medium ring-1 ring-transparent"
         >
           {value || <span className="text-ink-subtle">{emptyLabel}</span>}
         </dd>
       )}
-      {error ? <p className="text-brand-red-deep mt-0.5 text-xs">{t(error)}</p> : null}
+      {error ? <p className="text-brand-red-deep text-caption mt-0.5">{t(error)}</p> : null}
     </div>
   );
 }

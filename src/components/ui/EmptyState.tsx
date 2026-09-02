@@ -14,7 +14,9 @@ export function EmptyState({
   return (
     <p
       className={cn(
-        'border-border text-ink-subtle flex items-center justify-center gap-2 rounded border border-dashed px-4 py-6 text-sm',
+        // rounded-md, not the panel radius: this sits nested inside a Card, and
+        // a child with a larger radius than its container reads as misaligned.
+        'border-border text-ink-subtle text-body-sm flex items-center justify-center gap-2 rounded-md border border-dashed px-4 py-6',
         className,
       )}
     >

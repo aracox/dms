@@ -22,7 +22,7 @@ Legend: `[x]` done · `[~]` partial · `[ ]` not started
 - [x] Thai + English message catalogues
 - [x] Supabase Auth: login page, session middleware, `profiles` + role
 - [x] Permission helpers (`owner` / `admin` / `staff`) + server-side guards
-- [x] Brand color tokens (CP AXTRA / Lotus's) as CSS variables
+- [x] Brand color tokens as CSS variables
 
 ## Phase 2 — Rooms, Floor Plan, Room Detail
 

@@ -3,8 +3,10 @@
 import { useTranslations } from 'next-intl';
 import { useActionState, useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Input } from '@/components/ui/Input';
 import { TD, TH, Table } from '@/components/ui/Table';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
@@ -31,60 +33,56 @@ function AdHocExpenseForm({
       {expense ? <input type="hidden" name="expense_id" value={expense.id} /> : null}
 
       <div className="col-span-2 sm:col-span-2">
-        <label className="text-ink-muted block text-xs font-medium">
+        <label className="text-ink text-body-sm block font-medium">
           {t('expenses.description')}
         </label>
-        <input
+        <Input
           name="description"
           type="text"
           maxLength={500}
           defaultValue={expense?.description ?? ''}
           required
-          className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-3 py-2 text-sm"
+          className="mt-1"
         />
       </div>
 
       <div>
-        <label className="text-ink-muted block text-xs font-medium">{t('common.amount')}</label>
-        <input
+        <label className="text-ink text-body-sm block font-medium">{t('common.amount')}</label>
+        <Input
           name="amount"
           type="number"
           min={0}
           step="0.01"
           defaultValue={expense?.amount}
           required
-          className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-3 py-2 text-sm"
+          className="mt-1"
         />
       </div>
 
       <div>
-        <label className="text-ink-muted block text-xs font-medium">
+        <label className="text-ink text-body-sm block font-medium">
           {t('expenses.expenseDate')}
         </label>
-        <input
+        <Input
           name="expense_date"
           type="date"
           defaultValue={expense?.expense_date ?? bangkokToday()}
           required
-          className="border-border bg-surface text-ink mt-1 w-full rounded-md border px-3 py-2 text-sm"
+          className="mt-1"
         />
       </div>
 
       <div className="col-span-2 flex items-center gap-2 sm:col-span-4">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"
-        >
+        <Button variant="primary" size="md" type="submit" disabled={isPending}>
           {isPending ? t('common.loading') : t('common.save')}
-        </button>
-        <button type="button" onClick={onClose} className="text-ink-subtle text-xs underline">
+        </Button>
+        <button type="button" onClick={onClose} className="text-ink-subtle text-caption underline">
           {t('common.close')}
         </button>
       </div>
 
       {state.error ? (
-        <p className="text-brand-red-deep col-span-full text-xs">{t(state.error)}</p>
+        <p className="text-brand-red-deep text-caption col-span-full">{t(state.error)}</p>
       ) : null}
     </form>
   );
@@ -126,13 +124,14 @@ export function AdHocExpensesSection({
             </CardBody>
           </Card>
         ) : (
-          <button
+          <Button
+            variant="secondary"
+            size="md"
             type="button"
             onClick={() => setPanel({ open: true, editing: null })}
-            className="border-border text-ink-muted hover:bg-surface-sunken rounded-md border px-3 py-2 text-sm"
           >
             + {t('expenses.addExpense')}
-          </button>
+          </Button>
         )
       ) : null}
 
@@ -164,7 +163,7 @@ export function AdHocExpensesSection({
                       <button
                         type="button"
                         onClick={() => setPanel({ open: true, editing: expense })}
-                        className="text-brand-blue-deep text-xs underline"
+                        className="text-brand-blue-deep text-caption underline"
                       >
                         {t('common.edit')}
                       </button>

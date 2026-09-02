@@ -30,11 +30,13 @@ function DeleteReadingButton({ roomId, readingId }: { roomId: string; readingId:
       <button
         type="submit"
         disabled={isPending}
-        className="text-brand-red-deep text-xs underline disabled:opacity-60"
+        className="text-brand-red-deep text-caption underline disabled:opacity-60"
       >
         {isPending ? t('common.loading') : t('common.delete')}
       </button>
-      {state.error ? <p className="text-brand-red-deep mt-1 text-xs">{t(state.error)}</p> : null}
+      {state.error ? (
+        <p className="text-brand-red-deep text-caption mt-1">{t(state.error)}</p>
+      ) : null}
     </form>
   );
 }
@@ -148,7 +150,7 @@ export function MetersSection({
                       <button
                         type="button"
                         onClick={() => editReading(reading.meter_type, reading.billing_month)}
-                        className="text-brand-blue-deep text-xs underline"
+                        className="text-brand-blue-deep text-caption underline"
                       >
                         {t('common.edit')}
                       </button>

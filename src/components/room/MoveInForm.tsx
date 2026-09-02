@@ -3,15 +3,15 @@
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 import { RequiredMark } from '@/components/ui/RequiredMark';
 import { moveInAction, type MoveInState } from '@/lib/rooms/actions';
 
 const INITIAL_STATE: MoveInState = { error: null };
 
-const INPUT_CLASS =
-  'border-border bg-surface text-ink mt-1 w-full rounded-md border px-3 py-2 text-sm';
-const LABEL_CLASS = 'text-ink-muted block text-xs font-medium';
+const LABEL_CLASS = 'text-ink block text-body-sm font-medium';
 
 function TextField({
   name,
@@ -36,7 +36,7 @@ function TextField({
         {label}
         {required ? <RequiredMark /> : null}
       </label>
-      <input
+      <Input
         id={name}
         name={name}
         type={type}
@@ -44,7 +44,7 @@ function TextField({
         required={required}
         step={step}
         min={min}
-        className={INPUT_CLASS}
+        className="mt-1"
       />
     </div>
   );
@@ -98,7 +98,7 @@ export function MoveInForm({
               accept="image/jpeg,image/png,image/webp,application/pdf"
               className="text-ink-muted mt-1 block w-full text-sm"
             />
-            <p className="text-ink-subtle mt-1 text-xs">{t('tenant.documentsHint')}</p>
+            <p className="text-ink-subtle text-caption mt-1">{t('tenant.documentsHint')}</p>
           </div>
         </CardBody>
       </Card>
@@ -157,8 +157,13 @@ export function MoveInForm({
             />
           </div>
 
-          <label className="text-ink mt-4 flex items-center gap-2 text-sm">
-            <input type="checkbox" name="activate_cards" defaultChecked className="size-4" />
+          <label className="text-ink text-body-sm mt-4 flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="activate_cards"
+              defaultChecked
+              className="accent-brand-blue size-5 rounded-sm"
+            />
             {t('contract.activateCards')}
           </label>
         </CardBody>
@@ -167,19 +172,15 @@ export function MoveInForm({
       {state.error ? (
         <p
           role="alert"
-          className="border-brand-red bg-brand-red-soft text-brand-red-deep rounded border px-3 py-2 text-xs"
+          className="border-brand-red bg-brand-red-soft text-brand-red-deep text-caption rounded-md border px-3 py-2"
         >
           {t(state.error)}
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-      >
+      <Button type="submit" variant="primary" size="md" disabled={isPending}>
         {isPending ? t('common.loading') : t('contract.moveIn')}
-      </button>
+      </Button>
     </form>
   );
 }

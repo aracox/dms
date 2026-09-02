@@ -63,7 +63,9 @@ export async function RoomCardsTab({ detail, locale }: { detail: RoomDetail; loc
                   value={formatTHB(card.replacement_fee, locale)}
                 />
               </FieldGrid>
-              {card.notes ? <p className="text-ink-subtle mt-1 text-xs">{card.notes}</p> : null}
+              {card.notes ? (
+                <p className="text-ink-subtle text-caption mt-1">{card.notes}</p>
+              ) : null}
               {canWrite ? (
                 <div className="border-border mt-3 border-t pt-3">
                   <CardActions
@@ -78,7 +80,7 @@ export async function RoomCardsTab({ detail, locale }: { detail: RoomDetail; loc
         ))}
       </div>
 
-      <p className="text-ink-subtle text-xs">{t('cards.belongsToRoom')}</p>
+      <p className="text-ink-subtle text-caption">{t('cards.belongsToRoom')}</p>
 
       {detail.cardEvents.length > 0 ? (
         <Card>
@@ -104,7 +106,7 @@ export async function RoomCardsTab({ detail, locale }: { detail: RoomDetail; loc
                   <TD>{card?.card_number ?? t('common.notAvailable')}</TD>
                   <TD>{t(`cardAction.${event.action}`)}</TD>
                   <TD>
-                    <span className="text-ink-muted text-xs">
+                    <span className="text-ink-muted text-caption">
                       {event.from_status ? `${t(`cardStatus.${event.from_status}`)} → ` : ''}
                     </span>
                     {t(`cardStatus.${event.to_status}`)}
