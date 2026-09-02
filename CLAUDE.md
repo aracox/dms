@@ -254,10 +254,24 @@ Two deliberate deviations from that document, both load-bearing:
 
 1. **Palette.** The doc specifies gold / deep red / royal purple on dark brown. The app keeps the
    brand hues below instead. Do not introduce the doc's hex values.
-2. **Fonts.** Cinzel and Spectral carry no Thai glyphs, and Thai is the default locale. Every font
-   stack therefore lists `--font-noto-sans-thai` second, so browsers resolve Latin to the display
-   or body face and Thai to Noto, keeping tone-mark positioning correct. Never drop Noto from a
-   stack, and never set a font family that omits it.
+2. **Fonts.** The doc specifies Cinzel + Spectral. The app uses **Google Sans** for headings and
+   body, and **Google Sans Code** for `--font-mono`, both via `next/font/google`. Google Sans
+   replaced Cinzel/Spectral because it ships the `thai` subset — Thai is the default locale — so
+   one typeface sets both scripts instead of Latin and Thai landing in different faces.
+
+   Three things about it are load-bearing:
+
+   - **`weight` is omitted for Google Sans on purpose.** It is a variable font with a `wght` axis
+     spanning 400–700, so every step the type ramp asks for (400, 500, 600, 700) is a real
+     interpolation. Pinning a `weight` array would discard the axis and reintroduce coercion.
+   - **Every stack still lists `--font-noto-sans-thai` second**, and Noto is loaded with
+     `preload: false`. Google Sans covers Thai, so Noto is insurance against a load failure rather
+     than the face doing the work. Never drop it from a stack, and do not preload it.
+   - **Generic fallbacks are sans-serif**, not the serif tail the Cinzel/Spectral stacks used.
+
+   Fonts must be referenced through the `next/font` CSS variable, never by family name — naming
+   `'Google Sans'` as a string silently bypasses the self-hosted, subsetted font and only works on
+   machines that happen to have it installed locally.
 
 Use the tokens, not ad-hoc values:
 

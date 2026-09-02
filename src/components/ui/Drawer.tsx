@@ -10,6 +10,9 @@ import { Button } from './Button';
  *
  * Uses a native <dialog> so focus trapping, Escape and the top layer come from
  * the platform rather than from a focus-management library.
+ *
+ * The slide-in/out is CSS only -- see the `drawer-panel` utility in globals.css
+ * for why @starting-style and allow-discrete are both required.
  */
 export function Drawer({
   open,
@@ -46,7 +49,7 @@ export function Drawer({
         // Clicking the backdrop closes; clicking the panel does not.
         if (event.target === dialogRef.current) onClose();
       }}
-      className="bg-surface text-ink m-0 ml-auto h-full max-h-none w-full max-w-md p-0 backdrop:bg-black/30 open:flex open:flex-col"
+      className="glass glass-scrim drawer-panel border-surface/50 text-ink m-0 ml-auto h-full max-h-none w-full max-w-md border-l p-0 shadow-xl [--glass-blur:20px] [--glass-opacity:56%] open:flex open:flex-col"
     >
       <header className="border-border flex items-start justify-between gap-4 border-b px-4 py-3">
         <div className="min-w-0">

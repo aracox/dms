@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Cinzel, Fira_Code, Noto_Sans_Thai, Spectral } from 'next/font/google';
+import { Google_Sans, Google_Sans_Code, Noto_Sans_Thai } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
@@ -10,40 +10,44 @@ import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 /**
- * Thai needs a font with proper tone-mark positioning. Cinzel and Spectral
- * carry no Thai glyphs, so Noto stays loaded and sits second in every stack
- * (see globals.css) -- the browser resolves per glyph, so Latin gets the
- * display/body face and Thai gets Noto.
+ * Google Sans, headings and body both.
+ *
+ * It carries the `thai` subset, so one typeface sets both scripts and Thai no
+ * longer renders in a visibly different face from Latin. `weight` is omitted
+ * deliberately: this is a variable font with a wght axis spanning 400-700, so
+ * every step the type ramp asks for (400, 500, 600, 700) is a real
+ * interpolation rather than a synthesised or coerced weight.
  */
-const notoSansThai = Noto_Sans_Thai({
+const googleSans = Google_Sans({
   subsets: ['thai', 'latin'],
-  weight: ['400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font-noto-sans-thai',
+  variable: '--font-google-sans',
 });
 
-/** Headings and small caps labels. */
-const cinzel = Cinzel({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  display: 'swap',
-  variable: '--font-cinzel',
-});
-
-/** Body copy. */
-const spectral = Spectral({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-  variable: '--font-spectral',
-});
-
-/** Meter readings, invoice numbers, card UIDs. */
-const firaCode = Fira_Code({
+/**
+ * Meter readings, invoice numbers, card UIDs. The monospace member of the same
+ * family, so the mono face is tonally consistent with the text face. It has no
+ * Thai subset, which is fine -- everything set in mono here is digits and IDs.
+ */
+const googleSansCode = Google_Sans_Code({
   subsets: ['latin'],
   weight: ['400'],
   display: 'swap',
-  variable: '--font-fira-code',
+  variable: '--font-google-sans-code',
+});
+
+/**
+ * Fallback only, second in every stack (see globals.css). Google Sans covers
+ * Thai, so this exists purely as insurance against a face failing to load.
+ * `preload: false` on purpose: preloading it would ship a font the browser is
+ * never expected to need.
+ */
+const notoSansThai = Noto_Sans_Thai({
+  subsets: ['thai'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  preload: false,
+  variable: '--font-noto-sans-thai',
 });
 
 export function generateStaticParams() {
@@ -87,7 +91,7 @@ export default async function LocaleLayout({
     // own attributes, not for the tree inside them.
     <html
       lang={locale}
-      className={`${notoSansThai.variable} ${cinzel.variable} ${spectral.variable} ${firaCode.variable}`}
+      className={`${googleSans.variable} ${googleSansCode.variable} ${notoSansThai.variable}`}
       suppressHydrationWarning
     >
       <body className="font-sans antialiased" suppressHydrationWarning>

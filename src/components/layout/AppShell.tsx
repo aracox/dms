@@ -24,7 +24,7 @@ export async function AppShell({
 
   return (
     <div className="min-h-dvh">
-      <header className="border-border bg-surface sticky top-0 z-10 border-b">
+      <header className="border-border glass sticky top-0 z-10 border-b">
         <div className="flex items-center justify-between gap-4 px-4 py-2.5">
           <Link href="/dashboard" className="text-ink flex items-center gap-2">
             <span className="bg-brand-blue border-brand-blue-deep flex size-7 items-center justify-center rounded-md border text-white">

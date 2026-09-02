@@ -38,6 +38,26 @@ export function FloorPlanSvg({
 }) {
   const t = useTranslations();
 
+  /*
+   * Rooms share walls: every room's right edge IS the next room's left edge
+   * (the layout JSON has a gap of 0 between all of them). SVG strokes straddle
+   * the path rather than sitting inside it, so whichever room is drawn later
+   * paints its fill over the outer half of its neighbour's stroke.
+   *
+   * At the unselected width of 1.5 that is what you want -- two half strokes
+   * read as one shared wall line. At the selected width of 4 it eats half the
+   * border, so a selected room shows 4 on the side whose neighbour was drawn
+   * first and only 2 on the other, which reads as a missing edge. Drawing the
+   * selected room last puts its whole stroke on top. sort() is stable, so
+   * every other room keeps its original order.
+   */
+  const orderedRooms = selectedRoomNumber
+    ? [...layout.rooms].sort(
+        (a, b) =>
+          Number(a.roomNumber === selectedRoomNumber) - Number(b.roomNumber === selectedRoomNumber),
+      )
+    : layout.rooms;
+
   return (
     <svg
       viewBox={layout.viewBox}
@@ -94,7 +114,7 @@ export function FloorPlanSvg({
         </g>
       ))}
 
-      {layout.rooms.map((roomLayout) => {
+      {orderedRooms.map((roomLayout) => {
         const room = roomsByNumber.get(roomLayout.roomNumber);
 
         // A layout entry with no database row means the seed and the layout have
@@ -160,7 +180,7 @@ export function FloorPlanSvg({
                 ? `rotate(${roomLayout.rotation} ${centreX} ${roomLayout.y + roomLayout.height / 2})`
                 : undefined
             }
-            className="cursor-pointer outline-offset-2"
+            className="group cursor-pointer"
           >
             <rect
               x={roomLayout.x}
@@ -184,6 +204,27 @@ export function FloorPlanSvg({
                 pointerEvents="none"
               />
             ) : null}
+
+            {/*
+              Keyboard focus ring, drawn here rather than left to CSS `outline`.
+              An outline on this <g> is drawn around the group's bounding box --
+              the room rect plus its selected 4px stroke plus every text child --
+              and outline-offset pushes it further out, so it lands outside the
+              room and over the neighbouring one. Inset inside the room instead,
+              so it hugs the geometry and never collides with an adjacent room.
+              globals.css suppresses the CSS outline for these groups.
+            */}
+            <rect
+              x={roomLayout.x + 3}
+              y={roomLayout.y + 3}
+              width={roomLayout.width - 6}
+              height={roomLayout.height - 6}
+              rx="2"
+              fill="none"
+              strokeWidth="2"
+              pointerEvents="none"
+              className="stroke-brand-blue opacity-0 group-focus-visible:opacity-100"
+            />
 
             <text
               x={roomLayout.x + 10}
