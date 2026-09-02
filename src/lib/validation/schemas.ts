@@ -165,6 +165,8 @@ export const cardActionSchema = z.object({
   action: z.enum(['activate', 'disable', 'report_lost', 'replace', 'return', 'mark_damaged']),
   replacement_fee: money.optional(),
   note: z.string().trim().max(500).optional(),
+  /** Only meaningful for 'replace': the new physical card's UID. */
+  card_uid: z.string().trim().max(64).optional(),
 });
 
 export type CardActionInput = z.infer<typeof cardActionSchema>;

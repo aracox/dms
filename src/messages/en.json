@@ -325,6 +325,7 @@
     "subtitle": "Each room has 2 cards. Cards belong to the room, not to a person.",
     "cardNumber": "Card number",
     "cardUid": "Card UID",
+    "newCardUid": "New card UID",
     "issuedDate": "Issued on",
     "returnedDate": "Returned on",
     "replacementFee": "Replacement fee",
@@ -332,7 +333,8 @@
     "slotA": "Card 1",
     "slotB": "Card 2",
     "belongsToRoom": "Cards belong to the room; no cardholder needs to be assigned",
-    "returnOnMoveOut": "Mark active cards as returned"
+    "returnOnMoveOut": "Mark active cards as returned",
+    "uidAlreadyInUse": "That card UID is already in use by another card"
   },
   "meters": {
     "title": "Meter Readings",

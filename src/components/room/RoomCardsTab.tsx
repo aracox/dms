@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
@@ -6,9 +6,13 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
+import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
+import { getCurrentProfile } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/utils/date';
 import type { CardStatus } from '@/types/database';
+
+import { CardActions } from './CardActions';
 
 const CARD_TONE: Record<CardStatus, BadgeTone> = {
   available: 'neutral',
@@ -20,8 +24,14 @@ const CARD_TONE: Record<CardStatus, BadgeTone> = {
 };
 
 /** Two cards per room, belonging to the room rather than to any occupant. */
-export function RoomCardsTab({ detail, locale }: { detail: RoomDetail; locale: Locale }) {
-  const t = useTranslations();
+export async function RoomCardsTab({ detail, locale }: { detail: RoomDetail; locale: Locale }) {
+  const t = await getTranslations();
+  const profile = await getCurrentProfile();
+  const canWrite = can(profile?.role, 'cards:write');
+  const defaultReplacementFee =
+    typeof detail.settings.card_replacement_fee === 'number'
+      ? detail.settings.card_replacement_fee
+      : 0;
 
   if (detail.cards.length === 0) {
     return <EmptyState message={t('room.noCards')} />;
@@ -54,6 +64,15 @@ export function RoomCardsTab({ detail, locale }: { detail: RoomDetail; locale: L
                 />
               </FieldGrid>
               {card.notes ? <p className="text-ink-subtle mt-1 text-xs">{card.notes}</p> : null}
+              {canWrite ? (
+                <div className="border-border mt-3 border-t pt-3">
+                  <CardActions
+                    roomId={detail.room.id}
+                    card={card}
+                    defaultReplacementFee={defaultReplacementFee}
+                  />
+                </div>
+              ) : null}
             </CardBody>
           </Card>
         ))}

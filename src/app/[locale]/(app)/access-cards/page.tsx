@@ -1,14 +1,15 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { PageHeader } from '@/components/layout/AppShell';
+import { CardActions } from '@/components/room/CardActions';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Card, CardHeader } from '@/components/ui/Card';
-import { ComingSoon } from '@/components/ui/ComingSoon';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { formatTHB } from '@/lib/billing/money';
+import { can } from '@/lib/permissions';
 import { getAccessCardReport } from '@/lib/reporting/queries';
+import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/utils/date';
 import type { CardStatus } from '@/types/database';
 
@@ -27,20 +28,25 @@ export default async function AccessCardsPage({ params }: { params: Promise<{ lo
 
   const t = await getTranslations();
   const typedLocale = locale as Locale;
-  const cards = await getAccessCardReport();
+  const supabase = await createClient();
+
+  const [cards, profile, cardReplacementFeeSetting] = await Promise.all([
+    getAccessCardReport(),
+    getCurrentProfile(),
+    supabase.from('settings').select('value').eq('key', 'card_replacement_fee').maybeSingle(),
+  ]);
+
+  const canWrite = can(profile?.role, 'cards:write');
+  const defaultReplacementFee =
+    typeof cardReplacementFeeSetting.data?.value === 'number'
+      ? cardReplacementFeeSetting.data.value
+      : 0;
 
   const lost = cards.filter((card) => card.status === 'lost');
 
   return (
     <>
       <PageHeader title={t('cards.title')} description={t('cards.subtitle')} />
-
-      <div className="mb-4">
-        <ComingSoon>
-          {t('cardAction.activate')} / {t('cardAction.disable')} / {t('cardAction.report_lost')} /{' '}
-          {t('cardAction.replace')} / {t('cardAction.return')}
-        </ComingSoon>
-      </div>
 
       <Card>
         <CardHeader
@@ -56,7 +62,7 @@ export default async function AccessCardsPage({ params }: { params: Promise<{ lo
               <TH>{t('common.status')}</TH>
               <TH>{t('cards.issuedDate')}</TH>
               <TH>{t('cards.returnedDate')}</TH>
-              <TH numeric>{t('cards.replacementFee')}</TH>
+              {canWrite ? <TH>{t('common.actions')}</TH> : null}
             </tr>
           }
         >
@@ -77,9 +83,15 @@ export default async function AccessCardsPage({ params }: { params: Promise<{ lo
               </TD>
               <TD>{formatDate(card.issued_date, typedLocale)}</TD>
               <TD>{formatDate(card.returned_date, typedLocale)}</TD>
-              <TD numeric>
-                {card.replacement_fee > 0 ? formatTHB(card.replacement_fee, typedLocale) : '-'}
-              </TD>
+              {canWrite ? (
+                <TD>
+                  <CardActions
+                    roomId={card.room_id}
+                    card={{ id: card.card_id, status: card.status }}
+                    defaultReplacementFee={defaultReplacementFee}
+                  />
+                </TD>
+              ) : null}
             </tr>
           ))}
         </Table>
