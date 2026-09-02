@@ -38,6 +38,9 @@ export type Permission =
   | 'payments:delete'
   | 'maintenance:read'
   | 'maintenance:write'
+  | 'expenses:read'
+  | 'expenses:write'
+  | 'expenses:delete'
   | 'reports:read'
   | 'settings:read'
   | 'settings:write'
@@ -77,6 +80,11 @@ const REQUIRED_ROLE: Record<Permission, AppRole> = {
 
   'maintenance:read': 'staff',
   'maintenance:write': 'staff',
+
+  'expenses:read': 'staff',
+  'expenses:write': 'admin',
+  // Deleting an expense destroys financial history.
+  'expenses:delete': 'owner',
 
   'reports:read': 'staff',
 

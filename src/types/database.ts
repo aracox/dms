@@ -48,6 +48,9 @@ export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent';
 
 export type AuditAction = 'insert' | 'update' | 'delete';
 
+export type CommonExpenseCategory =
+  'common_electricity' | 'common_water' | 'housekeeping' | 'gardening' | 'other';
+
 /** Derived on the server in v_room_board, not stored. */
 export type FinancialStatus = 'none' | 'paid' | 'payment_due' | 'overdue';
 
@@ -256,6 +259,20 @@ export type MaintenanceTicketRow = {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+};
+
+export type CommonExpenseRow = {
+  id: string;
+  category: CommonExpenseCategory;
+  description: string | null;
+  amount: number;
+  expense_date: string;
+  /** Required for the 4 recurring categories; null for ad hoc ('other') rows. */
+  billing_month: string | null;
+  recorded_by: string | null;
+  is_test: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
 export type AuditLogRow = {
@@ -544,6 +561,15 @@ export type Database = {
         Partial<Writable<MaintenanceTicketRow, 'id'>> & { category: string; description: string },
         Partial<Writable<MaintenanceTicketRow, 'id'>>
       >;
+      common_expenses: TableDef<
+        CommonExpenseRow,
+        Partial<Writable<CommonExpenseRow, 'id'>> & {
+          category: CommonExpenseCategory;
+          amount: number;
+          expense_date: string;
+        },
+        Partial<Writable<CommonExpenseRow, 'id'>>
+      >;
       audit_logs: TableDef<
         AuditLogRow,
         Partial<Omit<AuditLogRow, 'id' | 'created_at'>> & {
@@ -618,6 +644,7 @@ export type Database = {
       maintenance_status: MaintenanceStatus;
       maintenance_priority: MaintenancePriority;
       audit_action: AuditAction;
+      common_expense_category: CommonExpenseCategory;
     };
     CompositeTypes: Record<string, never>;
   };

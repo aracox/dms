@@ -60,6 +60,12 @@ export const NAV_SECTIONS: NavSection[] = [
         icon: 'Wrench',
         permission: 'maintenance:read',
       },
+      {
+        href: '/expenses',
+        labelKey: 'expenses',
+        icon: 'HandCoins',
+        permission: 'expenses:read',
+      },
       { href: '/reports', labelKey: 'reports', icon: 'ChartColumn', permission: 'reports:read' },
     ],
   },

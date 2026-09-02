@@ -15,6 +15,7 @@
     "billing": "ใบแจ้งหนี้",
     "payments": "การชำระเงิน",
     "maintenance": "งานซ่อมบำรุง",
+    "expenses": "ค่าใช้จ่ายส่วนกลาง",
     "reports": "รายงาน",
     "profile": "โปรไฟล์",
     "settings": "ตั้งค่า",
@@ -395,6 +396,26 @@
     "completedAt": "วันที่เสร็จ",
     "commonArea": "พื้นที่ส่วนกลาง",
     "newTicket": "แจ้งงานซ่อม"
+  },
+  "expenses": {
+    "title": "ค่าใช้จ่ายส่วนกลาง",
+    "subtitle": "รายจ่ายส่วนกลางของหอพัก ไม่ผูกกับห้องใดห้องหนึ่ง",
+    "category": "หมวดหมู่",
+    "description": "รายละเอียด",
+    "expenseDate": "วันที่",
+    "addExpense": "เพิ่มรายจ่าย",
+    "editExpense": "แก้ไขรายจ่าย",
+    "noExpenses": "ยังไม่มีรายจ่ายที่บันทึกไว้",
+    "monthlyTitle": "ค่าใช้จ่ายส่วนกลางประจำเดือน",
+    "adHocTitle": "ค่าใช้จ่ายเฉพาะครั้ง",
+    "recordMonth": "บันทึกเดือนนี้"
+  },
+  "expenseCategory": {
+    "common_electricity": "ค่าไฟพื้นที่ส่วนกลาง",
+    "common_water": "ค่าน้ำส่วนกลาง",
+    "housekeeping": "ค่าแม่บ้าน",
+    "gardening": "ค่าคนทำสวน",
+    "other": "อื่นๆ"
   },
   "reports": {
     "title": "รายงาน",

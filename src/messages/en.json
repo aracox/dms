@@ -15,6 +15,7 @@
     "billing": "Billing",
     "payments": "Payments",
     "maintenance": "Maintenance",
+    "expenses": "Common Expenses",
     "reports": "Reports",
     "profile": "Profile",
     "settings": "Settings",
@@ -395,6 +396,26 @@
     "completedAt": "Completed on",
     "commonArea": "Common area",
     "newTicket": "New ticket"
+  },
+  "expenses": {
+    "title": "Common Expenses",
+    "subtitle": "Building-wide operating costs, not tied to any one room",
+    "category": "Category",
+    "description": "Description",
+    "expenseDate": "Date",
+    "addExpense": "Add expense",
+    "editExpense": "Edit expense",
+    "noExpenses": "No expenses recorded yet",
+    "monthlyTitle": "Monthly common expenses",
+    "adHocTitle": "Ad hoc expenses",
+    "recordMonth": "Record this month"
+  },
+  "expenseCategory": {
+    "common_electricity": "Common-area electricity",
+    "common_water": "Common-area water",
+    "housekeeping": "Housekeeping",
+    "gardening": "Gardening",
+    "other": "Other"
   },
   "reports": {
     "title": "Reports",
