@@ -334,7 +334,14 @@
     "slotB": "ใบที่ 2",
     "belongsToRoom": "คีย์การ์ดผูกกับห้อง ไม่ต้องระบุผู้ถือบัตร",
     "returnOnMoveOut": "ทำเครื่องหมายคืนคีย์การ์ดที่ใช้งานอยู่",
-    "uidAlreadyInUse": "รหัสบัตร (UID) นี้ถูกใช้กับบัตรอื่นแล้ว"
+    "uidAlreadyInUse": "รหัสบัตร (UID) นี้ถูกใช้กับบัตรอื่นแล้ว",
+    "searchPlaceholder": "ค้นหาด้วยหมายเลขห้องหรือหมายเลขบัตร",
+    "filterByRoom": "กรองตามห้อง",
+    "allRooms": "ทุกห้อง",
+    "filterByStatus": "กรองตามสถานะ",
+    "allStatuses": "ทุกสถานะ",
+    "resultCount": "{count} บัตร",
+    "noResults": "ไม่พบคีย์การ์ดที่ตรงกับเงื่อนไข"
   },
   "meters": {
     "title": "จดมิเตอร์",

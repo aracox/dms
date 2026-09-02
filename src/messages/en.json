@@ -334,7 +334,14 @@
     "slotB": "Card 2",
     "belongsToRoom": "Cards belong to the room; no cardholder needs to be assigned",
     "returnOnMoveOut": "Mark active cards as returned",
-    "uidAlreadyInUse": "That card UID is already in use by another card"
+    "uidAlreadyInUse": "That card UID is already in use by another card",
+    "searchPlaceholder": "Search by room or card number",
+    "filterByRoom": "Filter by room",
+    "allRooms": "All rooms",
+    "filterByStatus": "Filter by status",
+    "allStatuses": "All statuses",
+    "resultCount": "{count} cards",
+    "noResults": "No cards match these filters"
   },
   "meters": {
     "title": "Meter Readings",

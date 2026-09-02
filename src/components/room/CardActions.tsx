@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState, useState } from 'react';
 
 import { cardActionAction, type CardActionState } from '@/lib/access-cards/actions';
+import { TD } from '@/components/ui/Table';
 import type { CardStatus } from '@/types/database';
 
 const INITIAL_STATE: CardActionState = { error: null };
@@ -30,10 +31,13 @@ export function CardActions({
   roomId,
   card,
   defaultReplacementFee,
+  asTableCells = false,
 }: {
   roomId: string;
   card: { id: string; status: CardStatus };
   defaultReplacementFee: number;
+  /** Render as two <TD>s (action form, save button) instead of one inline block. */
+  asTableCells?: boolean;
 }) {
   const t = useTranslations();
   const actions = ACTIONS_BY_STATUS[card.status];
@@ -54,46 +58,84 @@ export function CardActions({
       ? defaultReplacementFee
       : 0;
 
-  return (
-    <form action={formAction} className="space-y-2">
+  const formId = `card-action-${card.id}`;
+
+  const hiddenFields = (
+    <>
       <input type="hidden" name="room_id" value={roomId} />
       <input type="hidden" name="card_id" value={card.id} />
       <input type="hidden" name="replacement_fee" value={fee} />
+    </>
+  );
 
+  const select = (
+    <select
+      name="action"
+      value={selected}
+      onChange={(event) => setAction(event.target.value as Action)}
+      className="border-border bg-surface text-ink rounded-md border px-2 py-1.5 text-xs"
+    >
+      {actions.map((option) => (
+        <option key={option} value={option}>
+          {t(`cardAction.${option}`)}
+        </option>
+      ))}
+    </select>
+  );
+
+  const replaceInput =
+    selected === 'replace' ? (
+      <input
+        name="card_uid"
+        type="text"
+        maxLength={64}
+        placeholder={t('cards.newCardUid')}
+        className="border-border bg-surface text-ink w-full rounded-md border px-2 py-1 text-xs"
+      />
+    ) : null;
+
+  const errorMessage = state.error ? (
+    <p className="text-brand-red-deep text-xs">{t(state.error)}</p>
+  ) : null;
+
+  // form={formId} lets this button submit the form even when it lives in a
+  // separate table cell, outside the <form> element itself.
+  const saveButton = (
+    <button
+      type="submit"
+      form={formId}
+      disabled={isPending}
+      className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+    >
+      {isPending ? t('common.loading') : t('common.save')}
+    </button>
+  );
+
+  if (asTableCells) {
+    return (
+      <>
+        <TD>
+          <form id={formId} action={formAction} className="space-y-2">
+            {hiddenFields}
+            {select}
+            {replaceInput}
+            {errorMessage}
+          </form>
+        </TD>
+        <TD>{saveButton}</TD>
+      </>
+    );
+  }
+
+  return (
+    <form id={formId} action={formAction} className="space-y-2">
+      {hiddenFields}
       <div className="flex flex-wrap items-center gap-2">
-        <select
-          name="action"
-          value={selected}
-          onChange={(event) => setAction(event.target.value as Action)}
-          className="border-border bg-surface text-ink rounded-md border px-2 py-1.5 text-xs"
-        >
-          {actions.map((option) => (
-            <option key={option} value={option}>
-              {t(`cardAction.${option}`)}
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="submit"
-          disabled={isPending}
-          className="bg-brand-blue hover:bg-brand-blue-deep rounded-md px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
-        >
-          {isPending ? t('common.loading') : t('common.save')}
-        </button>
+        {select}
+        {saveButton}
       </div>
-
-      {selected === 'replace' ? (
-        <input
-          name="card_uid"
-          type="text"
-          maxLength={64}
-          placeholder={t('cards.newCardUid')}
-          className="border-border bg-surface text-ink w-full rounded-md border px-2 py-1 text-xs"
-        />
-      ) : null}
-
-      {state.error ? <p className="text-brand-red-deep text-xs">{t(state.error)}</p> : null}
+      {replaceInput}
+      {errorMessage}
     </form>
   );
 }
