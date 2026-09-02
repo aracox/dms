@@ -23,11 +23,17 @@
   --color-brand-green-deep: rgb(38 92 89);
   --color-brand-red-deep: rgb(150 30 26);
 
-  --color-surface: rgb(255 255 255);
-  --color-surface-muted: rgb(247 248 250);
-  --color-surface-sunken: rgb(241 243 246);
-  --color-border: rgb(224 228 234);
-  --color-border-strong: rgb(199 205 214);
+  /*
+   * Surface ladder. Warm and deliberately spread: a white card on a 3%-off-white
+   * page has no separation, so panels read as flat page rather than as panels.
+   * Cards stay the lightest step but never pure white, and the page ground sits
+   * far enough below them that elevation is legible without leaning on shadow.
+   */
+  --color-surface: rgb(253 252 250);
+  --color-surface-muted: rgb(239 235 228);
+  --color-surface-sunken: rgb(228 223 214);
+  --color-border: rgb(216 209 197);
+  --color-border-strong: rgb(185 175 158);
   --color-ink: rgb(24 30 40);
   --color-ink-muted: rgb(96 106 122);
   --color-ink-subtle: rgb(138 147 161);
