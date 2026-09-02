@@ -38,7 +38,7 @@ export default async function AccessCardsPage({ params }: { params: Promise<{ lo
       <div className="mb-4">
         <ComingSoon>
           {t('cardAction.activate')} / {t('cardAction.disable')} / {t('cardAction.report_lost')} /{' '}
-          {t('cardAction.replace')} / {t('cardAction.return')} — {t('common.loading')}
+          {t('cardAction.replace')} / {t('cardAction.return')}
         </ComingSoon>
       </div>
 

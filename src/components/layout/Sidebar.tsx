@@ -46,7 +46,10 @@ export function Sidebar({ role }: { role: AppRole | null }) {
   const pathname = usePathname();
 
   return (
-    <nav aria-label={t('dashboard')} className="space-y-5">
+    <nav
+      aria-label={t('dashboard')}
+      className="flex gap-4 overflow-x-auto lg:block lg:space-y-5 lg:overflow-visible"
+    >
       {NAV_SECTIONS.map((section, sectionIndex) => {
         const visible = section.items.filter(
           (item) => !item.permission || can(role, item.permission as Permission),
@@ -54,26 +57,26 @@ export function Sidebar({ role }: { role: AppRole | null }) {
         if (visible.length === 0) return null;
 
         return (
-          <div key={section.labelKey ?? `section-${sectionIndex}`}>
+          <div key={section.labelKey ?? `section-${sectionIndex}`} className="shrink-0 lg:shrink">
             {section.labelKey ? (
-              <h2 className="text-ink-subtle px-3 pb-1 text-[11px] font-semibold tracking-wide uppercase">
+              <h2 className="text-ink-subtle hidden px-3 pb-1 text-[11px] font-semibold tracking-wide uppercase lg:block">
                 {t(section.labelKey)}
               </h2>
             ) : null}
 
-            <ul className="space-y-0.5">
+            <ul className="flex gap-1 lg:block lg:space-y-0.5">
               {visible.map((item) => {
                 const Icon = ICONS[item.icon] ?? DoorClosed;
                 // Match the section, so /rooms/<id> keeps Rooms highlighted.
                 const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 return (
-                  <li key={item.href}>
+                  <li key={item.href} className="shrink-0 lg:shrink">
                     <Link
                       href={item.href}
                       aria-current={isActive ? 'page' : undefined}
                       className={cn(
-                        'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm',
+                        'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm whitespace-nowrap',
                         isActive
                           ? 'bg-brand-blue-soft text-brand-blue-deep font-semibold'
                           : 'text-ink-muted hover:bg-surface-sunken hover:text-ink',
