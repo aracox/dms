@@ -49,7 +49,13 @@ export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent';
 export type AuditAction = 'insert' | 'update' | 'delete';
 
 export type CommonExpenseCategory =
-  'common_electricity' | 'common_water' | 'housekeeping' | 'gardening' | 'other';
+  | 'common_electricity'
+  | 'common_water'
+  | 'housekeeping'
+  | 'gardening'
+  | 'internet'
+  | 'transformer_fee'
+  | 'other';
 
 /** Derived on the server in v_room_board, not stored. */
 export type FinancialStatus = 'none' | 'paid' | 'payment_due' | 'overdue';

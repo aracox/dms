@@ -415,6 +415,8 @@
     "common_water": "ค่าน้ำส่วนกลาง",
     "housekeeping": "ค่าแม่บ้าน",
     "gardening": "ค่าคนทำสวน",
+    "internet": "ค่าอินเทอร์เน็ต",
+    "transformer_fee": "ค่าหม้อแปลง",
     "other": "อื่นๆ"
   },
   "reports": {

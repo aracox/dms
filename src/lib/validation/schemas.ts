@@ -256,12 +256,19 @@ export type MaintenanceInput = z.infer<typeof maintenanceSchema>;
 // --- Common expenses ---------------------------------------------------------
 
 /**
- * The 4 recurring monthly categories: one row per category per month, like
+ * The 6 recurring monthly categories: one row per category per month, like
  * meter readings. Repairs go through maintenanceSchema (room_id null)
  * instead, not this.
  */
 export const monthlyCommonExpenseSchema = z.object({
-  category: z.enum(['common_electricity', 'common_water', 'housekeeping', 'gardening']),
+  category: z.enum([
+    'common_electricity',
+    'common_water',
+    'housekeeping',
+    'gardening',
+    'internet',
+    'transformer_fee',
+  ]),
   description: z.string().trim().max(500).nullable().optional(),
   amount: positiveMoney,
   billing_month: billingMonth,

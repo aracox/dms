@@ -415,6 +415,8 @@
     "common_water": "Common-area water",
     "housekeeping": "Housekeeping",
     "gardening": "Gardening",
+    "internet": "Internet",
+    "transformer_fee": "Transformer fee",
     "other": "Other"
   },
   "reports": {

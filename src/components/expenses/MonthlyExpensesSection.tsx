@@ -19,6 +19,8 @@ const MONTHLY_CATEGORIES: readonly CommonExpenseCategory[] = [
   'common_water',
   'housekeeping',
   'gardening',
+  'internet',
+  'transformer_fee',
 ];
 
 type FormState = { open: boolean; month: string };
@@ -41,6 +43,8 @@ export function MonthlyExpensesSection({
     common_water: { open: false, month: defaultMonth },
     housekeeping: { open: false, month: defaultMonth },
     gardening: { open: false, month: defaultMonth },
+    internet: { open: false, month: defaultMonth },
+    transformer_fee: { open: false, month: defaultMonth },
     other: { open: false, month: defaultMonth },
   });
 
