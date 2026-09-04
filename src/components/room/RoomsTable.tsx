@@ -102,7 +102,7 @@ export function RoomsTable({ rooms, locale }: { rooms: RoomBoardRow[]; locale: L
       {filtered.length === 0 ? (
         <EmptyState message={t('rooms.noResults')} />
       ) : (
-        <div className="border-border bg-surface rounded-md border shadow-sm">
+        <div className="border-border glass rounded-md border shadow-sm">
           <Table
             head={
               <tr>

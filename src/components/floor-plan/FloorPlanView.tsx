@@ -67,7 +67,7 @@ export function FloorPlanView({
       </div>
 
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
-        <div className="bg-surface flex min-h-0 items-center justify-center rounded-xl p-3">
+        <div className="glass border-border flex min-h-0 items-center justify-center rounded-xl border p-3 shadow-sm">
           {layout ? (
             <FloorPlanSvg
               layout={layout}
@@ -83,7 +83,7 @@ export function FloorPlanView({
           )}
         </div>
 
-        <aside className="bg-surface min-h-0 overflow-y-auto rounded-xl p-3">
+        <aside className="glass border-border min-h-0 overflow-y-auto rounded-xl border p-3 shadow-sm">
           <StatusLegend />
           <p className="text-ink-subtle text-caption mt-4 pt-3">{t('floorPlan.subtitle')}</p>
         </aside>

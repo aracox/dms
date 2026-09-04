@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
 import type { AppRole } from '@/types/database';
 
+import { GlassSettings } from './GlassSettings';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { Sidebar } from './Sidebar';
 import { UserMenu } from './UserMenu';
@@ -36,12 +37,13 @@ export async function AppShell({
           <div className="flex items-center gap-4">
             <LocaleSwitcher />
             <UserMenu name={profile.full_name} email={profile.email} role={profile.role} />
+            <GlassSettings />
           </div>
         </div>
       </header>
 
       <div className="flex flex-col lg:flex-row">
-        <aside className="border-border bg-surface shrink-0 border-b px-2 py-3 lg:sticky lg:top-[53px] lg:h-[calc(100dvh-53px)] lg:w-60 lg:overflow-y-auto lg:border-r lg:border-b-0">
+        <aside className="border-border glass shrink-0 border-b px-2 py-3 lg:sticky lg:top-[53px] lg:h-[calc(100dvh-53px)] lg:w-60 lg:overflow-y-auto lg:border-r lg:border-b-0">
           <Sidebar role={profile.role} />
         </aside>
 

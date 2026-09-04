@@ -20,7 +20,7 @@ export default function AppError({
   const isPermissionError = error.name === 'PermissionError';
 
   return (
-    <div className="border-border bg-surface mx-auto max-w-md rounded-xl border px-5 py-8 text-center shadow-md">
+    <div className="border-border glass mx-auto max-w-md rounded-xl border px-5 py-8 text-center shadow-md">
       <span className="bg-brand-red-soft text-brand-red-deep mx-auto flex size-10 items-center justify-center rounded-full">
         <TriangleAlert size={20} aria-hidden="true" />
       </span>

@@ -42,7 +42,7 @@ export function StatTile({
   return (
     <div
       className={cn(
-        'border-border bg-surface relative overflow-hidden rounded-xl border p-4 shadow-sm',
+        'border-border glass relative overflow-hidden rounded-xl border p-4 shadow-sm',
         className,
       )}
     >

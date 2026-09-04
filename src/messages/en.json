@@ -4,6 +4,14 @@
     "shortName": "Dormitory",
     "tagline": "Rooms, contracts, billing and maintenance in one place"
   },
+  "appearance": {
+    "open": "Open appearance settings",
+    "title": "Appearance",
+    "transparency": "Glass transparency",
+    "solid": "Solid",
+    "clear": "Clear",
+    "hint": "Adjusts glass surfaces on this device."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "floorPlan": "Floor Plan",

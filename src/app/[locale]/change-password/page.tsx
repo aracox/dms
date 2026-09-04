@@ -27,7 +27,7 @@ export default async function ChangePasswordPage({
           </p>
         </div>
 
-        <div className="border-border bg-surface rounded-xl border p-5 shadow-md">
+        <div className="border-border glass rounded-xl border p-5 shadow-md">
           <ChangePasswordForm />
         </div>
       </div>

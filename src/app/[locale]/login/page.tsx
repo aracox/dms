@@ -28,7 +28,7 @@ export default async function LoginPage({
           <p className="text-ink-muted text-body-sm mt-0.5">{t('auth.signInSubtitle')}</p>
         </div>
 
-        <div className="border-border bg-surface rounded-xl border p-5 shadow-md">
+        <div className="border-border glass rounded-xl border p-5 shadow-md">
           {passwordChanged ? (
             <p className="border-brand-green bg-brand-green-soft text-brand-green-deep text-caption mb-4 rounded-md border px-3 py-2">
               {t('auth.passwordChangedSignInAgain')}

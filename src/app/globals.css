@@ -125,15 +125,13 @@
   --shadow-glow: 0 0 0 3px rgb(246 194 74 / 0.35);
 }
 
-/*
- * Glass. Reserved for the two surfaces that genuinely have content passing
- * behind them -- the sticky header and the drawer. A translucent panel over
- * flat page ground reads as murk rather than glass, so cards and tables stay
- * opaque; they also carry the financial figures, which must not trade contrast
- * for an effect.
- */
+/* Frosted surfaces share one user-adjustable opacity value. */
 @theme {
   --blur-glass: 12px;
+}
+
+:root {
+  --glass-opacity: 72%;
 }
 
 /*
@@ -229,12 +227,12 @@
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .glass {
+  html:not([data-glass-preference='custom']) .glass {
     background-color: var(--color-surface);
     backdrop-filter: none;
   }
 
-  .glass-scrim::backdrop {
+  html:not([data-glass-preference='custom']) .glass-scrim::backdrop {
     backdrop-filter: none;
   }
 }
@@ -282,6 +280,11 @@ html {
 
 body {
   background-color: var(--color-surface-muted);
+  background-image:
+    radial-gradient(circle at 8% 0%, rgb(48 111 199 / 0.2), transparent 30rem),
+    radial-gradient(circle at 100% 18%, rgb(67 147 143 / 0.18), transparent 32rem),
+    linear-gradient(135deg, rgb(239 235 228), rgb(233 240 250) 55%, rgb(232 243 242));
+  background-attachment: fixed;
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
 }

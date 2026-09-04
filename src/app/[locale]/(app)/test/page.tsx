@@ -60,7 +60,7 @@ export default async function TestModePage({ params }: { params: Promise<{ local
         </div>
       </div>
 
-      <section className="border-border bg-surface mb-5 rounded-xl border p-3">
+      <section className="border-border glass mb-5 rounded-xl border p-3">
         <h2 className="text-ink font-display text-h4 mb-2 font-semibold">
           {t('testMode.scenario')}
           {scenario ? (
