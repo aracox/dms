@@ -7,12 +7,13 @@ import type { AppRole } from '@/types/database';
 
 import { GlassSettings } from './GlassSettings';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { MobileNavigation } from './MobileNavigation';
 import { Sidebar } from './Sidebar';
 import { UserMenu } from './UserMenu';
 
 /**
- * Desktop-first admin chrome: a fixed sidebar on wide screens, a horizontally
- * scrolling nav strip below `lg`.
+ * Desktop-first admin chrome with a fixed sidebar on wide screens and a drawer
+ * navigation below `lg`.
  */
 export async function AppShell({
   children,
@@ -27,14 +28,23 @@ export async function AppShell({
     <div className="min-h-dvh">
       <header className="border-border glass sticky top-0 z-10 border-b">
         <div className="flex items-center justify-between gap-4 px-4 py-2.5">
-          <Link href="/dashboard" className="text-ink flex items-center gap-2">
-            <span className="bg-brand-blue border-brand-blue-deep flex size-7 items-center justify-center rounded-md border text-white">
-              <Building2 size={16} aria-hidden="true" />
-            </span>
-            <span className="font-display text-h4 font-semibold">{t('app.name')}</span>
-          </Link>
+          <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+            <MobileNavigation role={profile.role} />
+            <Link
+              href="/dashboard"
+              aria-label={t('app.name')}
+              className="text-ink flex min-w-0 items-center gap-2"
+            >
+              <span className="bg-brand-blue border-brand-blue-deep flex size-7 shrink-0 items-center justify-center rounded-md border text-white">
+                <Building2 size={16} aria-hidden="true" />
+              </span>
+              <span className="font-display text-h4 hidden truncate font-semibold sm:inline">
+                {t('app.name')}
+              </span>
+            </Link>
+          </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-4">
             <LocaleSwitcher />
             <UserMenu name={profile.full_name} email={profile.email} role={profile.role} />
             <GlassSettings />
@@ -43,7 +53,7 @@ export async function AppShell({
       </header>
 
       <div className="flex flex-col lg:flex-row">
-        <aside className="border-border glass shrink-0 border-b px-2 py-3 lg:sticky lg:top-[53px] lg:h-[calc(100dvh-53px)] lg:w-60 lg:overflow-y-auto lg:border-r lg:border-b-0">
+        <aside className="border-border glass hidden shrink-0 border-r px-2 py-3 lg:sticky lg:top-[53px] lg:block lg:h-[calc(100dvh-53px)] lg:w-60 lg:overflow-y-auto">
           <Sidebar role={profile.role} />
         </aside>
 

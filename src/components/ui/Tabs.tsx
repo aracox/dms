@@ -46,7 +46,7 @@ export function Tabs({
       <div
         role="tablist"
         aria-orientation="horizontal"
-        className="border-border flex flex-wrap gap-1 border-b"
+        className="border-border flex gap-1 overflow-x-auto border-b"
       >
         {tabs.map((tab, index) => {
           const isActive = tab.id === activeId;
@@ -76,7 +76,7 @@ export function Tabs({
                 }
               }}
               className={cn(
-                'font-display text-body-sm -mb-px flex items-center gap-1.5 border-b-2 px-4 py-2.5 font-semibold',
+                'font-display text-body-sm -mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-4 py-2.5 font-semibold whitespace-nowrap',
                 'transition-colors duration-150',
                 isActive
                   ? 'border-brand-blue text-brand-blue-deep'

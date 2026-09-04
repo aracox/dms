@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import {
   cancelInvoiceAction,
   deleteInvoiceAction,
@@ -43,13 +44,9 @@ export function InvoiceActions({
         <form action={cancelAction}>
           <input type="hidden" name="invoice_id" value={invoiceId} />
           <input type="hidden" name="room_id" value={roomId} />
-          <button
-            type="submit"
-            disabled={isCancelling}
-            className="text-ink-muted text-caption underline disabled:opacity-60"
-          >
+          <Button type="submit" variant="link" size="sm" disabled={isCancelling}>
             {isCancelling ? t('common.loading') : t('billing.cancelInvoice')}
-          </button>
+          </Button>
         </form>
       ) : null}
 
@@ -57,13 +54,15 @@ export function InvoiceActions({
         <form action={deleteAction}>
           <input type="hidden" name="invoice_id" value={invoiceId} />
           <input type="hidden" name="room_id" value={roomId} />
-          <button
+          <Button
             type="submit"
+            variant="link"
+            size="sm"
             disabled={isDeleting}
-            className="text-brand-red-deep text-caption underline disabled:opacity-60"
+            className="text-brand-red-deep hover:text-brand-red-deep"
           >
             {isDeleting ? t('common.loading') : t('common.delete')}
-          </button>
+          </Button>
         </form>
       ) : null}
 

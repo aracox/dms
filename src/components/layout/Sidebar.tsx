@@ -12,7 +12,6 @@ import {
   Map,
   ReceiptText,
   Settings,
-  User,
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
@@ -38,18 +37,14 @@ const ICONS: Record<string, LucideIcon> = {
   ChartColumn,
   Settings,
   FlaskConical,
-  User,
 };
 
-export function Sidebar({ role }: { role: AppRole | null }) {
+export function Sidebar({ role, onNavigate }: { role: AppRole | null; onNavigate?: () => void }) {
   const t = useTranslations('nav');
   const pathname = usePathname();
 
   return (
-    <nav
-      aria-label={t('dashboard')}
-      className="flex gap-4 overflow-x-auto lg:block lg:space-y-5 lg:overflow-visible"
-    >
+    <nav aria-label={t('dashboard')} className="space-y-5">
       {NAV_SECTIONS.map((section, sectionIndex) => {
         const visible = section.items.filter(
           (item) => !item.permission || can(role, item.permission as Permission),
@@ -57,23 +52,24 @@ export function Sidebar({ role }: { role: AppRole | null }) {
         if (visible.length === 0) return null;
 
         return (
-          <div key={section.labelKey ?? `section-${sectionIndex}`} className="shrink-0 lg:shrink">
+          <div key={section.labelKey ?? `section-${sectionIndex}`}>
             {section.labelKey ? (
-              <h2 className="text-ink-subtle font-display text-caption hidden px-3 pb-1 font-semibold tracking-wide uppercase lg:block">
+              <h2 className="text-ink-subtle font-display text-caption px-3 pb-1 font-semibold tracking-wide uppercase">
                 {t(section.labelKey)}
               </h2>
             ) : null}
 
-            <ul className="flex gap-1 lg:block lg:space-y-0.5">
+            <ul className="space-y-0.5">
               {visible.map((item) => {
                 const Icon = ICONS[item.icon] ?? DoorClosed;
                 // Match the section, so /rooms/<id> keeps Rooms highlighted.
                 const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 return (
-                  <li key={item.href} className="shrink-0 lg:shrink">
+                  <li key={item.href}>
                     <Link
                       href={item.href}
+                      onClick={onNavigate}
                       aria-current={isActive ? 'page' : undefined}
                       className={cn(
                         'font-display flex items-center gap-2.5 rounded-md px-3 py-2 text-sm whitespace-nowrap',

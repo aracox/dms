@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import {
   deleteCommonExpenseAction,
   type DeleteCommonExpenseState,
@@ -17,13 +18,15 @@ export function DeleteExpenseButton({ expenseId }: { expenseId: string }) {
   return (
     <form action={action}>
       <input type="hidden" name="expense_id" value={expenseId} />
-      <button
+      <Button
         type="submit"
+        variant="link"
+        size="sm"
         disabled={isPending}
-        className="text-brand-red-deep text-caption underline disabled:opacity-60"
+        className="text-brand-red-deep hover:text-brand-red-deep"
       >
         {isPending ? t('common.loading') : t('common.delete')}
-      </button>
+      </Button>
       {state.error ? (
         <p className="text-brand-red-deep text-caption mt-1">{t(state.error)}</p>
       ) : null}

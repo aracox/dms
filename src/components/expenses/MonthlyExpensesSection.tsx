@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
@@ -114,13 +115,15 @@ export function MonthlyExpensesSection({
                 <TD>
                   <div className="flex items-center gap-3">
                     {canWrite ? (
-                      <button
+                      <Button
                         type="button"
+                        variant="link"
+                        size="sm"
                         onClick={() => editEntry(entry.category, entry.billing_month!)}
-                        className="text-brand-blue-deep text-caption underline"
+                        className="text-brand-blue-deep hover:text-brand-blue-deep"
                       >
                         {t('common.edit')}
-                      </button>
+                      </Button>
                     ) : null}
                     {canDelete ? <DeleteExpenseButton expenseId={entry.id} /> : null}
                   </div>

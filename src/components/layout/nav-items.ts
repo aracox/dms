@@ -18,10 +18,10 @@ export interface NavSection {
 }
 
 /**
- * Main navigation, per the spec's §26 ordering.
+ * Main navigation ordered around the owner's monthly and daily workflows.
  *
- * Tenants and Contracts are deliberately absent: they are reached through Room
- * Detail, which is where the owner actually thinks about them.
+ * Tenants and Contracts are reached through Room Detail. Profile lives in the
+ * account area in the header instead of being duplicated here.
  */
 export const NAV_SECTIONS: NavSection[] = [
   {
@@ -38,11 +38,11 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    labelKey: 'finance',
+    labelKey: 'monthlyWorkflow',
     items: [
+      { href: '/meters', labelKey: 'meters', icon: 'Gauge', permission: 'meters:read' },
       { href: '/billing', labelKey: 'billing', icon: 'ReceiptText', permission: 'invoices:read' },
       { href: '/payments', labelKey: 'payments', icon: 'Banknote', permission: 'payments:read' },
-      { href: '/meters', labelKey: 'meters', icon: 'Gauge', permission: 'meters:read' },
     ],
   },
   {
@@ -60,6 +60,11 @@ export const NAV_SECTIONS: NavSection[] = [
         icon: 'Wrench',
         permission: 'maintenance:read',
       },
+    ],
+  },
+  {
+    labelKey: 'financeInsights',
+    items: [
       {
         href: '/expenses',
         labelKey: 'expenses',
@@ -72,7 +77,6 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     labelKey: 'system',
     items: [
-      { href: '/profile', labelKey: 'profile', icon: 'User' },
       { href: '/settings', labelKey: 'settings', icon: 'Settings', permission: 'settings:read' },
       { href: '/test', labelKey: 'testMode', icon: 'FlaskConical', permission: 'test-mode:use' },
     ],

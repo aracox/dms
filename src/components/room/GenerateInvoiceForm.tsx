@@ -71,13 +71,9 @@ export function GenerateInvoiceForm({
             className="mt-1 block w-auto"
           />
         </label>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="text-ink-subtle text-caption underline"
-        >
+        <Button type="button" variant="link" size="sm" onClick={() => setOpen(false)}>
           {t('common.close')}
-        </button>
+        </Button>
       </div>
 
       {hasLiveInvoice ? (

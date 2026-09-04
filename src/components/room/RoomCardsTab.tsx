@@ -72,6 +72,7 @@ export async function RoomCardsTab({ detail, locale }: { detail: RoomDetail; loc
                     roomId={detail.room.id}
                     card={card}
                     defaultReplacementFee={defaultReplacementFee}
+                    locale={locale}
                   />
                 </div>
               ) : null}

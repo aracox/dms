@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useActionState, useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
@@ -27,13 +28,15 @@ function DeleteReadingButton({ roomId, readingId }: { roomId: string; readingId:
     <form action={action}>
       <input type="hidden" name="reading_id" value={readingId} />
       <input type="hidden" name="room_id" value={roomId} />
-      <button
+      <Button
         type="submit"
+        variant="link"
+        size="sm"
         disabled={isPending}
-        className="text-brand-red-deep text-caption underline disabled:opacity-60"
+        className="text-brand-red-deep hover:text-brand-red-deep"
       >
         {isPending ? t('common.loading') : t('common.delete')}
-      </button>
+      </Button>
       {state.error ? (
         <p className="text-brand-red-deep text-caption mt-1">{t(state.error)}</p>
       ) : null}
@@ -147,13 +150,15 @@ export function MetersSection({
                 <TD>
                   <div className="flex items-center gap-3">
                     {canCorrect ? (
-                      <button
+                      <Button
                         type="button"
+                        variant="link"
+                        size="sm"
                         onClick={() => editReading(reading.meter_type, reading.billing_month)}
-                        className="text-brand-blue-deep text-caption underline"
+                        className="text-brand-blue-deep hover:text-brand-blue-deep"
                       >
                         {t('common.edit')}
-                      </button>
+                      </Button>
                     ) : null}
                     {canDelete ? (
                       <DeleteReadingButton roomId={roomId} readingId={reading.id} />

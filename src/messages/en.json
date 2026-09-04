@@ -13,6 +13,9 @@
     "hint": "Adjusts glass surfaces on this device."
   },
   "nav": {
+    "menu": "Menu",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu",
     "dashboard": "Dashboard",
     "floorPlan": "Floor Plan",
     "rooms": "Rooms",
@@ -29,8 +32,9 @@
     "settings": "Settings",
     "testMode": "Test Mode",
     "operations": "Operations",
-    "finance": "Finance",
-    "system": "System"
+    "monthlyWorkflow": "Monthly workflow",
+    "financeInsights": "Finance & insights",
+    "system": "Administration"
   },
   "common": {
     "save": "Save",
@@ -334,6 +338,7 @@
     "cardNumber": "Card number",
     "cardUid": "Card UID",
     "newCardUid": "New card UID",
+    "chooseAction": "Choose action",
     "issuedDate": "Issued on",
     "returnedDate": "Returned on",
     "replacementFee": "Replacement fee",

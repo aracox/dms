@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react';
 
 import { cn } from '@/lib/utils/cn';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'link';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 /**
@@ -17,6 +17,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   ghost: 'bg-transparent text-ink-muted border-transparent hover:bg-surface-sunken hover:text-ink',
   destructive:
     'bg-brand-red text-white border-brand-red-deep hover:bg-brand-red-deep enabled:hover:shadow-sm',
+  link: 'bg-transparent text-ink-muted border-transparent underline underline-offset-2 hover:text-ink',
 };
 
 /** Heights are fixed at 32 / 40 / 48px so controls line up across a row. */

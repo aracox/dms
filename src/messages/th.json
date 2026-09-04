@@ -13,6 +13,9 @@
     "hint": "ปรับพื้นผิวกระจกบนอุปกรณ์นี้"
   },
   "nav": {
+    "menu": "เมนู",
+    "openMenu": "เปิดเมนูนำทาง",
+    "closeMenu": "ปิดเมนูนำทาง",
     "dashboard": "ภาพรวม",
     "floorPlan": "ผังห้องพัก",
     "rooms": "ห้องพัก",
@@ -29,8 +32,9 @@
     "settings": "ตั้งค่า",
     "testMode": "โหมดทดสอบ",
     "operations": "งานประจำวัน",
-    "finance": "การเงิน",
-    "system": "ระบบ"
+    "monthlyWorkflow": "งานประจำเดือน",
+    "financeInsights": "การเงินและรายงาน",
+    "system": "การดูแลระบบ"
   },
   "common": {
     "save": "บันทึก",
@@ -334,6 +338,7 @@
     "cardNumber": "หมายเลขบัตร",
     "cardUid": "รหัสบัตร (UID)",
     "newCardUid": "รหัสบัตรใหม่ (UID)",
+    "chooseAction": "เลือกการทำงาน",
     "issuedDate": "วันที่ออกบัตร",
     "returnedDate": "วันที่รับคืน",
     "replacementFee": "ค่าออกบัตรใหม่",

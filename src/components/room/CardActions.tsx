@@ -7,6 +7,8 @@ import { cardActionAction, type CardActionState } from '@/lib/access-cards/actio
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
 import { TD } from '@/components/ui/Table';
+import type { Locale } from '@/i18n/routing';
+import { formatTHB } from '@/lib/billing/money';
 import type { CardStatus } from '@/types/database';
 
 const INITIAL_STATE: CardActionState = { error: null };
@@ -24,33 +26,34 @@ const ACTIONS_BY_STATUS: Record<CardStatus, readonly Action[]> = {
 };
 
 /**
- * One dropdown + submit per card -- the set of valid actions depends on the
- * card's current status. report_lost/replace silently apply the settings
- * replacement fee (no fee/note input -- keep this to the status change plus,
- * for replace, the new card's UID).
+ * A single valid transition is a direct button. Multiple valid transitions use
+ * an explicit action choice followed by a command-labelled button. Actions that
+ * create a replacement fee show it before submission.
  */
 export function CardActions({
   roomId,
   card,
   defaultReplacementFee,
-  asTableCells = false,
+  locale,
+  asTableCell = false,
 }: {
   roomId: string;
   card: { id: string; status: CardStatus };
   defaultReplacementFee: number;
-  /** Render as two <TD>s (action form, save button) instead of one inline block. */
-  asTableCells?: boolean;
+  locale: Locale;
+  /** Render the action form inside one table cell. */
+  asTableCell?: boolean;
 }) {
   const t = useTranslations();
   const actions = ACTIONS_BY_STATUS[card.status];
-  const fallback = actions[0] ?? 'activate';
-  const [action, setAction] = useState<Action>(fallback);
+  const onlyAction = actions.length === 1 ? actions[0] : undefined;
+  const [action, setAction] = useState<Action | ''>(onlyAction ?? '');
   const [state, formAction, isPending] = useActionState(cardActionAction, INITIAL_STATE);
 
   // The card's status (and so its valid actions) can change after a
   // successful submit without this component remounting -- fall back to the
   // first valid action rather than keep a selection that's no longer offered.
-  const selected = actions.includes(action) ? action : fallback;
+  const selected = action && actions.includes(action) ? action : (onlyAction ?? '');
 
   // report_lost is only reachable from 'active', so it's always a fresh
   // charge. replace is reachable from 'active' too (skipping report_lost) or
@@ -60,8 +63,6 @@ export function CardActions({
       ? defaultReplacementFee
       : 0;
 
-  const formId = `card-action-${card.id}`;
-
   const hiddenFields = (
     <>
       <input type="hidden" name="room_id" value={roomId} />
@@ -70,13 +71,20 @@ export function CardActions({
     </>
   );
 
-  const select = (
+  const actionControl = onlyAction ? (
+    <input type="hidden" name="action" value={onlyAction} />
+  ) : (
     <Select
       name="action"
       value={selected}
+      required
+      aria-label={t('cards.chooseAction')}
       onChange={(event) => setAction(event.target.value as Action)}
       className="w-auto"
     >
+      <option value="" disabled>
+        {t('cards.chooseAction')}
+      </option>
       {actions.map((option) => (
         <option key={option} value={option}>
           {t(`cardAction.${option}`)}
@@ -94,39 +102,33 @@ export function CardActions({
     <p className="text-brand-red-deep text-caption">{t(state.error)}</p>
   ) : null;
 
-  // form={formId} lets this button submit the form even when it lives in a
-  // separate table cell, outside the <form> element itself.
-  const saveButton = (
-    <Button type="submit" form={formId} size="sm" disabled={isPending}>
-      {isPending ? t('common.loading') : t('common.save')}
+  const actionButton = selected ? (
+    <Button
+      type="submit"
+      size="sm"
+      variant={selected === 'report_lost' ? 'destructive' : 'secondary'}
+      disabled={isPending}
+    >
+      {isPending ? t('common.loading') : t(`cardAction.${selected}`)}
     </Button>
-  );
+  ) : null;
 
-  if (asTableCells) {
-    return (
-      <>
-        <TD>
-          <form id={formId} action={formAction} className="space-y-2">
-            {hiddenFields}
-            {select}
-            {replaceInput}
-            {errorMessage}
-          </form>
-        </TD>
-        <TD>{saveButton}</TD>
-      </>
-    );
-  }
-
-  return (
-    <form id={formId} action={formAction} className="space-y-2">
+  const form = (
+    <form action={formAction} className="space-y-2">
       {hiddenFields}
       <div className="flex flex-wrap items-center gap-2">
-        {select}
-        {saveButton}
+        {actionControl}
+        {replaceInput}
+        {actionButton}
       </div>
-      {replaceInput}
+      {fee > 0 ? (
+        <p className="text-brand-red-deep text-caption">
+          {t('cards.replacementFee')}: {formatTHB(fee, locale)}
+        </p>
+      ) : null}
       {errorMessage}
     </form>
   );
+
+  return asTableCell ? <TD>{form}</TD> : form;
 }

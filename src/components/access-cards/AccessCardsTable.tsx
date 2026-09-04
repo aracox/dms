@@ -132,7 +132,6 @@ export function AccessCardsTable({
               <TH>{t('cards.issuedDate')}</TH>
               <TH>{t('cards.returnedDate')}</TH>
               {canWrite ? <TH>{t('common.actions')}</TH> : null}
-              {canWrite ? <TH>{t('common.save')}</TH> : null}
             </tr>
           }
         >
@@ -158,7 +157,8 @@ export function AccessCardsTable({
                   roomId={card.room_id}
                   card={{ id: card.card_id, status: card.status }}
                   defaultReplacementFee={defaultReplacementFee}
-                  asTableCells
+                  locale={locale}
+                  asTableCell
                 />
               ) : null}
             </tr>

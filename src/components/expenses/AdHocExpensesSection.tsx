@@ -76,9 +76,9 @@ function AdHocExpenseForm({
         <Button variant="primary" size="md" type="submit" disabled={isPending}>
           {isPending ? t('common.loading') : t('common.save')}
         </Button>
-        <button type="button" onClick={onClose} className="text-ink-subtle text-caption underline">
+        <Button type="button" variant="link" size="sm" onClick={onClose}>
           {t('common.close')}
-        </button>
+        </Button>
       </div>
 
       {state.error ? (
@@ -160,13 +160,15 @@ export function AdHocExpensesSection({
                 <TD>
                   <div className="flex items-center gap-3">
                     {canWrite ? (
-                      <button
+                      <Button
                         type="button"
+                        variant="link"
+                        size="sm"
                         onClick={() => setPanel({ open: true, editing: expense })}
-                        className="text-brand-blue-deep text-caption underline"
+                        className="text-brand-blue-deep hover:text-brand-blue-deep"
                       >
                         {t('common.edit')}
-                      </button>
+                      </Button>
                     ) : null}
                     {canDelete ? <DeleteExpenseButton expenseId={expense.id} /> : null}
                   </div>

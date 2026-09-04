@@ -76,9 +76,9 @@ export function MeterReadingForm({
             className="mt-1 block w-auto"
           />
         </label>
-        <button type="button" onClick={onClose} className="text-ink-subtle text-caption underline">
+        <Button type="button" variant="link" size="sm" onClick={onClose}>
           {t('common.close')}
-        </button>
+        </Button>
       </div>
 
       <form

@@ -64,13 +64,9 @@ export function MoveOutForm({
         <Button type="submit" variant="destructive" size="sm" disabled={isPending}>
           {isPending ? t('common.loading') : t('contract.terminate')}
         </Button>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="text-ink-subtle text-caption underline"
-        >
+        <Button type="button" variant="link" size="sm" onClick={() => setOpen(false)}>
           {t('common.close')}
-        </button>
+        </Button>
       </div>
 
       {state.error ? <p className="text-brand-red-deep text-caption">{t(state.error)}</p> : null}
