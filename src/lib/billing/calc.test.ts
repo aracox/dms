@@ -53,23 +53,23 @@ describe('money', () => {
   });
 
   it('formats Thai baht', () => {
-    expect(formatTHB(6500, 'en')).toBe('฿6,500.00');
+    expect(formatTHB(3500, 'en')).toBe('฿3,500.00');
   });
 });
 
 describe('invoice totals', () => {
   const t01Items = buildMonthlyInvoiceItems({
-    monthlyRent: 6500,
+    monthlyRent: 3500,
     electricity: { previousReading: 1250, currentReading: 1380, rate: 8 },
     water: { previousReading: 220, currentReading: 226, rate: 20 },
   });
 
   it('reproduces the T01 example invoice from the specification', () => {
-    // Rent 6,500 + Electricity 1,040 + Water 120 = 7,660
-    expect(invoiceItemAmount(t01Items[0]!)).toBe(6500);
+    // Rent 3,500 + Electricity 1,040 + Water 120 = 4,660
+    expect(invoiceItemAmount(t01Items[0]!)).toBe(3500);
     expect(invoiceItemAmount(t01Items[1]!)).toBe(1040);
     expect(invoiceItemAmount(t01Items[2]!)).toBe(120);
-    expect(invoiceTotals(t01Items)).toEqual({ subtotal: 7660, discount: 0, total: 7660 });
+    expect(invoiceTotals(t01Items)).toEqual({ subtotal: 4660, discount: 0, total: 4660 });
   });
 
   it('omits a utility line when usage is zero', () => {

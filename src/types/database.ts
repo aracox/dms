@@ -351,6 +351,18 @@ export type FinanceSummaryRow = {
   overdue: number;
 };
 
+export type BusinessOverviewRow = {
+  billing_month: string;
+  occupied_rooms: number;
+  total_rooms: number;
+  occupancy_rate: number;
+  billed_amount: number;
+  collected_amount: number;
+  expense_amount: number;
+  net_after_expenses: number;
+  collection_rate: number;
+};
+
 export type ContractExpiringRow = {
   contract_id: string;
   room_id: string;
@@ -591,6 +603,7 @@ export type Database = {
       report_rooms: ViewDef<RoomBoardRow>;
       report_room_summary: ViewDef<RoomSummaryRow>;
       report_finance_summary: ViewDef<FinanceSummaryRow>;
+      report_business_overview: ViewDef<BusinessOverviewRow>;
       report_contracts_expiring: ViewDef<ContractExpiringRow>;
       report_outstanding: ViewDef<OutstandingRow>;
       report_payment_collection: ViewDef<PaymentCollectionRow>;

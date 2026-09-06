@@ -22,8 +22,8 @@ export const T01_DEFAULTS = {
   tenantName: 'Test Tenant',
   tenantPhone: '0800000000',
   occupantCount: 2,
-  monthlyRent: 6500,
-  deposit: 13000,
+  monthlyRent: 3500,
+  deposit: 3500,
   cards: [
     { cardNumber: 'T01-A', cardUid: 'TEST-CARD-001' },
     { cardNumber: 'T01-B', cardUid: 'TEST-CARD-002' },

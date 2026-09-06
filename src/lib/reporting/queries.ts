@@ -17,6 +17,7 @@ import { createClient } from '@/lib/supabase/server';
 import { currentBillingMonth, type IsoDate } from '@/lib/utils/date';
 import type {
   AccessCardReportRow,
+  BusinessOverviewRow,
   ContractExpiringRow,
   FinanceSummaryRow,
   MaintenanceReportRow,
@@ -58,6 +59,16 @@ export async function getFinanceSummary(): Promise<FinanceSummaryRow> {
   const supabase = await createClient();
   const { data } = await supabase.from('report_finance_summary').select('*').maybeSingle();
   return data ?? EMPTY_FINANCE_SUMMARY;
+}
+
+/** Monthly occupancy, billing, collections, and common expenses. */
+export async function getBusinessOverview(): Promise<BusinessOverviewRow[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('report_business_overview')
+    .select('*')
+    .order('billing_month');
+  return data ?? [];
 }
 
 /** Registered tenants (one per contract) and total occupants. */
@@ -165,18 +176,20 @@ export async function getMeterUsage(billingMonth?: IsoDate): Promise<MeterUsageR
 
 /**
  * Everything the dashboard needs, in parallel.
- * All five queries hit report_* views, so none of them can see T01.
+ * Every query hits a report_* view, so none of them can see T01.
  */
 export async function getDashboardData() {
-  const [rooms, finance, tenants, expiring, maintenance, lostCards, overdue] = await Promise.all([
-    getRoomSummary(),
-    getFinanceSummary(),
-    getTenantSummary(),
-    getExpiringContracts(60),
-    getOpenMaintenance(10),
-    getLostCards(),
-    getOverdueInvoices(10),
-  ]);
+  const [rooms, finance, overview, tenants, expiring, maintenance, lostCards, overdue] =
+    await Promise.all([
+      getRoomSummary(),
+      getFinanceSummary(),
+      getBusinessOverview(),
+      getTenantSummary(),
+      getExpiringContracts(60),
+      getOpenMaintenance(10),
+      getLostCards(),
+      getOverdueInvoices(10),
+    ]);
 
-  return { rooms, finance, tenants, expiring, maintenance, lostCards, overdue };
+  return { rooms, finance, overview, tenants, expiring, maintenance, lostCards, overdue };
 }

@@ -63,7 +63,7 @@ async function main() {
     console.log(
       count === 0
         ? '\nSchema already up to date.'
-        : `\nApplied ${count} migration${count === 1 ? '' : 's'}. Next: npm run seed`,
+        : `\nApplied ${count} migration${count === 1 ? '' : 's'}. Next: npm run seed -- --reset`,
     );
   } finally {
     await client.end();

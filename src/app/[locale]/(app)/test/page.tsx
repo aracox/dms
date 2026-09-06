@@ -80,7 +80,9 @@ export default async function TestModePage({ params }: { params: Promise<{ local
       {detail ? (
         <RoomDetail detail={detail} locale={locale as Locale} today={today} />
       ) : (
-        <EmptyState message={`${t('errors.roomNotFound')} (${T01_ROOM_NUMBER}) — npm run seed`} />
+        <EmptyState
+          message={`${t('errors.roomNotFound')} (${T01_ROOM_NUMBER}) — npm run seed -- --reset`}
+        />
       )}
     </>
   );

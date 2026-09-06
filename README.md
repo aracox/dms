@@ -1,7 +1,7 @@
 # Dormitory Management System
 
 Bilingual (ไทย / English) management system for a single dormitory in Thailand:
-**21 rooms across 3 floors, L-shaped building, 2 access cards per room.**
+**24 rooms across 3 floors, L-shaped building, 2 access cards per room.**
 
 Built for the dormitory owner. The main entry point is an interactive floor plan
 rather than a room list — you click the room you are thinking about.
@@ -17,7 +17,7 @@ next-intl · Zod. Deploys to Vercel free tier against Supabase free tier.
 npm install
 cp .env.example .env.local     # then fill in your Supabase values
 npm run db:push                # apply supabase/migrations/*.sql in order
-npm run seed                   # 21 real rooms + T01, tenants, invoices, payments
+npm run seed -- --reset        # replace demo data; preserve login profiles
 npm run dev                    # http://localhost:3000 -> redirects to /th
 ```
 
@@ -55,20 +55,20 @@ $env:PATH = "D:\Users\boitsaret\AppData\Local\Microsoft\WinGet\Packages\OpenJS.N
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Dev server on :3000 |
-| `npm run build` | Production build |
-| `npm run start` | Serve the production build |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | ESLint |
-| `npm run format` | Prettier |
-| `npm test` | Vitest, single run |
-| `npm run test:watch` | Vitest, watch mode |
-| `npm run db:push` | Apply pending migrations (tracked in `schema_migrations`) |
-| `npm run seed` | Apply `supabase/seed.sql` and verify test-data exclusion |
-| `npm run sql -- "select ..."` | Ad-hoc query for inspection. Bypasses RLS |
-| `npm run create-user -- <email> <role>` | Create an auth user and set its role |
+| Command                                 | What it does                                                                                     |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `npm run dev`                           | Dev server on :3000                                                                              |
+| `npm run build`                         | Production build                                                                                 |
+| `npm run start`                         | Serve the production build                                                                       |
+| `npm run typecheck`                     | `tsc --noEmit`                                                                                   |
+| `npm run lint`                          | ESLint                                                                                           |
+| `npm run format`                        | Prettier                                                                                         |
+| `npm test`                              | Vitest, single run                                                                               |
+| `npm run test:watch`                    | Vitest, watch mode                                                                               |
+| `npm run db:push`                       | Apply pending migrations (tracked in `schema_migrations`)                                        |
+| `npm run seed -- --reset`               | Replace demo business data and verify rent, occupancy, monthly coverage, and test-data exclusion |
+| `npm run sql -- "select ..."`           | Ad-hoc query for inspection. Bypasses RLS                                                        |
+| `npm run create-user -- <email> <role>` | Create an auth user and set its role                                                             |
 
 Run one test file, or one test by name:
 
@@ -81,13 +81,13 @@ npx vitest run -t "excludes the T01 payment from collected revenue"
 
 ## Environment variables
 
-| Variable | Where | Purpose |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | browser + server | Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | browser + server | Anon key; RLS applies |
-| `SUPABASE_SERVICE_ROLE_KEY` | **server only** | Bypasses RLS. Seeding and system jobs |
-| `SUPABASE_DB_URL` | scripts only | Direct Postgres URI for `db:push` / `seed` |
-| `NEXT_PUBLIC_SITE_URL` | optional | Public origin for auth redirects |
+| Variable                        | Where            | Purpose                                    |
+| ------------------------------- | ---------------- | ------------------------------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`      | browser + server | Project URL                                |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | browser + server | Anon key; RLS applies                      |
+| `SUPABASE_SERVICE_ROLE_KEY`     | **server only**  | Bypasses RLS. Seeding and system jobs      |
+| `SUPABASE_DB_URL`               | scripts only     | Direct Postgres URI for `db:push` / `seed` |
+| `NEXT_PUBLIC_SITE_URL`          | optional         | Public origin for auth redirects           |
 
 `src/lib/env.server.ts` imports `server-only`, so a client bundle that reaches
 the service-role key fails the build rather than shipping it.
@@ -110,7 +110,7 @@ supabase/migrations/
   0006_views.sql                     v_* operational, report_* reporting
   0007_rls.sql                       row level security for every table
   0008_storage.sql                   private storage buckets + policies
-supabase/seed.sql                    idempotent development data
+supabase/seed.sql                    destructive development/demo data reset
 ```
 
 Migrations are append-only. To change the schema, add a numbered file; never
@@ -130,8 +130,8 @@ A client cannot write any of those, by construction.
 
 ## The rule that shapes everything
 
-The database holds **22 rooms**: the 21 real ones plus a mock room `T01` used by
-Test Mode. Every figure the owner sees must come from the 21.
+The database holds **25 rooms**: 24 real rooms plus a mock room `T01` used by
+Test Mode. Every figure the owner sees must come from the 24 real rooms.
 
 Four independent defences:
 
@@ -147,9 +147,11 @@ Four independent defences:
    `queries.ts` for stray base-table access, and greps the migrations for the
    constraints and triggers above.
 
-With the seed applied, the dashboard reads 21 rooms and ฿46,760 collected. If
-`T01` leaked in it would read 22 rooms and ฿54,420 — which is exactly what that
-test checks.
+The seed creates monthly history from Jan 2025 through the current Bangkok
+month. All rooms and contracts use ฿3,500 rent, and monthly occupancy varies
+between 20 and 24 of the 24 real rooms (83.3%–100%). T01 has the same rent but
+remains excluded from every operational report; the test suite checks that
+exclusion explicitly.
 
 ---
 
@@ -191,7 +193,7 @@ Three Supabase clients, and the difference matters:
 
 - **One tenant per room.** A room may house several people, but exactly one is
   registered, and that person is also the contact. Additional occupants exist
-  only as `contracts.occupant_count`, which *includes* the main tenant. There is
+  only as `contracts.occupant_count`, which _includes_ the main tenant. There is
   deliberately no `roommates` table.
 - **Access cards belong to rooms**, never to people. Exactly two per room, named
   `<room>-A` and `<room>-B`; a trigger rejects a third, and every status change
@@ -222,14 +224,14 @@ the database — it describes the building, not the business.
 
 ## Roles
 
-| | Owner | Admin | Staff |
-| --- | --- | --- | --- |
-| Read everything | ✓ | ✓ | ✓ |
-| Record meter readings, payments, tickets | ✓ | ✓ | ✓ |
-| Rooms, tenants, contracts, cards, invoices | ✓ | ✓ | |
-| Correct meter readings | ✓ | ✓ | |
-| Delete payments | ✓ | | |
-| Change settings | ✓ | | |
+|                                            | Owner | Admin | Staff |
+| ------------------------------------------ | ----- | ----- | ----- |
+| Read everything                            | ✓     | ✓     | ✓     |
+| Record meter readings, payments, tickets   | ✓     | ✓     | ✓     |
+| Rooms, tenants, contracts, cards, invoices | ✓     | ✓     |       |
+| Correct meter readings                     | ✓     | ✓     |       |
+| Delete payments                            | ✓     |       |       |
+| Change settings                            | ✓     |       |       |
 
 Enforced by RLS in `0007_rls.sql`. `src/lib/permissions/` mirrors it so the UI
 can hide what a user cannot do — it is not the enforcement.

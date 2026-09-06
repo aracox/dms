@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
+import { BusinessOverviewCharts } from '@/components/dashboard/BusinessOverviewCharts';
 import { PageHeader } from '@/components/layout/AppShell';
 import { MAINTENANCE_TONE, PRIORITY_TONE } from '@/components/room/RoomMaintenanceTab';
 import { Badge } from '@/components/ui/Badge';
@@ -33,7 +34,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
 
   const t = await getTranslations();
   const typedLocale = locale as Locale;
-  const { rooms, finance, tenants, expiring, maintenance, lostCards, overdue } =
+  const { rooms, finance, overview, tenants, expiring, maintenance, lostCards, overdue } =
     await getDashboardData();
 
   const money = (amount: number) => formatTHB(amount, typedLocale);
@@ -109,6 +110,33 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
             icon={<TriangleAlert size={14} aria-hidden="true" />}
           />
         </div>
+      </section>
+
+      <section aria-labelledby="business-overview-heading" className="mb-6">
+        <h2
+          id="business-overview-heading"
+          className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase"
+        >
+          {t('dashboard.businessOverview')}
+        </h2>
+        <BusinessOverviewCharts
+          rows={overview}
+          locale={typedLocale}
+          labels={{
+            occupancyTrend: t('dashboard.occupancyTrend'),
+            occupancyHint: t('dashboard.occupancyTrendHint'),
+            average: t('dashboard.average'),
+            current: t('dashboard.current'),
+            financialTrend: t('dashboard.financialTrend'),
+            financialHint: t('dashboard.financialTrendHint'),
+            billed: t('dashboard.billed'),
+            collected: t('dashboard.collected'),
+            expenses: t('dashboard.commonExpenses'),
+            collectionRate: t('dashboard.collectionRate'),
+            netAfterExpenses: t('dashboard.netAfterExpenses'),
+            noData: t('dashboard.noOverviewData'),
+          }}
+        />
       </section>
 
       <section aria-labelledby="tenants-heading" className="mb-6">

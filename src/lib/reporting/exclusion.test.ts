@@ -19,7 +19,16 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { excludeTest, financeSummary, roomSummary, tenantSummary } from './aggregate';
-import { SEED_TODAY, seedContracts, seedInvoices, seedPayments, seedRooms } from './fixtures';
+import {
+  SEED_MONTHLY_RENT,
+  SEED_MONTHS,
+  SEED_START_MONTH,
+  SEED_TODAY,
+  seedContracts,
+  seedInvoices,
+  seedPayments,
+  seedRooms,
+} from './fixtures';
 
 const readRepoFile = (relative: string) =>
   readFileSync(fileURLToPath(new URL(relative, import.meta.url)), 'utf8');
@@ -47,22 +56,22 @@ describe('room reporting excludes T01', () => {
   });
 
   it('reports occupancy over the real rooms only', () => {
-    expect(summary.occupied).toBe(9);
-    expect(summary.vacant).toBe(13);
+    expect(summary.occupied).toBe(20);
+    expect(summary.vacant).toBe(2);
     expect(summary.reserved).toBe(1);
     expect(summary.maintenance).toBe(1);
     expect(summary.occupied + summary.vacant + summary.reserved + summary.maintenance).toBe(24);
   });
 
   it('computes the occupancy rate from 24', () => {
-    // 9 / 24 = 37.5%. Over 25 rooms it would read 36%.
-    expect(summary.occupancy_rate).toBeCloseTo(37.5, 2);
+    // 20 / 24 = 83.3%. T01 never contributes to either side.
+    expect(summary.occupancy_rate).toBeCloseTo(83.33, 2);
   });
 
   it('would report different numbers if T01 leaked in', () => {
     const leaked = roomSummary(seedRooms.map((room) => ({ ...room, is_test: false })));
     expect(leaked.total_rooms).toBe(25);
-    expect(leaked.occupied).toBe(10);
+    expect(leaked.occupied).toBe(21);
     expect(leaked.total_rooms).not.toBe(summary.total_rooms);
   });
 });
@@ -76,25 +85,20 @@ describe('financial reporting excludes T01', () => {
   });
 
   it('excludes the T01 rent from expected revenue', () => {
-    // 6,000 x 3 + 4,500 + 6,000 x 3 + 6,000 x 2 = 52,500. With T01: 59,000.
-    expect(finance.expected_rent).toBe(52_500);
+    expect(finance.expected_rent).toBe(70_000);
   });
 
   it('excludes the T01 invoice from the invoiced total', () => {
-    expect(finance.invoiced_total).toBe(63_140);
+    expect(finance.invoiced_total).toBe(86_600);
   });
 
   it('excludes the T01 payment from collected revenue', () => {
-    // The single most likely leak: T01 is paid in full, so a missing filter
-    // silently inflates collections by 7,660.
-    expect(finance.collected_this_month).toBe(46_760);
+    expect(finance.collected_this_month).toBe(80_160);
   });
 
   it('excludes T01 from outstanding and overdue', () => {
-    // 104: 2,320 + 203: 6,720 + 302: 7,340 = 16,380
-    expect(finance.outstanding).toBe(16_380);
-    // Only the invoices past 2026-08-26: 104 and 203.
-    expect(finance.overdue).toBe(9_040);
+    expect(finance.outstanding).toBe(6_440);
+    expect(finance.overdue).toBe(6_440);
   });
 
   it('would report different numbers if T01 leaked in', () => {
@@ -105,22 +109,69 @@ describe('financial reporting excludes T01', () => {
       today: SEED_TODAY,
     });
 
-    expect(leaked.expected_rent).toBe(59_000);
-    expect(leaked.invoiced_total).toBe(70_800);
-    expect(leaked.collected_this_month).toBe(54_420);
+    expect(leaked.expected_rent).toBe(73_500);
+    expect(leaked.invoiced_total).toBe(91_260);
+    expect(leaked.collected_this_month).toBe(84_820);
   });
 });
 
 describe('tenant reporting excludes T01', () => {
   const tenants = tenantSummary(seedContracts);
 
-  it('counts 9 registered tenants, not 10', () => {
-    expect(tenants.registered_tenants).toBe(9);
+  it('counts 20 registered tenants, not 21', () => {
+    expect(tenants.registered_tenants).toBe(20);
   });
 
   it('counts occupants across real rooms only', () => {
-    // 2+1+3+2+1+2+1+2+4 = 18. With the T01 contract it would be 20.
-    expect(tenants.total_occupants).toBe(18);
+    expect(tenants.total_occupants).toBe(41);
+  });
+});
+
+describe('seed data policy', () => {
+  it('starts on 1 Jan 2025 and covers every month through the fixture month', () => {
+    expect(SEED_MONTHS[0]).toBe(SEED_START_MONTH);
+    expect(SEED_MONTHS.at(-1)).toBe('2026-09-01');
+    expect(SEED_MONTHS).toHaveLength(21);
+  });
+
+  it('sets every room and contract rent to 3,500 THB', () => {
+    expect(seedRooms.every((room) => room.monthly_rent === SEED_MONTHLY_RENT)).toBe(true);
+    expect(seedContracts.every((contract) => contract.monthly_rent === SEED_MONTHLY_RENT)).toBe(
+      true,
+    );
+  });
+
+  it('keeps real-room occupancy at or above 80% in every seeded month', () => {
+    const realRoomCount = seedRooms.filter((room) => !room.is_test).length;
+    const monthlyOccupiedRooms = SEED_MONTHS.map(
+      (month) =>
+        seedContracts.filter(
+          (contract) =>
+            !contract.is_test && contract.start_date <= month && contract.end_date >= month,
+        ).length,
+    );
+
+    for (const [index, month] of SEED_MONTHS.entries()) {
+      const occupied = monthlyOccupiedRooms[index]!;
+      expect((occupied * 100) / realRoomCount, month).toBeGreaterThanOrEqual(80);
+    }
+
+    expect(new Set(monthlyOccupiedRooms).size).toBeGreaterThan(1);
+    expect(Math.min(...monthlyOccupiedRooms)).toBe(20);
+    expect(Math.max(...monthlyOccupiedRooms)).toBe(24);
+  });
+
+  it('has complete invoices for every occupied real room in every seeded month', () => {
+    for (const month of SEED_MONTHS) {
+      const occupied = seedContracts.filter(
+        (contract) =>
+          !contract.is_test && contract.start_date <= month && contract.end_date >= month,
+      ).length;
+      const invoices = seedInvoices.filter(
+        (invoice) => !invoice.is_test && invoice.billing_month === month,
+      );
+      expect(invoices, month).toHaveLength(occupied);
+    }
   });
 });
 
@@ -178,6 +229,7 @@ describe('the reporting layer cannot reach a base table', () => {
 
 describe('the SQL enforces exclusion, not just the TypeScript', () => {
   const views = readRepoFile('../../../supabase/migrations/0006_views.sql');
+  const businessOverview = readRepoFile('../../../supabase/migrations/0023_business_overview.sql');
   const tables = readRepoFile('../../../supabase/migrations/0002_core_tables.sql');
   const triggers = readRepoFile('../../../supabase/migrations/0005_functions_and_triggers.sql');
 
@@ -219,5 +271,10 @@ describe('the SQL enforces exclusion, not just the TypeScript', () => {
 
   it('blocks a test tenant from being contracted to a real room', () => {
     expect(triggers).toContain('enforce_contract_tenant_test_match');
+  });
+
+  it('filters test data from every business-overview source', () => {
+    expect(businessOverview).toContain('report_business_overview');
+    expect(businessOverview.match(/is_test = false/g)).toHaveLength(7);
   });
 });

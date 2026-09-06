@@ -1,20 +1,22 @@
 /**
- * The seed dataset, in TypeScript.
+ * Deterministic TypeScript mirror of supabase/seed.sql.
  *
- * supabase/seed.sql is the source of truth. This mirrors it so the exclusion
- * rule can be tested without a live database. If the seed changes, the numbers
- * asserted in exclusion.test.ts change with it -- which is the point: the test
- * fails and forces the two back into agreement.
- *
- * Includes T01 deliberately. A fixture set without the test room could not
- * prove that the test room is excluded.
+ * The SQL is authoritative. These fixtures keep the reporting and exclusion
+ * rules testable without connecting to a database.
  */
 
 import type { InvoiceStatus, RoomStatus } from '@/types/database';
-import type { IsoDate } from '@/lib/utils/date';
+import { addDays, type IsoDate } from '@/lib/utils/date';
 
-export const SEED_TODAY: IsoDate = '2026-08-26';
-export const SEED_BILLING_MONTH: IsoDate = '2026-08-01';
+export const SEED_START_MONTH: IsoDate = '2025-01-01';
+export const SEED_TODAY: IsoDate = '2026-09-06';
+export const SEED_BILLING_MONTH: IsoDate = '2026-09-01';
+export const SEED_MONTHLY_RENT = 3500;
+
+export const SEED_MONTHS: IsoDate[] = Array.from({ length: 21 }, (_, index) => {
+  const date = new Date(Date.UTC(2025, index, 1));
+  return date.toISOString().slice(0, 10) as IsoDate;
+});
 
 export interface SeedRoom {
   room_number: string;
@@ -24,35 +26,75 @@ export interface SeedRoom {
   monthly_rent: number;
 }
 
-/** 24 real rooms (21 dorm rooms across floors 1-3 + 3 houses on floor 1), plus T01 on floor 0. */
+const room = (
+  roomNumber: string,
+  floor: number,
+  roomStatus: RoomStatus = 'occupied',
+): SeedRoom => ({
+  room_number: roomNumber,
+  floor,
+  is_test: false,
+  room_status: roomStatus,
+  monthly_rent: SEED_MONTHLY_RENT,
+});
+
+/** 24 real rooms (21 dorm rooms + 3 houses), plus isolated T01. */
 export const seedRooms: SeedRoom[] = [
-  { room_number: '101', floor: 1, is_test: false, room_status: 'occupied', monthly_rent: 6000 },
-  { room_number: '102', floor: 1, is_test: false, room_status: 'occupied', monthly_rent: 6000 },
-  { room_number: '103', floor: 1, is_test: false, room_status: 'occupied', monthly_rent: 6000 },
-  { room_number: '104', floor: 1, is_test: false, room_status: 'occupied', monthly_rent: 4500 },
-  { room_number: '105', floor: 1, is_test: false, room_status: 'maintenance', monthly_rent: 4500 },
-  { room_number: '106', floor: 1, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
-  { room_number: '107', floor: 1, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
-  { room_number: '201', floor: 2, is_test: false, room_status: 'occupied', monthly_rent: 6000 },
-  { room_number: '202', floor: 2, is_test: false, room_status: 'occupied', monthly_rent: 6000 },
-  { room_number: '203', floor: 2, is_test: false, room_status: 'occupied', monthly_rent: 6000 },
-  { room_number: '204', floor: 2, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
-  { room_number: '205', floor: 2, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
-  { room_number: '206', floor: 2, is_test: false, room_status: 'reserved', monthly_rent: 4500 },
-  { room_number: '207', floor: 2, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
-  { room_number: '301', floor: 3, is_test: false, room_status: 'occupied', monthly_rent: 6000 },
-  { room_number: '302', floor: 3, is_test: false, room_status: 'occupied', monthly_rent: 6000 },
-  { room_number: '303', floor: 3, is_test: false, room_status: 'vacant', monthly_rent: 6000 },
-  { room_number: '304', floor: 3, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
-  { room_number: '305', floor: 3, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
-  { room_number: '306', floor: 3, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
-  { room_number: '307', floor: 3, is_test: false, room_status: 'vacant', monthly_rent: 4500 },
-  // Houses have no floor of their own; placed on floor 1 by convention.
-  { room_number: 'H101', floor: 1, is_test: false, room_status: 'vacant', monthly_rent: 8500 },
-  { room_number: 'H102', floor: 1, is_test: false, room_status: 'vacant', monthly_rent: 8500 },
-  { room_number: 'H103', floor: 1, is_test: false, room_status: 'vacant', monthly_rent: 8500 },
-  // The mock room. Floor 0, never on a production floor plan.
-  { room_number: 'T01', floor: 0, is_test: true, room_status: 'occupied', monthly_rent: 6500 },
+  room('101', 1),
+  room('102', 1),
+  room('103', 1),
+  room('104', 1),
+  room('105', 1),
+  room('106', 1),
+  room('107', 1, 'maintenance'),
+  room('201', 2),
+  room('202', 2),
+  room('203', 2),
+  room('204', 2),
+  room('205', 2),
+  room('206', 2),
+  room('207', 2, 'vacant'),
+  room('301', 3),
+  room('302', 3),
+  room('303', 3),
+  room('304', 3),
+  room('305', 3),
+  room('306', 3),
+  room('307', 3, 'vacant'),
+  room('H101', 1),
+  room('H102', 1),
+  room('H103', 1, 'reserved'),
+  {
+    room_number: 'T01',
+    floor: 0,
+    is_test: true,
+    room_status: 'occupied',
+    monthly_rent: SEED_MONTHLY_RENT,
+  },
+];
+
+export const OCCUPIED_REAL_ROOM_NUMBERS = seedRooms
+  .filter((candidate) => !candidate.is_test && candidate.room_status === 'occupied')
+  .map((candidate) => candidate.room_number);
+
+const HISTORICAL_STAYS = [
+  ['107', '107:2025-02', '2025-02-01', '2025-09-30'],
+  ['107', '107:2025-11', '2025-11-01', '2026-05-31'],
+  ['107', '107:2026-07', '2026-07-01', '2026-08-31'],
+  ['207', '207:2025-03', '2025-03-01', '2025-08-31'],
+  ['207', '207:2025-12', '2025-12-01', '2026-04-30'],
+  ['307', '307:2025-04', '2025-04-01', '2025-07-31'],
+  ['307', '307:2026-01', '2026-01-01', '2026-03-31'],
+  ['H103', 'H103:2025-05', '2025-05-01', '2025-06-30'],
+  ['H103', 'H103:2026-02', '2026-02-01', '2026-02-28'],
+] as const satisfies ReadonlyArray<readonly [string, string, IsoDate, IsoDate]>;
+
+const BILLABLE_REAL_ROOM_NUMBERS = [
+  ...OCCUPIED_REAL_ROOM_NUMBERS,
+  ...seedRooms
+    .filter((candidate) => !candidate.is_test && candidate.room_status !== 'occupied')
+    .map((candidate) => candidate.room_number)
+    .sort(),
 ];
 
 export interface SeedContract {
@@ -62,99 +104,40 @@ export interface SeedContract {
   status: string;
   monthly_rent: number;
   occupant_count: number;
+  start_date: IsoDate;
   end_date: IsoDate;
 }
 
 export const seedContracts: SeedContract[] = [
-  {
-    room_number: '101',
-    tenant_id: 't-101',
+  ...OCCUPIED_REAL_ROOM_NUMBERS.map((roomNumber, index) => ({
+    room_number: roomNumber,
+    tenant_id: `t-${roomNumber}`,
     is_test: false,
     status: 'active',
-    monthly_rent: 6000,
-    occupant_count: 2,
-    end_date: '2026-12-31',
-  },
-  {
-    room_number: '102',
-    tenant_id: 't-102',
+    monthly_rent: SEED_MONTHLY_RENT,
+    occupant_count: 1 + ((index + 1) % 3),
+    start_date: SEED_START_MONTH,
+    end_date: '2027-12-31' as IsoDate,
+  })),
+  ...HISTORICAL_STAYS.map(([roomNumber, stayKey, startDate, endDate], index) => ({
+    room_number: roomNumber,
+    tenant_id: `t-${stayKey}`,
     is_test: false,
-    status: 'active',
-    monthly_rent: 6000,
-    occupant_count: 1,
-    end_date: '2027-01-31',
-  },
-  {
-    room_number: '103',
-    tenant_id: 't-103',
-    is_test: false,
-    status: 'active',
-    monthly_rent: 6000,
-    occupant_count: 3,
-    end_date: '2026-12-31',
-  },
-  {
-    room_number: '104',
-    tenant_id: 't-104',
-    is_test: false,
-    status: 'active',
-    monthly_rent: 4500,
-    occupant_count: 2,
-    end_date: '2027-02-28',
-  },
-  {
-    room_number: '201',
-    tenant_id: 't-201',
-    is_test: false,
-    status: 'active',
-    monthly_rent: 6000,
-    occupant_count: 1,
-    end_date: '2026-12-31',
-  },
-  {
-    room_number: '202',
-    tenant_id: 't-202',
-    is_test: false,
-    status: 'active',
-    monthly_rent: 6000,
-    occupant_count: 2,
-    end_date: '2027-03-31',
-  },
-  {
-    room_number: '203',
-    tenant_id: 't-203',
-    is_test: false,
-    status: 'active',
-    monthly_rent: 6000,
-    occupant_count: 1,
-    end_date: '2026-09-15',
-  },
-  {
-    room_number: '301',
-    tenant_id: 't-301',
-    is_test: false,
-    status: 'active',
-    monthly_rent: 6000,
-    occupant_count: 2,
-    end_date: '2026-12-31',
-  },
-  {
-    room_number: '302',
-    tenant_id: 't-302',
-    is_test: false,
-    status: 'active',
-    monthly_rent: 6000,
-    occupant_count: 4,
-    end_date: '2026-09-30',
-  },
+    status: 'expired',
+    monthly_rent: SEED_MONTHLY_RENT,
+    occupant_count: 1 + ((index + 1) % 3),
+    start_date: startDate,
+    end_date: endDate,
+  })),
   {
     room_number: 'T01',
     tenant_id: 't-T01',
     is_test: true,
     status: 'active',
-    monthly_rent: 6500,
+    monthly_rent: SEED_MONTHLY_RENT,
     occupant_count: 2,
-    end_date: '2026-12-31',
+    start_date: SEED_START_MONTH,
+    end_date: '2027-12-31',
   },
 ];
 
@@ -168,101 +151,55 @@ export interface SeedInvoice {
   paid_amount: number;
 }
 
-/**
- * August 2026 invoices. Totals are rent + electricity + water, matching the
- * meter readings in the seed.
- */
+function realInvoiceTotal(roomRank: number) {
+  const electricityUsage = 80 + (roomRank % 5) * 5;
+  const waterUsage = 4 + (roomRank % 4);
+  return SEED_MONTHLY_RENT + electricityUsage * 8 + waterUsage * 20;
+}
+
 export const seedInvoices: SeedInvoice[] = [
-  {
-    room_number: '101',
-    is_test: false,
-    billing_month: '2026-08-01',
-    due_date: '2026-08-05',
-    status: 'paid',
-    total: 7360,
-    paid_amount: 7360,
-  },
-  {
-    room_number: '102',
-    is_test: false,
-    billing_month: '2026-08-01',
-    due_date: '2026-08-05',
-    status: 'paid',
-    total: 7000,
-    paid_amount: 7000,
-  },
-  {
-    room_number: '103',
-    is_test: false,
-    billing_month: '2026-08-01',
-    due_date: '2026-08-05',
-    status: 'paid',
-    total: 8000,
-    paid_amount: 8000,
-  },
-  {
-    room_number: '104',
-    is_test: false,
-    billing_month: '2026-08-01',
-    due_date: '2026-08-05',
-    status: 'partially_paid',
-    total: 5320,
-    paid_amount: 3000,
-  },
-  {
-    room_number: '201',
-    is_test: false,
-    billing_month: '2026-08-01',
-    due_date: '2026-08-05',
-    status: 'paid',
-    total: 7000,
-    paid_amount: 7000,
-  },
-  {
-    room_number: '202',
-    is_test: false,
-    billing_month: '2026-08-01',
-    due_date: '2026-08-05',
-    status: 'paid',
-    total: 7260,
-    paid_amount: 7260,
-  },
-  {
-    room_number: '203',
-    is_test: false,
-    billing_month: '2026-08-01',
-    due_date: '2026-08-05',
-    status: 'overdue',
-    total: 6720,
-    paid_amount: 0,
-  },
-  {
-    room_number: '301',
-    is_test: false,
-    billing_month: '2026-08-01',
-    due_date: '2026-08-05',
-    status: 'paid',
-    total: 7140,
-    paid_amount: 7140,
-  },
-  {
-    room_number: '302',
-    is_test: false,
-    billing_month: '2026-08-01',
-    due_date: '2026-08-28',
-    status: 'issued',
-    total: 7340,
-    paid_amount: 0,
-  },
-  // T01: rent 6,500 + electricity 1,040 + water 120 = 7,660, paid in full.
+  ...SEED_MONTHS.flatMap((billingMonth) => {
+    const activeContracts = seedContracts
+      .filter(
+        (contract) =>
+          !contract.is_test &&
+          contract.start_date <= billingMonth &&
+          contract.end_date >= billingMonth,
+      )
+      .sort((left, right) => left.room_number.localeCompare(right.room_number));
+
+    return activeContracts.map((contract, index) => {
+      const roomNumber = contract.room_number;
+      const roomRank = BILLABLE_REAL_ROOM_NUMBERS.indexOf(roomNumber) + 1;
+      const total = realInvoiceTotal(roomRank);
+      const isCurrent = billingMonth === SEED_BILLING_MONTH;
+      const invoiceRank = index + 1;
+      const paidAmount = isCurrent && invoiceRank === 19 ? total / 2 : total;
+
+      return {
+        room_number: roomNumber,
+        is_test: false,
+        billing_month: billingMonth,
+        due_date: addDays(billingMonth, 4),
+        status:
+          isCurrent && invoiceRank === 20
+            ? ('overdue' as const)
+            : isCurrent && invoiceRank === 19
+              ? ('partially_paid' as const)
+              : ('paid' as const),
+        total,
+        paid_amount: isCurrent && invoiceRank === 20 ? 0 : paidAmount,
+      };
+    });
+  }),
   {
     room_number: 'T01',
     is_test: true,
-    billing_month: '2026-08-01',
-    due_date: '2026-08-28',
+    billing_month: SEED_BILLING_MONTH,
+    due_date: addDays(SEED_BILLING_MONTH, 4),
     status: 'paid',
-    total: 7660,
-    paid_amount: 7660,
+    total: 4660,
+    paid_amount: 4660,
   },
 ];
 
@@ -275,60 +212,28 @@ export interface SeedPayment {
 }
 
 export const seedPayments: SeedPayment[] = [
-  {
-    room_number: '101',
-    is_test: false,
-    payment_date: '2026-08-03',
-    amount: 7360,
-    status: 'confirmed',
-  },
-  {
-    room_number: '102',
-    is_test: false,
-    payment_date: '2026-08-04',
-    amount: 7000,
-    status: 'confirmed',
-  },
-  {
-    room_number: '103',
-    is_test: false,
-    payment_date: '2026-08-02',
-    amount: 8000,
-    status: 'confirmed',
-  },
-  {
-    room_number: '104',
-    is_test: false,
-    payment_date: '2026-08-05',
-    amount: 3000,
-    status: 'confirmed',
-  },
-  {
-    room_number: '201',
-    is_test: false,
-    payment_date: '2026-08-05',
-    amount: 7000,
-    status: 'confirmed',
-  },
-  {
-    room_number: '202',
-    is_test: false,
-    payment_date: '2026-08-01',
-    amount: 7260,
-    status: 'confirmed',
-  },
-  {
-    room_number: '301',
-    is_test: false,
-    payment_date: '2026-08-04',
-    amount: 7140,
-    status: 'confirmed',
-  },
+  ...seedInvoices
+    .filter((invoice) => !invoice.is_test && invoice.paid_amount > 0)
+    .map((invoice) => {
+      const roomRank =
+        seedInvoices
+          .filter(
+            (candidate) => !candidate.is_test && candidate.billing_month === invoice.billing_month,
+          )
+          .findIndex((candidate) => candidate.room_number === invoice.room_number) + 1;
+      return {
+        room_number: invoice.room_number,
+        is_test: false,
+        payment_date: addDays(invoice.billing_month, 1 + (roomRank % 4)),
+        amount: invoice.paid_amount,
+        status: 'confirmed',
+      };
+    }),
   {
     room_number: 'T01',
     is_test: true,
-    payment_date: '2026-08-05',
-    amount: 7660,
+    payment_date: SEED_TODAY,
+    amount: 4660,
     status: 'confirmed',
   },
 ];

@@ -16,8 +16,8 @@ describe('T01 defaults', () => {
     expect(T01_DEFAULTS.tenantName).toBe('Test Tenant');
     expect(T01_DEFAULTS.tenantPhone).toBe('0800000000');
     expect(T01_DEFAULTS.occupantCount).toBe(2);
-    expect(T01_DEFAULTS.monthlyRent).toBe(6500);
-    expect(T01_DEFAULTS.deposit).toBe(13000);
+    expect(T01_DEFAULTS.monthlyRent).toBe(3500);
+    expect(T01_DEFAULTS.deposit).toBe(3500);
   });
 
   it('sit on floor 0, off every production floor plan', () => {
@@ -49,8 +49,8 @@ describe('T01 defaults', () => {
       }),
     );
 
-    // Rent 6,500 + Electricity 1,040 + Water 120 = 7,660 THB
-    expect(totals.total).toBe(7660);
+    // Rent 3,500 + Electricity 1,040 + Water 120 = 4,660 THB
+    expect(totals.total).toBe(4660);
   });
 });
 
