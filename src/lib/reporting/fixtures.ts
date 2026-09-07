@@ -5,7 +5,7 @@
  * rules testable without connecting to a database.
  */
 
-import type { InvoiceStatus, RoomStatus } from '@/types/database';
+import type { InvoiceStatus, RoomStatus, RoomType } from '@/types/database';
 import { addDays, type IsoDate } from '@/lib/utils/date';
 
 export const SEED_START_MONTH: IsoDate = '2025-01-01';
@@ -21,10 +21,15 @@ export const SEED_MONTHS: IsoDate[] = Array.from({ length: 21 }, (_, index) => {
 export interface SeedRoom {
   room_number: string;
   floor: number;
+  room_type: RoomType;
   is_test: boolean;
   room_status: RoomStatus;
   monthly_rent: number;
 }
+
+/** Mirrors seed.sql: only the H-prefixed units are room_type 'house'. */
+const seedRoomType = (roomNumber: string): RoomType =>
+  roomNumber.startsWith('H') ? 'house' : 'standard';
 
 const room = (
   roomNumber: string,
@@ -33,6 +38,7 @@ const room = (
 ): SeedRoom => ({
   room_number: roomNumber,
   floor,
+  room_type: seedRoomType(roomNumber),
   is_test: false,
   room_status: roomStatus,
   monthly_rent: SEED_MONTHLY_RENT,
@@ -67,11 +73,22 @@ export const seedRooms: SeedRoom[] = [
   {
     room_number: 'T01',
     floor: 0,
+    room_type: 'standard',
     is_test: true,
     room_status: 'occupied',
     monthly_rent: SEED_MONTHLY_RENT,
   },
 ];
+
+/**
+ * Attaches each row's room type, the way every per-segment report view joins
+ * `rooms` to reach `room_property_segment(r.room_type)`.
+ */
+export function withRoomType<T extends { room_number: string }>(
+  rows: readonly T[],
+): (T & { room_type: RoomType })[] {
+  return rows.map((row) => ({ ...row, room_type: seedRoomType(row.room_number) }));
+}
 
 export const OCCUPIED_REAL_ROOM_NUMBERS = seedRooms
   .filter((candidate) => !candidate.is_test && candidate.room_status === 'occupied')

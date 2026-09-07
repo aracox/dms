@@ -11,6 +11,8 @@ import {
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { BusinessOverviewCharts } from '@/components/dashboard/BusinessOverviewCharts';
+import { PropertySegmentPanels } from '@/components/dashboard/PropertySegmentPanels';
+import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
 import { PageHeader } from '@/components/layout/AppShell';
 import { MAINTENANCE_TONE, PRIORITY_TONE } from '@/components/room/RoomMaintenanceTab';
 import { Badge } from '@/components/ui/Badge';
@@ -34,8 +36,20 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
 
   const t = await getTranslations();
   const typedLocale = locale as Locale;
-  const { rooms, finance, overview, tenants, expiring, maintenance, lostCards, overdue } =
-    await getDashboardData();
+  const {
+    rooms,
+    roomsBySegment,
+    finance,
+    financeBySegment,
+    overview,
+    overviewBySegment,
+    tenants,
+    tenantsBySegment,
+    expiring,
+    maintenance,
+    lostCards,
+    overdue,
+  } = await getDashboardData();
 
   const money = (amount: number) => formatTHB(amount, typedLocale);
 
@@ -43,7 +57,11 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
     <>
       <PageHeader
         title={t('dashboard.title')}
-        description={t('dashboard.subtitle', { count: rooms.total_rooms })}
+        description={t('dashboard.subtitle', {
+          count: rooms.total_rooms,
+          dorm: roomsBySegment.dorm.total_rooms,
+          house: roomsBySegment.house.total_rooms,
+        })}
       />
 
       <section aria-labelledby="rooms-heading" className="mb-6">
@@ -112,6 +130,21 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         </div>
       </section>
 
+      <section aria-labelledby="segments-heading" className="mb-6">
+        <h2
+          id="segments-heading"
+          className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase"
+        >
+          {t('segment.title')}
+        </h2>
+        <PropertySegmentPanels
+          rooms={roomsBySegment}
+          finance={financeBySegment}
+          tenants={tenantsBySegment}
+          locale={typedLocale}
+        />
+      </section>
+
       <section aria-labelledby="business-overview-heading" className="mb-6">
         <h2
           id="business-overview-heading"
@@ -121,6 +154,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         </h2>
         <BusinessOverviewCharts
           rows={overview}
+          segmentRows={overviewBySegment}
           locale={typedLocale}
           labels={{
             occupancyTrend: t('dashboard.occupancyTrend'),
@@ -135,6 +169,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
             collectionRate: t('dashboard.collectionRate'),
             netAfterExpenses: t('dashboard.netAfterExpenses'),
             noData: t('dashboard.noOverviewData'),
+            wholeProperty: t('segment.wholeProperty'),
+            buildingWide: t('segment.buildingWide'),
+            segments: { dorm: t('segment.dorm'), house: t('segment.house') },
           }}
         />
       </section>
@@ -192,6 +229,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               head={
                 <tr>
                   <TH>{t('room.roomNumber')}</TH>
+                  <TH>{t('segment.column')}</TH>
                   <TH>{t('tenant.title')}</TH>
                   <TH>{t('billing.dueDate')}</TH>
                   <TH numeric>{t('billing.outstanding')}</TH>
@@ -207,6 +245,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                     >
                       {invoice.room_number}
                     </Link>
+                  </TD>
+                  <TD>
+                    <SegmentBadge segment={invoice.property_segment} />
                   </TD>
                   <TD>{invoice.tenant_name ?? t('common.notAvailable')}</TD>
                   <TD>
@@ -235,6 +276,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               head={
                 <tr>
                   <TH>{t('room.roomNumber')}</TH>
+                  <TH>{t('segment.column')}</TH>
                   <TH>{t('tenant.title')}</TH>
                   <TH>{t('contract.endDate')}</TH>
                   <TH numeric>{t('room.monthlyRent')}</TH>
@@ -250,6 +292,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                     >
                       {contract.room_number}
                     </Link>
+                  </TD>
+                  <TD>
+                    <SegmentBadge segment={contract.property_segment} />
                   </TD>
                   <TD>{contract.tenant_name}</TD>
                   <TD>
@@ -290,6 +335,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               head={
                 <tr>
                   <TH>{t('room.roomNumber')}</TH>
+                  <TH>{t('segment.column')}</TH>
                   <TH>{t('maintenance.category')}</TH>
                   <TH>{t('maintenance.priority')}</TH>
                   <TH>{t('common.status')}</TH>
@@ -299,6 +345,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               {maintenance.map((ticket) => (
                 <tr key={ticket.ticket_id}>
                   <TD>{ticket.room_number ?? t('maintenance.commonArea')}</TD>
+                  <TD>
+                    <SegmentBadge segment={ticket.property_segment} />
+                  </TD>
                   <TD>{ticket.category}</TD>
                   <TD>
                     <Badge tone={PRIORITY_TONE[ticket.priority]}>
@@ -334,6 +383,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               head={
                 <tr>
                   <TH>{t('room.roomNumber')}</TH>
+                  <TH>{t('segment.column')}</TH>
                   <TH>{t('cards.cardNumber')}</TH>
                   <TH>{t('cards.cardUid')}</TH>
                   <TH numeric>{t('cards.replacementFee')}</TH>
@@ -343,6 +393,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               {lostCards.map((card) => (
                 <tr key={card.card_id}>
                   <TD>{card.room_number}</TD>
+                  <TD>
+                    <SegmentBadge segment={card.property_segment} />
+                  </TD>
                   <TD>{card.card_number}</TD>
                   <TD className="text-ink-muted text-caption font-mono">{card.card_uid ?? '-'}</TD>
                   <TD numeric>{money(card.replacement_fee)}</TD>

@@ -23,6 +23,12 @@ export type RoomStatus = 'vacant' | 'occupied' | 'reserved' | 'maintenance';
 
 export type RoomType = 'standard' | 'air_conditioned' | 'studio' | 'house';
 
+/**
+ * หอพัก (dorm rooms) vs บ้านพัก (standalone houses). Derived from room_type by
+ * `room_property_segment()` in migration 0024, never stored on a row.
+ */
+export type PropertySegment = 'dorm' | 'house';
+
 export type ContractStatus = 'draft' | 'active' | 'expired' | 'terminated';
 
 export type CardStatus = 'available' | 'active' | 'lost' | 'disabled' | 'damaged' | 'returned';
@@ -333,6 +339,11 @@ export type RoomBoardRow = {
   total_card_count: number;
 };
 
+/** report_rooms. v_room_board minus test rooms, plus the derived segment (0024). */
+export type ReportRoomRow = RoomBoardRow & {
+  property_segment: PropertySegment;
+};
+
 export type RoomSummaryRow = {
   total_rooms: number;
   occupied: number;
@@ -363,6 +374,21 @@ export type BusinessOverviewRow = {
   collection_rate: number;
 };
 
+/**
+ * report_business_overview_by_segment. No expense or net column: common
+ * expenses are building-wide and are not attributable to one segment.
+ */
+export type BusinessOverviewBySegmentRow = {
+  billing_month: string;
+  segment: PropertySegment;
+  occupied_rooms: number;
+  total_rooms: number;
+  occupancy_rate: number;
+  billed_amount: number;
+  collected_amount: number;
+  collection_rate: number;
+};
+
 export type ContractExpiringRow = {
   contract_id: string;
   room_id: string;
@@ -375,6 +401,7 @@ export type ContractExpiringRow = {
   monthly_rent: number;
   occupant_count: number;
   days_remaining: number;
+  property_segment: PropertySegment;
 };
 
 export type OutstandingRow = {
@@ -391,6 +418,7 @@ export type OutstandingRow = {
   paid_amount: number;
   outstanding: number;
   days_overdue: number;
+  property_segment: PropertySegment;
 };
 
 export type PaymentCollectionRow = {
@@ -426,6 +454,8 @@ export type MaintenanceReportRow = {
   technician: string | null;
   created_at: string;
   completed_at: string | null;
+  /** Null for a common-area ticket, which belongs to no segment. */
+  property_segment: PropertySegment | null;
 };
 
 export type AccessCardReportRow = {
@@ -439,11 +469,26 @@ export type AccessCardReportRow = {
   issued_date: string | null;
   returned_date: string | null;
   replacement_fee: number;
+  property_segment: PropertySegment;
 };
 
 export type TenantSummaryRow = {
   registered_tenants: number;
   total_occupants: number;
+};
+
+// --- Per-segment reporting views (0024) ------------------------------------
+
+export type RoomSummaryBySegmentRow = RoomSummaryRow & {
+  segment: PropertySegment;
+};
+
+export type FinanceSummaryBySegmentRow = FinanceSummaryRow & {
+  segment: PropertySegment;
+};
+
+export type TenantSummaryBySegmentRow = TenantSummaryRow & {
+  segment: PropertySegment;
 };
 
 // --- Client schema ---------------------------------------------------------
@@ -600,10 +645,13 @@ export type Database = {
     };
     Views: {
       v_room_board: ViewDef<RoomBoardRow>;
-      report_rooms: ViewDef<RoomBoardRow>;
+      report_rooms: ViewDef<ReportRoomRow>;
       report_room_summary: ViewDef<RoomSummaryRow>;
+      report_room_summary_by_segment: ViewDef<RoomSummaryBySegmentRow>;
       report_finance_summary: ViewDef<FinanceSummaryRow>;
+      report_finance_summary_by_segment: ViewDef<FinanceSummaryBySegmentRow>;
       report_business_overview: ViewDef<BusinessOverviewRow>;
+      report_business_overview_by_segment: ViewDef<BusinessOverviewBySegmentRow>;
       report_contracts_expiring: ViewDef<ContractExpiringRow>;
       report_outstanding: ViewDef<OutstandingRow>;
       report_payment_collection: ViewDef<PaymentCollectionRow>;
@@ -611,6 +659,7 @@ export type Database = {
       report_maintenance: ViewDef<MaintenanceReportRow>;
       report_access_cards: ViewDef<AccessCardReportRow>;
       report_tenant_summary: ViewDef<TenantSummaryRow>;
+      report_tenant_summary_by_segment: ViewDef<TenantSummaryBySegmentRow>;
     };
     Functions: {
       bangkok_today: { Args: Record<string, never>; Returns: string };

@@ -125,6 +125,18 @@
     "studio": "Studio",
     "house": "House"
   },
+  "segment": {
+    "title": "By property type",
+    "column": "Type",
+    "dorm": "Dorm rooms",
+    "house": "Houses",
+    "wholeProperty": "Whole property",
+    "buildingWide": "building-wide",
+    "units": {
+      "dorm": "{count} rooms",
+      "house": "{count} houses"
+    }
+  },
   "contractStatus": {
     "draft": "Draft",
     "active": "Active",
@@ -194,7 +206,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Across {count} real rooms. Test data is excluded.",
+    "subtitle": "Across {count} real units — {dorm} dorm rooms and {house} houses. Test data is excluded.",
     "rooms": "Rooms",
     "totalRooms": "Total rooms",
     "occupied": "Occupied",

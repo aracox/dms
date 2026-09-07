@@ -230,13 +230,16 @@ describe('the reporting layer cannot reach a base table', () => {
 describe('the SQL enforces exclusion, not just the TypeScript', () => {
   const views = readRepoFile('../../../supabase/migrations/0006_views.sql');
   const businessOverview = readRepoFile('../../../supabase/migrations/0023_business_overview.sql');
+  const segments = readRepoFile('../../../supabase/migrations/0024_property_segments.sql');
   const tables = readRepoFile('../../../supabase/migrations/0002_core_tables.sql');
   const triggers = readRepoFile('../../../supabase/migrations/0005_functions_and_triggers.sql');
 
-  it('filters is_test in every report_ view definition', () => {
-    const definitions = views.split(/create view /).filter((chunk) => chunk.startsWith('report_'));
+  const assertReportViewsFilterTestData = (migration: string, atLeast: number) => {
+    const definitions = migration
+      .split(/create (?:or replace )?view /)
+      .filter((chunk) => chunk.startsWith('report_'));
 
-    expect(definitions.length).toBeGreaterThanOrEqual(9);
+    expect(definitions.length).toBeGreaterThanOrEqual(atLeast);
     for (const definition of definitions) {
       const name = definition.slice(0, definition.indexOf(' '));
       // Either it filters directly, or it builds on a view that already does.
@@ -247,6 +250,14 @@ describe('the SQL enforces exclusion, not just the TypeScript', () => {
         `view ${name} neither filters is_test nor derives from a report_ view`,
       ).toBe(true);
     }
+  };
+
+  it('filters is_test in every report_ view definition', () => {
+    assertReportViewsFilterTestData(views, 9);
+  });
+
+  it('filters is_test in every per-segment report_ view', () => {
+    assertReportViewsFilterTestData(segments, 9);
   });
 
   it('constrains test rooms to floor 0 and real rooms to floors 1-3', () => {
@@ -276,5 +287,10 @@ describe('the SQL enforces exclusion, not just the TypeScript', () => {
   it('filters test data from every business-overview source', () => {
     expect(businessOverview).toContain('report_business_overview');
     expect(businessOverview.match(/is_test = false/g)).toHaveLength(7);
+  });
+
+  it('derives the property segment from room_type rather than storing it', () => {
+    expect(segments).toContain('create function room_property_segment(p_room_type room_type)');
+    expect(segments).not.toMatch(/alter table rooms add column .*segment/);
   });
 });
