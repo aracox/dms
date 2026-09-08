@@ -448,7 +448,8 @@
     "receipt": "Receipt",
     "history": "Payment history",
     "partialPayment": "Partial payment",
-    "maxAllowed": "Maximum {amount}"
+    "maxAllowed": "Maximum {amount}",
+    "collectionBuildingWide": "Collection by method is building-wide and is not split by property segment."
   },
   "maintenance": {
     "title": "Maintenance",
@@ -461,7 +462,8 @@
     "reportedAt": "Reported on",
     "completedAt": "Completed on",
     "commonArea": "Common area",
-    "newTicket": "New ticket"
+    "newTicket": "New ticket",
+    "commonAreaExcluded": "Excludes {count} common-area tickets, which belong to neither segment."
   },
   "expenses": {
     "title": "Common Expenses",

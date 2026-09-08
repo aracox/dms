@@ -1,5 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
+import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
+import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
 import { INVOICE_TONE } from '@/components/room/RoomBillingTab';
 import { Badge } from '@/components/ui/Badge';
@@ -11,22 +13,40 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
 import { getOutstandingInvoices, getPaymentCollection } from '@/lib/reporting/queries';
+import { filterByView, parseSegmentView } from '@/lib/reporting/segments';
 import { formatBillingMonth, formatDate } from '@/lib/utils/date';
 
-export default async function PaymentsPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function PaymentsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ segment?: string | string[] }>;
+}) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const t = await getTranslations();
   const typedLocale = locale as Locale;
-  const [outstanding, collection] = await Promise.all([
+  const view = parseSegmentView((await searchParams).segment);
+  const [allOutstanding, collection] = await Promise.all([
     getOutstandingInvoices(),
     getPaymentCollection(12),
   ]);
 
+  // report_outstanding carries property_segment, so the invoice list filters.
+  // report_payment_collection aggregates payments by month and method with no
+  // room join, so it has no segment to filter on and stays whole-property --
+  // splitting it would need a new view, not a change here.
+  const outstanding = filterByView(view, allOutstanding);
+
   return (
     <>
-      <PageHeader title={t('payments.title')} description={t('reports.subtitle')} />
+      <PageHeader
+        title={t('payments.title')}
+        description={t('reports.subtitle')}
+        action={<SegmentSwitcher current={view} pathname="/payments" />}
+      />
 
       <div className="mb-4">
         <ComingSoon>
@@ -47,6 +67,7 @@ export default async function PaymentsPage({ params }: { params: Promise<{ local
                 <tr>
                   <TH>{t('billing.invoiceNumber')}</TH>
                   <TH>{t('room.roomNumber')}</TH>
+                  <TH>{t('segment.column')}</TH>
                   <TH>{t('tenant.title')}</TH>
                   <TH>{t('billing.dueDate')}</TH>
                   <TH>{t('common.status')}</TH>
@@ -66,6 +87,9 @@ export default async function PaymentsPage({ params }: { params: Promise<{ local
                     >
                       {invoice.room_number}
                     </Link>
+                  </TD>
+                  <TD>
+                    <SegmentBadge segment={invoice.property_segment} />
                   </TD>
                   <TD>{invoice.tenant_name ?? '-'}</TD>
                   <TD>
@@ -93,7 +117,10 @@ export default async function PaymentsPage({ params }: { params: Promise<{ local
         </Card>
 
         <Card>
-          <CardHeader title={t('reports.collection')} />
+          <CardHeader
+            title={t('reports.collection')}
+            description={view === 'all' ? undefined : t('payments.collectionBuildingWide')}
+          />
           {collection.length === 0 ? (
             <div className="p-3">
               <EmptyState message={t('common.noData')} />

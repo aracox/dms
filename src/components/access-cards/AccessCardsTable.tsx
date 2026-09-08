@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
+import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
 import { CardActions } from '@/components/room/CardActions';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -126,6 +127,7 @@ export function AccessCardsTable({
           head={
             <tr>
               <TH>{t('room.roomNumber')}</TH>
+              <TH>{t('segment.column')}</TH>
               <TH>{t('cards.cardNumber')}</TH>
               <TH>{t('cards.cardUid')}</TH>
               <TH>{t('common.status')}</TH>
@@ -144,6 +146,9 @@ export function AccessCardsTable({
                 >
                   {card.room_number}
                 </Link>
+              </TD>
+              <TD>
+                <SegmentBadge segment={card.property_segment} />
               </TD>
               <TD>{card.card_number}</TD>
               <TD className="text-ink-muted text-caption font-mono">{card.card_uid ?? '-'}</TD>

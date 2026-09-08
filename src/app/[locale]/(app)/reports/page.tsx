@@ -1,5 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
+import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
+import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
 import { RoomStatusBadge } from '@/components/status/RoomStatusBadge';
 import { Card, CardHeader } from '@/components/ui/Card';
@@ -14,26 +16,63 @@ import {
   getMeterUsage,
   getReportRooms,
   getRoomSummary,
+  getRoomSummaryBySegment,
   getTenantSummary,
+  getTenantSummaryBySegment,
 } from '@/lib/reporting/queries';
+import { filterByView, forView, parseSegmentView } from '@/lib/reporting/segments';
 import { currentBillingMonth, formatBillingMonth, formatDate } from '@/lib/utils/date';
 
-export default async function ReportsPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function ReportsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ segment?: string | string[] }>;
+}) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const t = await getTranslations();
   const typedLocale = locale as Locale;
+  const view = parseSegmentView((await searchParams).segment);
   const month = currentBillingMonth();
 
-  const [summary, tenants, rooms, meterUsage, expiring] = await Promise.all([
+  const [
+    wholeSummary,
+    summaryBySegment,
+    wholeTenants,
+    tenantsBySegment,
+    allRooms,
+    allMeterUsage,
+    allExpiring,
+  ] = await Promise.all([
     getRoomSummary(),
+    getRoomSummaryBySegment(),
     getTenantSummary(),
+    getTenantSummaryBySegment(),
     getReportRooms(),
     getMeterUsage(month),
     // The full contract-expiry report, not just the dashboard's 60-day window.
     getExpiringContracts(3650),
   ]);
+
+  const summary = forView(view, wholeSummary, summaryBySegment);
+  const tenants = forView(view, wholeTenants, tenantsBySegment);
+  const rooms = filterByView(view, allRooms);
+  const expiring = filterByView(view, allExpiring);
+
+  /*
+   * report_meter_usage has no property_segment column -- 0024 did not add one.
+   * Its rows are per room rather than pre-aggregated, though, so the segment
+   * comes from the room set above, which does carry it. That keeps the meter
+   * report filterable without a new migration.
+   */
+  const segmentByRoomId = new Map(allRooms.map((room) => [room.room_id, room.property_segment]));
+  const meterUsage =
+    view === 'all'
+      ? allMeterUsage
+      : allMeterUsage.filter((row) => segmentByRoomId.get(row.room_id) === view);
 
   const electricityUnits = meterUsage
     .filter((row) => row.meter_type === 'electricity')
@@ -44,7 +83,11 @@ export default async function ReportsPage({ params }: { params: Promise<{ locale
 
   return (
     <>
-      <PageHeader title={t('reports.title')} description={t('reports.subtitle')} />
+      <PageHeader
+        title={t('reports.title')}
+        description={t('reports.subtitle')}
+        action={<SegmentSwitcher current={view} pathname="/reports" />}
+      />
 
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatTile
@@ -124,6 +167,7 @@ export default async function ReportsPage({ params }: { params: Promise<{ locale
               head={
                 <tr>
                   <TH>{t('room.roomNumber')}</TH>
+                  <TH>{t('segment.column')}</TH>
                   <TH>{t('common.status')}</TH>
                   <TH numeric>{t('meters.previousReading')}</TH>
                   <TH numeric>{t('meters.currentReading')}</TH>
@@ -136,6 +180,9 @@ export default async function ReportsPage({ params }: { params: Promise<{ locale
               {meterUsage.map((row) => (
                 <tr key={`${row.room_id}-${row.meter_type}`}>
                   <TD className="font-medium">{row.room_number}</TD>
+                  <TD>
+                    <SegmentBadge segment={segmentByRoomId.get(row.room_id) ?? null} />
+                  </TD>
                   <TD>{t(`meterType.${row.meter_type}`)}</TD>
                   <TD numeric>{row.previous_reading}</TD>
                   <TD numeric>{row.current_reading}</TD>
@@ -161,6 +208,7 @@ export default async function ReportsPage({ params }: { params: Promise<{ locale
               head={
                 <tr>
                   <TH>{t('room.roomNumber')}</TH>
+                  <TH>{t('segment.column')}</TH>
                   <TH>{t('tenant.title')}</TH>
                   <TH>{t('contract.startDate')}</TH>
                   <TH>{t('contract.endDate')}</TH>
@@ -172,6 +220,9 @@ export default async function ReportsPage({ params }: { params: Promise<{ locale
               {expiring.map((contract) => (
                 <tr key={contract.contract_id}>
                   <TD className="font-medium">{contract.room_number}</TD>
+                  <TD>
+                    <SegmentBadge segment={contract.property_segment} />
+                  </TD>
                   <TD>{contract.tenant_name}</TD>
                   <TD>{formatDate(contract.start_date, typedLocale)}</TD>
                   <TD>{formatDate(contract.end_date, typedLocale)}</TD>

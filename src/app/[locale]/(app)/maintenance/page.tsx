@@ -1,5 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
+import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
+import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
 import { MAINTENANCE_TONE, PRIORITY_TONE } from '@/components/room/RoomMaintenanceTab';
 import { Badge } from '@/components/ui/Badge';
@@ -11,15 +13,29 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
 import { getMaintenanceReport } from '@/lib/reporting/queries';
+import { filterByView, parseSegmentView } from '@/lib/reporting/segments';
 import { formatDate } from '@/lib/utils/date';
 
-export default async function MaintenancePage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function MaintenancePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ segment?: string | string[] }>;
+}) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const t = await getTranslations();
   const typedLocale = locale as Locale;
-  const tickets = await getMaintenanceReport();
+  const view = parseSegmentView((await searchParams).segment);
+  const allTickets = await getMaintenanceReport();
+  const tickets = filterByView(view, allTickets);
+
+  // A ticket with no room has no segment, so filtering to หอพัก or บ้านพัก
+  // drops it. Say how many rather than letting the total quietly shrink.
+  const commonAreaHidden =
+    view === 'all' ? 0 : allTickets.filter((ticket) => ticket.property_segment === null).length;
 
   const open = tickets.filter((ticket) =>
     ['open', 'in_progress', 'waiting'].includes(ticket.status),
@@ -30,6 +46,7 @@ export default async function MaintenancePage({ params }: { params: Promise<{ lo
       <PageHeader
         title={t('maintenance.title')}
         description={`${open.length} ${t('dashboard.openTickets')}`}
+        action={<SegmentSwitcher current={view} pathname="/maintenance" />}
       />
 
       <div className="mb-6">
@@ -37,7 +54,14 @@ export default async function MaintenancePage({ params }: { params: Promise<{ lo
       </div>
 
       <Card>
-        <CardHeader title={t('reports.maintenance')} />
+        <CardHeader
+          title={t('reports.maintenance')}
+          description={
+            commonAreaHidden > 0
+              ? t('maintenance.commonAreaExcluded', { count: commonAreaHidden })
+              : undefined
+          }
+        />
         {tickets.length === 0 ? (
           <div className="p-3">
             <EmptyState message={t('dashboard.noOpenTickets')} />
@@ -48,6 +72,7 @@ export default async function MaintenancePage({ params }: { params: Promise<{ lo
               <tr>
                 <TH>{t('maintenance.reportedAt')}</TH>
                 <TH>{t('room.roomNumber')}</TH>
+                <TH>{t('segment.column')}</TH>
                 <TH>{t('maintenance.category')}</TH>
                 <TH>{t('maintenance.description')}</TH>
                 <TH>{t('maintenance.priority')}</TH>
@@ -71,6 +96,9 @@ export default async function MaintenancePage({ params }: { params: Promise<{ lo
                   ) : (
                     <span className="text-ink-subtle">{t('maintenance.commonArea')}</span>
                   )}
+                </TD>
+                <TD>
+                  <SegmentBadge segment={ticket.property_segment} />
                 </TD>
                 <TD>{ticket.category}</TD>
                 <TD className="max-w-sm">{ticket.description}</TD>

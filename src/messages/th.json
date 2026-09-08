@@ -448,7 +448,8 @@
     "receipt": "ใบเสร็จ",
     "history": "ประวัติการชำระ",
     "partialPayment": "ชำระบางส่วน",
-    "maxAllowed": "ชำระได้ไม่เกิน {amount}"
+    "maxAllowed": "ชำระได้ไม่เกิน {amount}",
+    "collectionBuildingWide": "ยอดเก็บเงินตามช่องทางเป็นข้อมูลทั้งอาคาร ยังแยกตามกลุ่มทรัพย์สินไม่ได้"
   },
   "maintenance": {
     "title": "งานซ่อมบำรุง",
@@ -461,7 +462,8 @@
     "reportedAt": "วันที่แจ้ง",
     "completedAt": "วันที่เสร็จ",
     "commonArea": "พื้นที่ส่วนกลาง",
-    "newTicket": "แจ้งงานซ่อม"
+    "newTicket": "แจ้งงานซ่อม",
+    "commonAreaExcluded": "ไม่รวมงานส่วนกลาง {count} รายการ ซึ่งไม่ได้อยู่ในกลุ่มใด"
   },
   "expenses": {
     "title": "ค่าใช้จ่ายส่วนกลาง",

@@ -1,5 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
+import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
+import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
 import { INVOICE_TONE } from '@/components/room/RoomBillingTab';
 import { Badge } from '@/components/ui/Badge';
@@ -12,16 +14,25 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
 import { compareBillingRooms } from '@/lib/billing/room-priority';
+import { filterRoomsByView, parseSegmentView, propertySegment } from '@/lib/reporting/segments';
 import { getRoomBoard } from '@/lib/rooms/queries';
 import { formatBillingMonth } from '@/lib/utils/date';
 
-export default async function BillingPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function BillingPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ segment?: string | string[] }>;
+}) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const t = await getTranslations();
   const typedLocale = locale as Locale;
-  const rooms = await getRoomBoard({ includeTest: false });
+  const view = parseSegmentView((await searchParams).segment);
+  const rooms = filterRoomsByView(view, await getRoomBoard({ includeTest: false }));
+  // Every tile below derives from activeRooms, so they follow the filter too.
   const activeRooms = rooms
     .filter((room) => room.contract_status === 'active')
     .sort(compareBillingRooms);
@@ -31,7 +42,11 @@ export default async function BillingPage({ params }: { params: Promise<{ locale
 
   return (
     <>
-      <PageHeader title={t('billing.title')} description={t('billing.hubSubtitle')} />
+      <PageHeader
+        title={t('billing.title')}
+        description={t('billing.hubSubtitle')}
+        action={<SegmentSwitcher current={view} pathname="/billing" />}
+      />
 
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatTile label={t('billing.activeRooms')} value={activeRooms.length} tone="blue" />
@@ -58,6 +73,7 @@ export default async function BillingPage({ params }: { params: Promise<{ locale
             head={
               <tr>
                 <TH>{t('room.roomNumber')}</TH>
+                <TH>{t('segment.column')}</TH>
                 <TH>{t('tenant.title')}</TH>
                 <TH>{t('common.month')}</TH>
                 <TH>{t('common.status')}</TH>
@@ -78,6 +94,9 @@ export default async function BillingPage({ params }: { params: Promise<{ locale
                     >
                       {room.room_number}
                     </Link>
+                  </TD>
+                  <TD>
+                    <SegmentBadge segment={propertySegment(room.room_type)} />
                   </TD>
                   <TD>{room.tenant_name ?? t('common.notAvailable')}</TD>
                   <TD>
