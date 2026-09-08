@@ -11,8 +11,8 @@ import {
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { BusinessOverviewCharts } from '@/components/dashboard/BusinessOverviewCharts';
-import { PropertySegmentPanels } from '@/components/dashboard/PropertySegmentPanels';
 import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
+import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
 import { MAINTENANCE_TONE, PRIORITY_TONE } from '@/components/room/RoomMaintenanceTab';
 import { Badge } from '@/components/ui/Badge';
@@ -24,32 +24,51 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
 import { getDashboardData } from '@/lib/reporting/queries';
+import { filterByView, forView, parseSegmentView } from '@/lib/reporting/segments';
 import { formatDate } from '@/lib/utils/date';
 
 /**
  * Every figure on this page comes from `lib/reporting`, which reads only the
  * report_* views. The T01 test room cannot appear here.
  */
-export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function DashboardPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ segment?: string | string[] }>;
+}) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const t = await getTranslations();
   const typedLocale = locale as Locale;
+  const view = parseSegmentView((await searchParams).segment);
   const {
-    rooms,
+    rooms: wholeRooms,
     roomsBySegment,
-    finance,
+    finance: wholeFinance,
     financeBySegment,
     overview,
     overviewBySegment,
-    tenants,
+    tenants: wholeTenants,
     tenantsBySegment,
-    expiring,
-    maintenance,
-    lostCards,
-    overdue,
+    expiring: allExpiring,
+    maintenance: allMaintenance,
+    lostCards: allLostCards,
+    overdue: allOverdue,
   } = await getDashboardData();
+
+  // Everything below reads the selected view -- the combined figures, or one
+  // segment's own. The report_* views already dropped T01 from both, so
+  // narrowing here cannot let test data back in.
+  const rooms = forView(view, wholeRooms, roomsBySegment);
+  const finance = forView(view, wholeFinance, financeBySegment);
+  const tenants = forView(view, wholeTenants, tenantsBySegment);
+  const expiring = filterByView(view, allExpiring);
+  const maintenance = filterByView(view, allMaintenance);
+  const lostCards = filterByView(view, allLostCards);
+  const overdue = filterByView(view, allOverdue);
 
   const money = (amount: number) => formatTHB(amount, typedLocale);
 
@@ -57,11 +76,19 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
     <>
       <PageHeader
         title={t('dashboard.title')}
-        description={t('dashboard.subtitle', {
-          count: rooms.total_rooms,
-          dorm: roomsBySegment.dorm.total_rooms,
-          house: roomsBySegment.house.total_rooms,
-        })}
+        description={
+          view === 'all'
+            ? t('dashboard.subtitle', {
+                count: wholeRooms.total_rooms,
+                dorm: roomsBySegment.dorm.total_rooms,
+                house: roomsBySegment.house.total_rooms,
+              })
+            : t('dashboard.subtitleSegment', {
+                segment: t(`segment.${view}`),
+                units: t(`segment.units.${view}`, { count: rooms.total_rooms }),
+              })
+        }
+        action={<SegmentSwitcher current={view} pathname="/dashboard" />}
       />
 
       <section aria-labelledby="rooms-heading" className="mb-6">
@@ -130,21 +157,6 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         </div>
       </section>
 
-      <section aria-labelledby="segments-heading" className="mb-6">
-        <h2
-          id="segments-heading"
-          className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase"
-        >
-          {t('segment.title')}
-        </h2>
-        <PropertySegmentPanels
-          rooms={roomsBySegment}
-          finance={financeBySegment}
-          tenants={tenantsBySegment}
-          locale={typedLocale}
-        />
-      </section>
-
       <section aria-labelledby="business-overview-heading" className="mb-6">
         <h2
           id="business-overview-heading"
@@ -155,6 +167,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         <BusinessOverviewCharts
           rows={overview}
           segmentRows={overviewBySegment}
+          view={view}
           locale={typedLocale}
           labels={{
             occupancyTrend: t('dashboard.occupancyTrend'),

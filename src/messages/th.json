@@ -128,6 +128,7 @@
   "segment": {
     "title": "แยกตามประเภททรัพย์สิน",
     "column": "ประเภท",
+    "filterLabel": "เลือกกลุ่มทรัพย์สินที่ต้องการดู",
     "dorm": "หอพัก",
     "house": "บ้านพัก",
     "wholeProperty": "ทั้งหมด",
@@ -207,6 +208,7 @@
   "dashboard": {
     "title": "ภาพรวม",
     "subtitle": "ข้อมูลของทรัพย์สินจริง {count} หน่วย — หอพัก {dorm} ห้อง และบ้านพัก {house} หลัง (ไม่รวมข้อมูลทดสอบ)",
+    "subtitleSegment": "แสดงเฉพาะ{segment} {units} (ไม่รวมข้อมูลทดสอบ)",
     "rooms": "ห้องพัก",
     "totalRooms": "ห้องพักทั้งหมด",
     "occupied": "มีผู้เช่า",
@@ -320,6 +322,7 @@
   "rooms": {
     "title": "ห้องพัก",
     "subtitle": "ห้องพักจริงทั้งหมด {count} ห้อง",
+    "subtitleSegment": "แสดงเฉพาะ{segment} {units}",
     "filterByFloor": "กรองตามชั้น",
     "filterByStatus": "กรองตามสถานะ",
     "allFloors": "ทุกชั้น",

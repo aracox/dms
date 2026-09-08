@@ -46,3 +46,65 @@ export function bySegment<T>(
   }
   return indexed;
 }
+
+/**
+ * The dashboard's segment filter: one segment on its own, or both combined.
+ *
+ * Kept separate from `PropertySegment` because 'all' is a view of the data, not
+ * a property of a room -- no row is ever tagged 'all'.
+ */
+export type SegmentView = 'all' | PropertySegment;
+
+/** Switcher order: ทั้งหมด first, then the segments in display order. */
+export const SEGMENT_VIEWS = [
+  'all',
+  ...PROPERTY_SEGMENTS,
+] as const satisfies readonly SegmentView[];
+
+/**
+ * Reads the `?segment=` query parameter. Anything unrecognised -- a stale
+ * bookmark, a hand-edited URL, a repeated parameter -- falls back to the
+ * combined view rather than throwing, so the dashboard always renders.
+ */
+export function parseSegmentView(value: string | string[] | undefined): SegmentView {
+  const first = Array.isArray(value) ? value[0] : value;
+  return SEGMENT_VIEWS.find((view) => view === first) ?? 'all';
+}
+
+/** The figures the selected view should show: the combined row, or one segment's. */
+export function forView<T>(view: SegmentView, whole: T, perSegment: Record<PropertySegment, T>): T {
+  return view === 'all' ? whole : perSegment[view];
+}
+
+/**
+ * Narrows a list of report rows to the selected view.
+ *
+ * A row with no segment -- a common-area maintenance ticket, which belongs to
+ * the building rather than to หอพัก or บ้านพัก -- appears only in the combined
+ * view, since claiming it for either segment would be a lie.
+ */
+export function filterByView<T extends { property_segment: PropertySegment | null }>(
+  view: SegmentView,
+  rows: readonly T[],
+): T[] {
+  return view === 'all' ? [...rows] : rows.filter((row) => row.property_segment === view);
+}
+
+/** The segments a view draws: both when combined, otherwise just the one. */
+export function viewSegments(view: SegmentView): readonly PropertySegment[] {
+  return view === 'all' ? PROPERTY_SEGMENTS : [view];
+}
+
+/**
+ * Narrows rows that carry a `room_type` to the selected view.
+ *
+ * The operational `v_room_board` rows behind the rooms list have no
+ * `property_segment` column -- only the report_* views add it -- so the segment
+ * is derived here exactly as `room_property_segment()` derives it in SQL.
+ */
+export function filterRoomsByView<T extends { room_type: RoomType }>(
+  view: SegmentView,
+  rows: readonly T[],
+): T[] {
+  return view === 'all' ? [...rows] : rows.filter((row) => propertySegment(row.room_type) === view);
+}

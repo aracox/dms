@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
+import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
 import { RoomStatusBadge } from '@/components/status/RoomStatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FormField, Input, Select } from '@/components/ui/Input';
@@ -12,6 +13,7 @@ import { FLOORS } from '@/config/floor-layout';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
+import { propertySegment } from '@/lib/reporting/segments';
 import { formatDate } from '@/lib/utils/date';
 import type { RoomBoardRow, RoomStatus } from '@/types/database';
 
@@ -107,6 +109,7 @@ export function RoomsTable({ rooms, locale }: { rooms: RoomBoardRow[]; locale: L
             head={
               <tr>
                 <TH>{t('room.roomNumber')}</TH>
+                <TH>{t('segment.column')}</TH>
                 <TH>{t('room.floor')}</TH>
                 <TH>{t('common.status')}</TH>
                 <TH>{t('room.mainTenant')}</TH>
@@ -126,6 +129,9 @@ export function RoomsTable({ rooms, locale }: { rooms: RoomBoardRow[]; locale: L
                   >
                     {room.room_number}
                   </Link>
+                </TD>
+                <TD>
+                  <SegmentBadge segment={propertySegment(room.room_type)} />
                 </TD>
                 <TD>{room.floor}</TD>
                 <TD>

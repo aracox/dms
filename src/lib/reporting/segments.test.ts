@@ -19,7 +19,18 @@ import {
   seedRooms,
   withRoomType,
 } from './fixtures';
-import { PROPERTY_SEGMENTS, bySegment, partitionBySegment, propertySegment } from './segments';
+import {
+  PROPERTY_SEGMENTS,
+  SEGMENT_VIEWS,
+  bySegment,
+  filterByView,
+  filterRoomsByView,
+  forView,
+  parseSegmentView,
+  partitionBySegment,
+  propertySegment,
+  viewSegments,
+} from './segments';
 
 describe('propertySegment', () => {
   it('treats only room_type house as บ้านพัก', () => {
@@ -168,5 +179,127 @@ describe('tenant reporting per segment', () => {
   it('adds back up to the whole-property tenant summary', () => {
     expect(dorm.registered_tenants + house.registered_tenants).toBe(combined.registered_tenants);
     expect(dorm.total_occupants + house.total_occupants).toBe(combined.total_occupants);
+  });
+});
+
+describe('parseSegmentView', () => {
+  it('accepts the two segments and the combined view', () => {
+    expect(parseSegmentView('all')).toBe('all');
+    expect(parseSegmentView('dorm')).toBe('dorm');
+    expect(parseSegmentView('house')).toBe('house');
+  });
+
+  it('falls back to the combined view when the parameter is absent or unknown', () => {
+    expect(parseSegmentView(undefined)).toBe('all');
+    expect(parseSegmentView('')).toBe('all');
+    expect(parseSegmentView('DORM')).toBe('all');
+    expect(parseSegmentView('apartments')).toBe('all');
+  });
+
+  it('takes the first value when the parameter is repeated', () => {
+    expect(parseSegmentView(['house', 'dorm'])).toBe('house');
+    expect(parseSegmentView([])).toBe('all');
+    expect(parseSegmentView(['nonsense'])).toBe('all');
+  });
+
+  it('refuses an inherited property name, which `forView` would then index with', () => {
+    // forView does perSegment[view], so the parser is what keeps a
+    // hand-edited URL from reaching Object.prototype.
+    expect(parseSegmentView('__proto__')).toBe('all');
+    expect(parseSegmentView('constructor')).toBe('all');
+    expect(parseSegmentView('toString')).toBe('all');
+  });
+
+  it('offers ทั้งหมด first, then the segments in display order', () => {
+    expect([...SEGMENT_VIEWS]).toEqual(['all', 'dorm', 'house']);
+  });
+});
+
+describe('forView', () => {
+  const whole = { total_rooms: 24 };
+  const perSegment = { dorm: { total_rooms: 21 }, house: { total_rooms: 3 } };
+
+  it('reads the combined figures for ทั้งหมด', () => {
+    expect(forView('all', whole, perSegment).total_rooms).toBe(24);
+  });
+
+  it('reads one segment own figures when filtered', () => {
+    expect(forView('dorm', whole, perSegment).total_rooms).toBe(21);
+    expect(forView('house', whole, perSegment).total_rooms).toBe(3);
+  });
+});
+
+describe('filterByView', () => {
+  const rows = [
+    { id: 'a', property_segment: 'dorm' as const },
+    { id: 'b', property_segment: 'house' as const },
+    { id: 'c', property_segment: 'dorm' as const },
+    // A common-area maintenance ticket: no room, so no segment.
+    { id: 'd', property_segment: null },
+  ];
+
+  it('keeps every row on ทั้งหมด, including the segment-less one', () => {
+    expect(filterByView('all', rows).map((row) => row.id)).toEqual(['a', 'b', 'c', 'd']);
+  });
+
+  it('keeps only the selected segment rows', () => {
+    expect(filterByView('dorm', rows).map((row) => row.id)).toEqual(['a', 'c']);
+    expect(filterByView('house', rows).map((row) => row.id)).toEqual(['b']);
+  });
+
+  it('hides a segment-less row rather than claiming it for either segment', () => {
+    expect(filterByView('dorm', rows).some((row) => row.property_segment === null)).toBe(false);
+    expect(filterByView('house', rows).some((row) => row.property_segment === null)).toBe(false);
+  });
+
+  it('does not mutate the rows it was given', () => {
+    const original = [...rows];
+    filterByView('dorm', rows);
+    expect(rows).toEqual(original);
+  });
+});
+
+describe('viewSegments', () => {
+  it('draws both segments on ทั้งหมด and just the one when filtered', () => {
+    expect([...viewSegments('all')]).toEqual(['dorm', 'house']);
+    expect([...viewSegments('dorm')]).toEqual(['dorm']);
+    expect([...viewSegments('house')]).toEqual(['house']);
+  });
+});
+
+describe('filterRoomsByView', () => {
+  // The rooms list reads v_room_board, which has room_type but no
+  // property_segment -- the segment has to be derived, as it is in SQL.
+  const real = seedRooms.filter((seedRoom) => !seedRoom.is_test);
+
+  it('keeps all 24 real units on ทั้งหมด', () => {
+    expect(filterRoomsByView('all', real)).toHaveLength(24);
+  });
+
+  it('narrows to the 21 dorm rooms', () => {
+    const dorm = filterRoomsByView('dorm', real);
+    expect(dorm).toHaveLength(21);
+    expect(dorm.every((seedRoom) => seedRoom.room_type !== 'house')).toBe(true);
+  });
+
+  it('narrows to exactly H101-H103', () => {
+    expect(filterRoomsByView('house', real).map((seedRoom) => seedRoom.room_number)).toEqual([
+      'H101',
+      'H102',
+      'H103',
+    ]);
+  });
+
+  it('partitions the units -- no unit lost, none counted twice', () => {
+    const dorm = filterRoomsByView('dorm', real);
+    const house = filterRoomsByView('house', real);
+    expect(dorm.length + house.length).toBe(real.length);
+    expect(new Set([...dorm, ...house]).size).toBe(real.length);
+  });
+
+  it('does not mutate the rows it was given', () => {
+    const original = [...real];
+    filterRoomsByView('house', real);
+    expect(real).toEqual(original);
   });
 });

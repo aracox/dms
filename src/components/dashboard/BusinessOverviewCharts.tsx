@@ -10,7 +10,7 @@ import {
   summarizeBusinessOverview,
   summarizeSegmentOccupancy,
 } from '@/lib/reporting/business-overview';
-import { PROPERTY_SEGMENTS } from '@/lib/reporting/segments';
+import { type SegmentView, viewSegments } from '@/lib/reporting/segments';
 import { cn } from '@/lib/utils/cn';
 import type {
   BusinessOverviewBySegmentRow,
@@ -65,20 +65,22 @@ function LegendItem({ label, className }: { label: string; className: string }) 
   );
 }
 
-/** Metric legend whose two swatches name the two segments. */
+/** Metric legend with one swatch per segment on show. */
 function StackedLegendItem({
   label,
   fills,
   segments,
+  shown,
 }: {
   label: string;
   fills: Record<PropertySegment, string>;
   segments: Record<PropertySegment, string>;
+  shown: readonly PropertySegment[];
 }) {
   return (
     <span className="text-ink-muted text-caption inline-flex items-center gap-1.5">
       <span className="text-ink font-medium">{label}</span>
-      {PROPERTY_SEGMENTS.map((segment) => (
+      {shown.map((segment) => (
         <span key={segment} className="inline-flex items-center gap-1">
           <span className={cn('size-2.5 rounded-sm', fills[segment])} aria-hidden="true" />
           {segments[segment]}
@@ -88,21 +90,27 @@ function StackedLegendItem({
   );
 }
 
-/** Two-slice bar: หอพัก at the base, บ้านพัก stacked above it. */
+/**
+ * One bar per metric, sliced by segment: หอพัก at the base, บ้านพัก stacked
+ * above it. Filtered to a single segment the stack collapses to one slice, so
+ * the bar reads as an ordinary column.
+ */
 function StackedBar({
   values,
   maximum,
   fills,
+  shown,
   ariaLabel,
   title,
 }: {
   values: Record<PropertySegment, number>;
   maximum: number;
   fills: Record<PropertySegment, string>;
+  shown: readonly PropertySegment[];
   ariaLabel: string;
   title: string;
 }) {
-  const total = values.dorm + values.house;
+  const total = shown.reduce((sum, segment) => sum + values[segment], 0);
 
   return (
     <span
@@ -112,16 +120,16 @@ function StackedBar({
       className="flex w-1.5 flex-col justify-end"
       style={{ height: `${chartHeight(total, maximum)}%` }}
     >
-      <span
-        className={cn('block w-full rounded-t-[1px]', fills.house)}
-        style={{ height: `${stackShare(values.house, total)}%` }}
-        aria-hidden="true"
-      />
-      <span
-        className={cn('block w-full', fills.dorm)}
-        style={{ height: `${stackShare(values.dorm, total)}%` }}
-        aria-hidden="true"
-      />
+      {/* Topmost slice takes the rounded cap, whether that is บ้านพัก or the
+          only segment on show. */}
+      {[...shown].reverse().map((segment) => (
+        <span
+          key={segment}
+          className={cn('block w-full first:rounded-t-[1px]', fills[segment])}
+          style={{ height: `${stackShare(values[segment], total)}%` }}
+          aria-hidden="true"
+        />
+      ))}
     </span>
   );
 }
@@ -184,20 +192,40 @@ function FooterTable({
 export function BusinessOverviewCharts({
   rows,
   segmentRows,
+  view,
   locale,
   labels,
 }: {
   rows: BusinessOverviewRow[];
   segmentRows: BusinessOverviewBySegmentRow[];
+  view: SegmentView;
   locale: Locale;
   labels: ChartLabels;
 }) {
   const { latest, averageOccupancy } = summarizeBusinessOverview(rows);
   const months = mergeOverviewSegments(rows, segmentRows);
   const segmentOccupancy = summarizeSegmentOccupancy(months);
+  const shown = viewSegments(view);
+
+  /**
+   * Common expenses have no room, so no segment can claim them -- see the
+   * header note on migration 0024. They stay on the combined view only, along
+   * with the net that depends on them.
+   */
+  const showBuildingWide = view === 'all';
+
+  // Scale to whatever is actually plotted, so a single segment's bars still
+  // fill the chart instead of hugging the axis.
   const financialMaximum = Math.max(
     0,
-    ...rows.flatMap((row) => [row.billed_amount, row.collected_amount, row.expense_amount]),
+    ...months.flatMap((month) =>
+      showBuildingWide
+        ? [month.total.billed_amount, month.total.collected_amount, month.total.expense_amount]
+        : shown.flatMap((segment) => [
+            month.segments[segment].billed_amount,
+            month.segments[segment].collected_amount,
+          ]),
+    ),
   );
   const money = (amount: number) => formatTHB(amount, locale);
 
@@ -217,7 +245,7 @@ export function BusinessOverviewCharts({
         <CardHeader title={labels.occupancyTrend} description={labels.occupancyHint} />
         <div className="px-4 pt-5 pb-4 sm:px-6">
           <div className="mb-4 flex flex-wrap gap-3">
-            {PROPERTY_SEGMENTS.map((segment) => (
+            {shown.map((segment) => (
               <LegendItem
                 key={segment}
                 label={labels.segments[segment]}
@@ -248,7 +276,7 @@ export function BusinessOverviewCharts({
                         className="flex h-full flex-col items-center gap-2"
                       >
                         <div className="flex min-h-0 w-full flex-1 items-end justify-center gap-0.5">
-                          {PROPERTY_SEGMENTS.map((segment) => {
+                          {shown.map((segment) => {
                             const row = entry.segments[segment];
                             const caption = `${month}, ${labels.segments[segment]}: ${row.occupancy_rate}% (${row.occupied_rooms}/${row.total_rooms})`;
                             return (
@@ -279,12 +307,18 @@ export function BusinessOverviewCharts({
           <FooterTable
             columns={[labels.average, labels.current]}
             rows={[
-              {
-                key: 'total',
-                label: labels.wholeProperty,
-                values: [`${averageOccupancy}%`, `${latest.occupancy_rate}%`],
-              },
-              ...PROPERTY_SEGMENTS.map((segment) => ({
+              // The combined row is the sum of both segments, so it only earns
+              // its place when both are on show.
+              ...(showBuildingWide
+                ? [
+                    {
+                      key: 'total',
+                      label: labels.wholeProperty,
+                      values: [`${averageOccupancy}%`, `${latest.occupancy_rate}%`],
+                    },
+                  ]
+                : []),
+              ...shown.map((segment) => ({
                 key: segment,
                 label: labels.segments[segment],
                 swatch: SEGMENT_STYLES[segment].fill,
@@ -306,16 +340,20 @@ export function BusinessOverviewCharts({
               label={labels.billed}
               fills={STACK_FILL.billed}
               segments={labels.segments}
+              shown={shown}
             />
             <StackedLegendItem
               label={labels.collected}
               fills={STACK_FILL.collected}
               segments={labels.segments}
+              shown={shown}
             />
-            <LegendItem
-              label={`${labels.expenses} (${labels.buildingWide})`}
-              className="bg-brand-yellow"
-            />
+            {showBuildingWide ? (
+              <LegendItem
+                label={`${labels.expenses} (${labels.buildingWide})`}
+                className="bg-brand-yellow"
+              />
+            ) : null}
           </div>
           <div className="overflow-x-auto pb-2">
             <figure aria-label={labels.financialTrend} className="min-w-[48rem]">
@@ -349,9 +387,11 @@ export function BusinessOverviewCharts({
                             dorm: entry.segments.dorm[stack.amount],
                             house: entry.segments.house[stack.amount],
                           };
-                          const caption = PROPERTY_SEGMENTS.map(
-                            (segment) => `${labels.segments[segment]} ${money(values[segment])}`,
-                          ).join(', ');
+                          const caption = shown
+                            .map(
+                              (segment) => `${labels.segments[segment]} ${money(values[segment])}`,
+                            )
+                            .join(', ');
 
                           return (
                             <StackedBar
@@ -359,20 +399,23 @@ export function BusinessOverviewCharts({
                               values={values}
                               maximum={financialMaximum}
                               fills={STACK_FILL[stack.key]}
+                              shown={shown}
                               ariaLabel={`${month}, ${stack.label}: ${caption}`}
                               title={`${month} · ${stack.label}: ${caption}`}
                             />
                           );
                         })}
-                        <span
-                          role="img"
-                          aria-label={`${month}, ${labels.expenses} (${labels.buildingWide}): ${money(entry.total.expense_amount)}`}
-                          title={`${month} · ${labels.expenses}: ${money(entry.total.expense_amount)}`}
-                          className="bg-brand-yellow block w-1.5 rounded-t-[1px]"
-                          style={{
-                            height: `${chartHeight(entry.total.expense_amount, financialMaximum)}%`,
-                          }}
-                        />
+                        {showBuildingWide ? (
+                          <span
+                            role="img"
+                            aria-label={`${month}, ${labels.expenses} (${labels.buildingWide}): ${money(entry.total.expense_amount)}`}
+                            title={`${month} · ${labels.expenses}: ${money(entry.total.expense_amount)}`}
+                            className="bg-brand-yellow block w-1.5 rounded-t-[1px]"
+                            style={{
+                              height: `${chartHeight(entry.total.expense_amount, financialMaximum)}%`,
+                            }}
+                          />
+                        ) : null}
                       </div>
                       <span className="text-ink-subtle h-5 text-[10px] whitespace-nowrap">
                         {month}
@@ -386,16 +429,20 @@ export function BusinessOverviewCharts({
           <FooterTable
             columns={[labels.billed, labels.collected, labels.collectionRate]}
             rows={[
-              {
-                key: 'total',
-                label: labels.wholeProperty,
-                values: [
-                  money(latest.billed_amount),
-                  money(latest.collected_amount),
-                  `${latest.collection_rate}%`,
-                ],
-              },
-              ...PROPERTY_SEGMENTS.map((segment) => {
+              ...(showBuildingWide
+                ? [
+                    {
+                      key: 'total',
+                      label: labels.wholeProperty,
+                      values: [
+                        money(latest.billed_amount),
+                        money(latest.collected_amount),
+                        `${latest.collection_rate}%`,
+                      ],
+                    },
+                  ]
+                : []),
+              ...shown.map((segment) => {
                 const row = latestSegments?.[segment];
                 return {
                   key: segment,
@@ -410,19 +457,21 @@ export function BusinessOverviewCharts({
               }),
             ]}
           />
-          <dl className="border-border mt-3 flex items-baseline justify-between gap-4 border-t pt-3">
-            <dt className="text-ink-subtle text-caption">
-              {labels.netAfterExpenses} ({labels.buildingWide})
-            </dt>
-            <dd
-              className={cn(
-                'font-semibold tabular-nums',
-                latest.net_after_expenses >= 0 ? 'text-brand-green-deep' : 'text-brand-red-deep',
-              )}
-            >
-              {money(latest.net_after_expenses)}
-            </dd>
-          </dl>
+          {showBuildingWide ? (
+            <dl className="border-border mt-3 flex items-baseline justify-between gap-4 border-t pt-3">
+              <dt className="text-ink-subtle text-caption">
+                {labels.netAfterExpenses} ({labels.buildingWide})
+              </dt>
+              <dd
+                className={cn(
+                  'font-semibold tabular-nums',
+                  latest.net_after_expenses >= 0 ? 'text-brand-green-deep' : 'text-brand-red-deep',
+                )}
+              >
+                {money(latest.net_after_expenses)}
+              </dd>
+            </dl>
+          ) : null}
         </div>
       </Card>
     </div>
