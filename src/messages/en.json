@@ -256,6 +256,8 @@
   "floorPlan": {
     "title": "Floor Plan",
     "subtitle": "Click a room to see its details",
+    "segmentShown": "Showing {shown} of {total} units on this floor ({segment}). Faded units are outside the filter.",
+    "noUnitsOnFloor": "No units of the selected segment on this floor",
     "floor": "Floor {floor}",
     "legend": "Legend",
     "corridor": "Corridor",

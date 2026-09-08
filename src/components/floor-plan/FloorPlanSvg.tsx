@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import type { KeyboardEvent } from 'react';
 
 import { STATUS_ICONS } from '@/components/status/RoomStatusBadge';
 import { STATUS_STYLES, toDisplayStatus } from '@/components/status/status-styles';
@@ -26,12 +27,15 @@ function truncate(value: string, max: number) {
 export function FloorPlanSvg({
   layout,
   roomsByNumber,
+  dimmed,
   selectedRoomNumber,
   onSelectRoom,
   locale,
 }: {
   layout: FloorLayout;
   roomsByNumber: Map<string, RoomBoardRow>;
+  /** Room numbers the segment filter excludes: drawn faded and inert. */
+  dimmed: Set<string>;
   selectedRoomNumber: string | null;
   onSelectRoom: (roomNumber: string) => void;
   locale: Locale;
@@ -160,27 +164,38 @@ export function FloorPlanSvg({
           .join('. ');
 
         const centreX = roomLayout.x + roomLayout.width / 2;
+        const isDimmed = dimmed.has(roomLayout.roomNumber);
 
         return (
           <g
             key={roomLayout.roomNumber}
-            role="button"
-            tabIndex={0}
-            aria-label={ariaLabel}
-            aria-pressed={isSelected}
-            onClick={() => onSelectRoom(roomLayout.roomNumber)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                onSelectRoom(roomLayout.roomNumber);
-              }
-            }}
+            // A unit the segment filter excludes keeps its place on the plan but
+            // stops being a control: not clickable, not focusable, and hidden
+            // from screen readers, which read the sidebar's count instead.
+            {...(isDimmed
+              ? { 'aria-hidden': true }
+              : {
+                  role: 'button',
+                  tabIndex: 0,
+                  'aria-label': ariaLabel,
+                  'aria-pressed': isSelected,
+                  onClick: () => onSelectRoom(roomLayout.roomNumber),
+                  onKeyDown: (event: KeyboardEvent<SVGGElement>) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      onSelectRoom(roomLayout.roomNumber);
+                    }
+                  },
+                })}
             transform={
               roomLayout.rotation
                 ? `rotate(${roomLayout.rotation} ${centreX} ${roomLayout.y + roomLayout.height / 2})`
                 : undefined
             }
-            className="group cursor-pointer"
+            className={cn(
+              'group transition-opacity',
+              isDimmed ? 'pointer-events-none opacity-20' : 'cursor-pointer',
+            )}
           >
             <rect
               x={roomLayout.x}
