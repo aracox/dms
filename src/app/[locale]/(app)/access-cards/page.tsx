@@ -7,8 +7,10 @@ import { Card, CardHeader } from '@/components/ui/Card';
 import type { Locale } from '@/i18n/routing';
 import { can } from '@/lib/permissions';
 import { getAccessCardReport } from '@/lib/reporting/queries';
-import { filterByView, parseSegmentView } from '@/lib/reporting/segments';
-import { createClient, getCurrentProfile } from '@/lib/supabase/server';
+import { PROPERTY_SEGMENTS, filterByView, parseSegmentView } from '@/lib/reporting/segments';
+import { getSettingsBySegment } from '@/lib/settings/queries';
+import { getCurrentProfile } from '@/lib/supabase/server';
+import type { PropertySegment } from '@/types/database';
 
 export default async function AccessCardsPage({
   params,
@@ -23,12 +25,13 @@ export default async function AccessCardsPage({
   const t = await getTranslations();
   const typedLocale = locale as Locale;
   const view = parseSegmentView((await searchParams).segment);
-  const supabase = await createClient();
 
-  const [allCards, profile, cardReplacementFeeSetting] = await Promise.all([
+  const [allCards, profile, settingsBySegment] = await Promise.all([
     getAccessCardReport(),
     getCurrentProfile(),
-    supabase.from('settings').select('value').eq('key', 'card_replacement_fee').maybeSingle(),
+    // Both segments: this table mixes หอพัก and บ้านพัก rows, and each one's
+    // replacement fee is its own since migration 0025.
+    getSettingsBySegment(),
   ]);
 
   // report_access_cards carries property_segment, so both the table and the
@@ -36,10 +39,9 @@ export default async function AccessCardsPage({
   const cards = filterByView(view, allCards);
 
   const canWrite = can(profile?.role, 'cards:write');
-  const defaultReplacementFee =
-    typeof cardReplacementFeeSetting.data?.value === 'number'
-      ? cardReplacementFeeSetting.data.value
-      : 0;
+  const replacementFeeBySegment = Object.fromEntries(
+    PROPERTY_SEGMENTS.map((segment) => [segment, settingsBySegment[segment].card_replacement_fee]),
+  ) as Record<PropertySegment, number>;
 
   const lost = cards.filter((card) => card.status === 'lost');
 
@@ -59,7 +61,7 @@ export default async function AccessCardsPage({
         <AccessCardsTable
           cards={cards}
           canWrite={canWrite}
-          defaultReplacementFee={defaultReplacementFee}
+          replacementFeeBySegment={replacementFeeBySegment}
           locale={typedLocale}
         />
       </Card>

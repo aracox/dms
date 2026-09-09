@@ -82,6 +82,8 @@ export type SettingRow = {
   key: string;
   value: Json;
   description: string | null;
+  /** 0025: true when segment_settings holds the value and this one is frozen. */
+  is_segment_scoped: boolean;
   updated_at: string;
   updated_by: string | null;
 };
@@ -90,6 +92,33 @@ export type SettingRow = {
 export type SettingsHistoryRow = {
   id: string;
   key: string;
+  old_value: Json | null;
+  new_value: Json;
+  changed_by: string | null;
+  changed_at: string;
+};
+
+/**
+ * One value per (segment-scoped setting, segment) -- migration 0025.
+ *
+ * Authoritative for every key where `settings.is_segment_scoped` is true;
+ * `settings.value` is frozen for those. Both segments are always present, so a
+ * lookup that finds nothing means the schema drifted, not that a default
+ * applies -- there is no shared fallback by design.
+ */
+export type SegmentSettingRow = {
+  key: string;
+  segment: PropertySegment;
+  value: Json;
+  updated_at: string;
+  updated_by: string | null;
+};
+
+/** Written only by the `on_segment_settings_value_changed` trigger. Audit only. */
+export type SegmentSettingsHistoryRow = {
+  id: string;
+  key: string;
+  segment: PropertySegment;
   old_value: Json | null;
   new_value: Json;
   changed_by: string | null;
@@ -642,6 +671,16 @@ export type Database = {
         NoWrites
       >;
       settings_history: TableDef<SettingsHistoryRow, NoWrites, NoWrites>;
+      segment_settings: TableDef<
+        SegmentSettingRow,
+        Partial<Omit<SegmentSettingRow, 'updated_at'>> & {
+          key: string;
+          segment: PropertySegment;
+          value: Json;
+        },
+        Partial<Omit<SegmentSettingRow, 'updated_at'>>
+      >;
+      segment_settings_history: TableDef<SegmentSettingsHistoryRow, NoWrites, NoWrites>;
     };
     Views: {
       v_room_board: ViewDef<RoomBoardRow>;

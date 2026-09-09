@@ -520,7 +520,8 @@
     "defaultPaymentDueDay": "Default payment due day",
     "paymentGraceDays": "Payment grace period (days)",
     "ownerOnly": "Only the owner can change settings",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "perSegmentHint": "Set separately for dorm rooms and houses. Both are required."
   },
   "profile": {
     "title": "Profile"

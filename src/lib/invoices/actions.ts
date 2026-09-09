@@ -9,6 +9,7 @@ import {
   type InvoiceExtraFeeKey,
 } from '@/lib/invoices/fees';
 import { assertCan } from '@/lib/permissions';
+import { propertySegment } from '@/lib/reporting/segments';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { bangkokToday, dueDateFor } from '@/lib/utils/date';
 import { generateInvoiceSchema } from '@/lib/validation/schemas';
@@ -54,14 +55,22 @@ export async function generateInvoiceAction(
 
   const supabase = await createClient();
 
-  const { data: contract } = await supabase
-    .from('contracts')
-    .select('id, monthly_rent, payment_due_day')
-    .eq('room_id', room_id)
-    .eq('status', 'active')
-    .maybeSingle();
+  const [{ data: contract }, { data: room }] = await Promise.all([
+    supabase
+      .from('contracts')
+      .select('id, monthly_rent, payment_due_day')
+      .eq('room_id', room_id)
+      .eq('status', 'active')
+      .maybeSingle(),
+    // The room's type decides which segment's fees apply -- a house is priced
+    // from the บ้านพัก column, not the building-wide one that no longer exists.
+    supabase.from('rooms').select('room_type').eq('id', room_id).maybeSingle(),
+  ]);
 
   if (!contract) return { error: 'billing.noActiveContract' };
+  if (!room) return { error: 'errors.generic' };
+
+  const segment = propertySegment(room.room_type);
 
   const [{ data: readings }, { data: settingsRows }] = await Promise.all([
     supabase
@@ -71,7 +80,11 @@ export async function generateInvoiceAction(
       .eq('billing_month', billing_month)
       .in('meter_type', ['electricity', 'water']),
     extraKeys.length
-      ? supabase.from('settings').select('key, value').in('key', extraKeys)
+      ? supabase
+          .from('segment_settings')
+          .select('key, value')
+          .eq('segment', segment)
+          .in('key', extraKeys)
       : Promise.resolve({ data: [] }),
   ]);
 

@@ -6,8 +6,10 @@ import { PageHeader } from '@/components/layout/AppShell';
 import { MoveInForm } from '@/components/room/MoveInForm';
 import { Link, redirect } from '@/i18n/navigation';
 import { assertCan } from '@/lib/permissions';
+import { propertySegment } from '@/lib/reporting/segments';
 import { getRoomDetail } from '@/lib/rooms/queries';
-import { createClient, getCurrentProfile } from '@/lib/supabase/server';
+import { getSegmentSettings } from '@/lib/settings/queries';
+import { getCurrentProfile } from '@/lib/supabase/server';
 import { bangkokToday } from '@/lib/utils/date';
 
 export default async function MoveInPage({
@@ -32,20 +34,13 @@ export default async function MoveInPage({
     return null;
   }
 
-  const supabase = await createClient();
-  const { data: moveInSettings } = await supabase
-    .from('settings')
-    .select('key, value')
-    .in('key', ['default_payment_due_day', 'default_monthly_rent', 'default_deposit']);
+  // A house prefills the บ้านพัก rent and deposit, not the dorm's -- these
+  // defaults are per segment since migration 0025.
+  const defaults = await getSegmentSettings(propertySegment(room.room_type));
 
-  const settingValue = (key: string) => moveInSettings?.find((row) => row.key === key)?.value;
-  const dueDaySetting = settingValue('default_payment_due_day');
-  const rentSetting = settingValue('default_monthly_rent');
-  const depositSetting = settingValue('default_deposit');
-
-  const defaultDueDay = typeof dueDaySetting === 'number' ? dueDaySetting : 5;
-  const defaultRent = typeof rentSetting === 'number' ? rentSetting : 0;
-  const defaultDeposit = typeof depositSetting === 'number' ? depositSetting : 0;
+  const defaultDueDay = defaults.default_payment_due_day || 5;
+  const defaultRent = defaults.default_monthly_rent;
+  const defaultDeposit = defaults.default_deposit;
 
   const startDate = bangkokToday();
   const [year, month, day] = startDate.split('-').map(Number);

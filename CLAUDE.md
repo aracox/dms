@@ -244,6 +244,28 @@ locale. Status colors are never the only signal — pair them with an icon and a
 `InvoiceView`, …). If you find yourself writing a mock-only variant of a component, that is a bug —
 parameterize the real one instead. Scenarios live in `src/config/test-scenarios/`.
 
+### 9. Rates and fees live in `segment_settings`, not `settings`
+
+Since migration 0025 every setting except `currency` and `dormitory` has one value per property
+segment, and **both are always required — there is no shared fallback**.
+
+- `settings.value` is **frozen** for those keys. A trigger raises on any attempt to change it, so
+  `update settings set value = …` fails rather than silently doing nothing. Write
+  `segment_settings (key, segment, value)` instead.
+- Reading a rate needs to know the segment. Use `getSegmentSettings(segment)` /
+  `getSettingsBySegment()` from `lib/settings/queries`, and derive a room's segment with
+  `propertySegment(room.room_type)`.
+- The three SQL lookups take a segment: `payment_grace_days(property_segment)`,
+  `default_monthly_rent(property_segment)`, `default_deposit(property_segment)`. The no-argument
+  forms still exist but **raise** — they are stubs kept only so a missed caller fails loudly instead
+  of billing the wrong segment's price. If you add a caller, pass the segment.
+- A missing `(key, segment)` row raises too. That is deliberate: quietly billing 0 THB is worse
+  than failing. Both rows are kept present by the backfill, the auto-seed trigger on `settings`,
+  and the absence of any delete grant or policy on `segment_settings`.
+
+`SEGMENT_SETTING_KEYS` in `lib/settings/segment-keys.ts` mirrors `settings.is_segment_scoped`;
+`segment-keys.test.ts` fails if it drifts from the zod schema, the form, or the migration.
+
 ## Design system
 
 The visual system is specified in `design/questui-DESIGN.md`. Its scales — spacing, radius,

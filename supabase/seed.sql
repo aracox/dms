@@ -40,6 +40,8 @@ truncate table
   tenants,
   rooms,
   settings_history,
+  segment_settings_history,
+  segment_settings,
   audit_logs,
   settings
 restart identity cascade;
@@ -66,10 +68,16 @@ insert into settings (key, value, description) values
   ('payment_grace_days',      '0'::jsonb,    'Days past due before an invoice is overdue'),
   ('default_monthly_rent',    '3500'::jsonb, 'Move-in rent prefill'),
   ('default_deposit',         '3500'::jsonb, 'Move-in deposit prefill'),
-  ('late_fee_per_day',        '0'::jsonb,    'Not charged in v1'),
-  ('currency',                '"THB"'::jsonb, 'Display currency'),
+  ('late_fee_per_day',        '0'::jsonb,    'Not charged in v1');
+
+-- Whole-property settings, inserted separately so is_segment_scoped is false
+-- for them. Everything above defaults to true and the settings_seed_segments
+-- trigger (0025) copies each value into both หอพัก and บ้านพัก; these two
+-- describe the property itself and must not be split.
+insert into settings (key, value, description, is_segment_scoped) values
+  ('currency',                '"THB"'::jsonb, 'Display currency', false),
   ('dormitory', '{"name_th":"หอพักตัวอย่าง","name_en":"Sample Dormitory","floors":3,"real_rooms":24}'::jsonb,
-    'Property identity shown in headers and on invoices');
+    'Property identity shown in headers and on invoices', false);
 
 -- ===========================================================================
 -- Rooms -- all room and house rents are exactly 3,500 THB.
@@ -617,7 +625,7 @@ values (
 
 -- Seed inserts should not masquerade as user audit activity. Card events stay
 -- because they are part of each card's operational history.
-truncate table audit_logs, settings_history restart identity;
+truncate table audit_logs, settings_history, segment_settings_history restart identity;
 
 drop function seed_uuid(text, text);
 

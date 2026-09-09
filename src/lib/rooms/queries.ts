@@ -11,6 +11,7 @@ import 'server-only';
  * Never use this module for a dashboard or report figure. Use lib/reporting.
  */
 
+import { propertySegment } from '@/lib/reporting/segments';
 import { createClient } from '@/lib/supabase/server';
 import { currentBillingMonth, type IsoDate } from '@/lib/utils/date';
 import type {
@@ -23,6 +24,7 @@ import type {
   MaintenanceTicketRow,
   MeterReadingRow,
   PaymentRow,
+  PropertySegment,
   RoomBoardRow,
   RoomRow,
   TenantRow,
@@ -141,7 +143,11 @@ export async function getRoomDetail(roomId: string): Promise<RoomDetail | null> 
         .eq('room_id', roomId)
         .order('created_at', { ascending: false })
         .limit(20),
-      supabase.from('settings').select('key, value').in('key', ROOM_DETAIL_SETTINGS_KEYS),
+      supabase
+        .from('segment_settings')
+        .select('key, value')
+        .eq('segment', propertySegment(room.room_type))
+        .in('key', ROOM_DETAIL_SETTINGS_KEYS),
     ]);
 
   const contractRows = contracts.data ?? [];
@@ -201,11 +207,14 @@ export async function getRoomDetail(roomId: string): Promise<RoomDetail | null> 
 }
 
 /** Current utility rates, for pre-filling the meter entry form. */
-export async function getUtilityRates(): Promise<{ electricity: number; water: number }> {
+export async function getUtilityRates(
+  segment: PropertySegment,
+): Promise<{ electricity: number; water: number }> {
   const supabase = await createClient();
   const { data } = await supabase
-    .from('settings')
+    .from('segment_settings')
     .select('key, value')
+    .eq('segment', segment)
     .in('key', ['electricity_rate', 'water_rate']);
 
   const read = (key: string, fallback: number) => {

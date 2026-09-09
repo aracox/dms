@@ -12,7 +12,7 @@ import { FormField, Input, Select } from '@/components/ui/Input';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import type { AccessCardReportRow, CardStatus } from '@/types/database';
+import type { AccessCardReportRow, CardStatus, PropertySegment } from '@/types/database';
 import { formatDate } from '@/lib/utils/date';
 
 const STATUSES: CardStatus[] = ['available', 'active', 'lost', 'disabled', 'damaged', 'returned'];
@@ -29,12 +29,17 @@ const CARD_TONE: Record<CardStatus, BadgeTone> = {
 export function AccessCardsTable({
   cards,
   canWrite,
-  defaultReplacementFee,
+  replacementFeeBySegment,
   locale,
 }: {
   cards: AccessCardReportRow[];
   canWrite: boolean;
-  defaultReplacementFee: number;
+  /**
+   * The card replacement fee of each segment. This table mixes หอพัก and
+   * บ้านพัก rows, and the fee is per segment since 0025, so a single number
+   * would charge houses the dorm price.
+   */
+  replacementFeeBySegment: Record<PropertySegment, number>;
   locale: Locale;
 }) {
   const t = useTranslations();
@@ -161,7 +166,7 @@ export function AccessCardsTable({
                 <CardActions
                   roomId={card.room_id}
                   card={{ id: card.card_id, status: card.status }}
-                  defaultReplacementFee={defaultReplacementFee}
+                  defaultReplacementFee={replacementFeeBySegment[card.property_segment]}
                   locale={locale}
                   asTableCell
                 />
