@@ -1,0 +1,176 @@
+DATABASE CHANGE LOG — outstanding work and how to apply it
+Recorded: 2026-09-09
+
+====================================================================
+1. PENDING — migration 0025_segment_settings.sql  (NOT APPLIED)
+====================================================================
+
+STATUS
+------
+Written, committed, and NOT applied to the database. Verified by probing the
+live project over the REST API:
+
+  segment_settings          -> 404 PGRST205  missing
+  segment_settings_history  -> 404 PGRST205  missing
+
+The SQL is also UNVERIFIED: no Postgres or Docker was reachable to parse it.
+Balanced dollar-quotes and parens were checked, and every replaced object was
+reproduced column-for-column against 0015 / 0019 / 0024, but that is review,
+not execution. It is wrapped in a transaction, so a syntax error rolls back
+harmlessly -- expect to run it once and read the error if there is one.
+
+WHY THE CODE AND THE MIGRATION MUST LAND TOGETHER
+-------------------------------------------------
+This is not like 0024, where only the dashboard's segment panels were affected
+and the rest of the app carried on. 0025 also replaces v_room_board,
+recalc_invoice, mark_overdue_invoices, report_finance_summary and
+report_finance_summary_by_segment, so the old code and the new schema cannot
+both be correct at once.
+
+Until it is applied, these paths read segment_settings and will hit the error
+boundary on every request:
+
+  /settings                  owner form and read-only view
+  /access-cards              needs both segments' replacement fees
+  /rooms/[id]/move-in        rent and deposit prefills
+  invoice generation         the optional extra fees
+
+The build itself succeeds and Vercel will deploy green, because all four are
+dynamic routes. It is the requests that fail, not the build.
+
+WHAT IT CHANGES
+---------------
+Settings are split per property segment. Every key except `currency` and
+`dormitory` now carries one value per segment, and BOTH are required -- there
+is no shared fallback, so a segment can never quietly inherit the other's
+price.
+
+  new  segment_settings (key, segment, value, updated_at, updated_by)
+       Authoritative. PK (key, segment), FK key -> settings(key).
+  new  segment_settings_history      audit trail, mirrors settings_history (0010)
+  new  settings.is_segment_scoped    boolean, false only for currency + dormitory
+
+  new  segment_setting_numeric(text, property_segment)
+  new  payment_grace_days(property_segment)
+  new  default_monthly_rent(property_segment)
+  new  default_deposit(property_segment)
+
+  changed  payment_grace_days()      -> raising stub
+  changed  default_monthly_rent()    -> raising stub
+  changed  default_deposit()         -> raising stub
+  changed  v_room_board                       repointed at the segment forms
+  changed  recalc_invoice(uuid)               repointed
+  changed  mark_overdue_invoices()            repointed
+  changed  report_finance_summary             repointed (balances CTE gains a rooms join)
+  changed  report_finance_summary_by_segment  repointed
+
+  triggers  segment_settings_scoped_only      rejects a value for a non-scoped key
+            settings_scoped_value_frozen      rejects UPDATE of settings.value
+                                              for a scoped key
+            settings_seed_segments            auto-creates both segment rows
+                                              for a newly inserted setting
+            segment_settings_set_updated_at
+            on_segment_settings_value_changed writes the history row
+
+Backfilled from current values, so nothing changes price on the day it runs.
+
+THREE DELIBERATE DESIGN DECISIONS, so they are not "fixed" later by mistake
+---------------------------------------------------------------------------
+- settings.value is FROZEN for scoped keys. `update settings set value = ...`
+  raises rather than silently doing nothing. One source of truth for a price.
+- The no-argument SQL functions are kept as RAISING STUBS rather than dropped,
+  so any caller that was missed fails loudly instead of reading a frozen value
+  and billing the wrong segment.
+- A missing (key, segment) row RAISES. Billing 0 THB silently is far worse than
+  failing. Both rows stay present via the backfill, settings_seed_segments, and
+  the absence of any delete grant or policy on segment_settings.
+
+====================================================================
+2. PENDING — supabase/seed.sql  (only matters on the next reset)
+====================================================================
+
+Two changes, both required by 0025:
+
+- currency and dormitory are now inserted SEPARATELY with
+  is_segment_scoped = false. The seed truncates and re-inserts settings, and
+  new rows default to segment-scoped, so without this the settings_seed_segments
+  trigger would wrongly give those two keys per-segment rows.
+- segment_settings and segment_settings_history added to the reset truncate
+  lists.
+
+Run only with the explicit flag, and only after 0025:
+
+  npm run seed -- --reset
+
+====================================================================
+3. BLOCKERS — .env.local credentials are stale
+====================================================================
+
+The network firewall is FIXED (2026-09-09). Both Postgres ports now open:
+
+  aws-0-ap-southeast-1.pooler.supabase.com:5432  OPEN
+  aws-0-ap-southeast-1.pooler.supabase.com:6543  OPEN
+
+But `npm run db:push` now fails on credentials instead:
+
+  password authentication failed for user "postgres"
+
+SUPABASE_DB_URL is well-formed -- pooler username postgres.<ref>, correct host,
+port and database, a real 15-character password that is not a placeholder and
+needs no URL-encoding. The password is simply wrong.
+
+SUPABASE_SERVICE_ROLE_KEY is also invalid: 28 characters, no sb_secret_ prefix,
+and the REST API answers `401 Invalid API key`. It gates `npm run seed` and
+`npm run create-user`.
+
+Two stale secrets in one file points at the project credentials having been
+rotated without .env.local being updated. NEXT_PUBLIC_SUPABASE_ANON_KEY still
+works because it is the newer sb_publishable_ format and a database password
+reset does not touch it.
+
+TO FIX
+------
+  1. Supabase -> Project Settings -> Database -> Reset database password,
+     then update the password in SUPABASE_DB_URL in .env.local
+  2. Supabase -> Project Settings -> API Keys -> copy the sb_secret_* key
+     into SUPABASE_SERVICE_ROLE_KEY
+
+Then:
+
+  npm run db:push        # skips 0001-0024, applies only 0025
+
+If you would rather not rotate the password, the SQL editor route needs no
+credentials at all. Paste 0025 wrapped in a transaction, followed by:
+
+  insert into schema_migrations (filename) values ('0025_segment_settings.sql')
+    on conflict (filename) do nothing;
+
+so a later db:push skips it rather than trying to re-apply it.
+
+====================================================================
+4. APPLIED — for reference
+====================================================================
+
+0024_property_segments.sql — applied 2026-09-08 (by hand, not via db:push).
+Confirmed by REST probe: all four report_*_by_segment views answer 42501
+(exist, anon denied) rather than 404. This is what the deleted earlier note
+covered; the dashboard's "24 units, 0 dorm rooms and 0 houses" is long fixed.
+
+0001-0023 — applied. schema_migrations could not be read directly to confirm
+the ledger, because the database password above is stale.
+
+====================================================================
+5. STANDING NOTES
+====================================================================
+
+- Migrations are append-only. Never edit an applied file; add a new numbered
+  one.
+- `npm run db:push` is the intended path and records what it applied in
+  schema_migrations. Applying by hand in the SQL editor does NOT, so always
+  add the bookkeeping insert or the next db:push will try again.
+- After any schema change, regenerate or hand-update src/types/database.ts.
+  Row shapes must be `type`, not `interface`, and an append-only table's
+  Update must use the NoWrites helper -- break either and every query
+  silently degrades to `never`.
+- src/lib/reporting/exclusion.test.ts is the regression test for the
+  is_test invariant. If you touch schema, seeds or reporting, it must pass.
