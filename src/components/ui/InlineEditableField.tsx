@@ -13,11 +13,14 @@ import { Input } from './Input';
 export function InlineEditableField({
   label,
   value,
+  displayValue,
   emptyLabel,
   onCommit,
 }: {
   label: string;
   value: string;
+  /** Read-mode rendering, e.g. comma-grouped, when it must differ from the raw editable value. */
+  displayValue?: string;
   emptyLabel: string;
   onCommit: (value: string) => Promise<string | null>;
 }) {
@@ -96,7 +99,7 @@ export function InlineEditableField({
           }}
           className="text-ink hover:bg-surface-sunken hover:ring-border -mx-1 mt-0.5 cursor-text rounded-md px-1 py-0.5 text-sm font-medium ring-1 ring-transparent"
         >
-          {value || <span className="text-ink-subtle">{emptyLabel}</span>}
+          {(displayValue ?? value) || <span className="text-ink-subtle">{emptyLabel}</span>}
         </dd>
       )}
       {error ? <p className="text-brand-red-deep text-caption mt-0.5">{t(error)}</p> : null}

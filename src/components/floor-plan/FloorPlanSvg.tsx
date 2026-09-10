@@ -158,7 +158,9 @@ export function FloorPlanSvg({
           t('room.title', { roomNumber: room.room_number }),
           statusLabel,
           room.tenant_name ?? '',
-          room.outstanding > 0 ? `${t('billing.outstanding')} ${room.outstanding}` : '',
+          room.outstanding > 0
+            ? `${t('billing.outstanding')} ${formatAmount(room.outstanding, locale)}`
+            : '',
         ]
           .filter(Boolean)
           .join('. ');

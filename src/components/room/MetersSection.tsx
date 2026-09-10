@@ -8,7 +8,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
 import type { Locale } from '@/i18n/routing';
-import { formatTHB } from '@/lib/billing/money';
+import { formatAmount, formatTHB } from '@/lib/billing/money';
 import { deleteMeterReadingAction, type DeleteMeterReadingState } from '@/lib/meters/actions';
 import { currentBillingMonth, formatBillingMonth } from '@/lib/utils/date';
 import type { MeterReadingRow, MeterType } from '@/types/database';
@@ -138,12 +138,12 @@ export function MetersSection({
               <tr key={reading.id}>
                 <TD>{formatBillingMonth(reading.billing_month, locale)}</TD>
                 <TD>{t(`meterType.${reading.meter_type}`)}</TD>
-                <TD numeric>{reading.previous_reading}</TD>
-                <TD numeric>{reading.current_reading}</TD>
+                <TD numeric>{formatAmount(reading.previous_reading, locale)}</TD>
+                <TD numeric>{formatAmount(reading.current_reading, locale)}</TD>
                 <TD numeric className="font-medium">
-                  {reading.usage}
+                  {formatAmount(reading.usage, locale)}
                 </TD>
-                <TD numeric>{reading.rate}</TD>
+                <TD numeric>{formatAmount(reading.rate, locale)}</TD>
                 <TD numeric className="font-medium">
                   {formatTHB(reading.amount, locale)}
                 </TD>

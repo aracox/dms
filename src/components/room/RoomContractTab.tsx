@@ -140,6 +140,7 @@ export async function RoomContractTab({
                   contractId={contract.id}
                   roomId={detail.room.id}
                   monthlyRent={contract.monthly_rent}
+                  locale={locale}
                 />
               ) : (
                 <Field

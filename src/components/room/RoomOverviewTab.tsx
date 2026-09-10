@@ -6,7 +6,7 @@ import { buttonClasses } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { formatTHB } from '@/lib/billing/money';
+import { formatAmount, formatTHB } from '@/lib/billing/money';
 import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
@@ -56,6 +56,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
                 contractId={contract.id}
                 roomId={room.id}
                 monthlyRent={contract.monthly_rent}
+                locale={locale}
               />
             ) : (
               <Field
@@ -128,7 +129,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
                 label={t('room.electricity')}
                 value={
                   latestElectricity
-                    ? t('meters.usageUnits', { units: latestElectricity.usage })
+                    ? t('meters.usageUnits', { units: formatAmount(latestElectricity.usage, locale) })
                     : t('room.noMeterReading')
                 }
                 hint={
@@ -141,7 +142,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
                 label={t('room.water')}
                 value={
                   latestWater
-                    ? t('meters.usageUnits', { units: latestWater.usage })
+                    ? t('meters.usageUnits', { units: formatAmount(latestWater.usage, locale) })
                     : t('room.noMeterReading')
                 }
                 hint={

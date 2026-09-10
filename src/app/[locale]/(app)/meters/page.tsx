@@ -11,6 +11,7 @@ import { StatTile } from '@/components/ui/StatTile';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
+import { formatAmount } from '@/lib/billing/money';
 import {
   compareMeterRoomProgress,
   groupMeterReadingsByRoom,
@@ -87,14 +88,14 @@ export default async function MetersPage({
         />
         <StatTile
           label={t('room.electricity')}
-          value={electricityUsage}
-          hint={t('meters.usageUnits', { units: electricityUsage })}
+          value={formatAmount(electricityUsage, typedLocale)}
+          hint={t('meters.usageUnits', { units: formatAmount(electricityUsage, typedLocale) })}
           tone="yellow"
         />
         <StatTile
           label={t('room.water')}
-          value={waterUsage}
-          hint={t('meters.usageUnits', { units: waterUsage })}
+          value={formatAmount(waterUsage, typedLocale)}
+          hint={t('meters.usageUnits', { units: formatAmount(waterUsage, typedLocale) })}
           tone="blue"
         />
       </div>
@@ -145,9 +146,13 @@ export default async function MetersPage({
                   <TD>
                     {electricity ? (
                       <div>
-                        <p className="font-semibold tabular-nums">{electricity.current_reading}</p>
+                        <p className="font-semibold tabular-nums">
+                          {formatAmount(electricity.current_reading, typedLocale)}
+                        </p>
                         <p className="text-ink-subtle text-caption">
-                          {t('meters.usageUnits', { units: electricity.usage })}
+                          {t('meters.usageUnits', {
+                            units: formatAmount(electricity.usage, typedLocale),
+                          })}
                         </p>
                       </div>
                     ) : (
@@ -159,9 +164,11 @@ export default async function MetersPage({
                   <TD>
                     {water ? (
                       <div>
-                        <p className="font-semibold tabular-nums">{water.current_reading}</p>
+                        <p className="font-semibold tabular-nums">
+                          {formatAmount(water.current_reading, typedLocale)}
+                        </p>
                         <p className="text-ink-subtle text-caption">
-                          {t('meters.usageUnits', { units: water.usage })}
+                          {t('meters.usageUnits', { units: formatAmount(water.usage, typedLocale) })}
                         </p>
                       </div>
                     ) : (

@@ -11,7 +11,7 @@ import 'server-only';
  */
 
 import { buildMonthlyInvoiceItems, invoiceTotals } from '@/lib/billing/calc';
-import { round2 } from '@/lib/billing/money';
+import { formatAmount, round2 } from '@/lib/billing/money';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { bangkokToday, currentBillingMonth, type IsoDate } from '@/lib/utils/date';
 import {
@@ -293,7 +293,9 @@ async function reconcileInvoice(
       invoice_id: invoiceId,
       type: item.type,
       description:
-        item.type === 'rent' ? 'Monthly rent' : `${item.quantity} units @ ${item.unitPrice}`,
+        item.type === 'rent'
+          ? 'Monthly rent'
+          : `${formatAmount(item.quantity, 'en')} units @ ${formatAmount(item.unitPrice, 'en')}`,
       quantity: item.quantity,
       unit_price: item.unitPrice,
       sort_order: index + 1,

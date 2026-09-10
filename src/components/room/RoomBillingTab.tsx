@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
 import type { Locale } from '@/i18n/routing';
 import { confirmedPaid, outstanding } from '@/lib/billing/calc';
-import { formatTHB } from '@/lib/billing/money';
+import { formatAmount, formatTHB } from '@/lib/billing/money';
 import { INVOICE_EXTRA_FEE_KEYS } from '@/lib/invoices/fees';
 import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
@@ -104,8 +104,8 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
                       <span className="text-ink-subtle text-caption block">{item.description}</span>
                     ) : null}
                   </TD>
-                  <TD numeric>{item.quantity}</TD>
-                  <TD numeric>{item.unit_price}</TD>
+                  <TD numeric>{formatAmount(item.quantity, locale)}</TD>
+                  <TD numeric>{formatAmount(item.unit_price, locale)}</TD>
                   <TD numeric className="font-medium">
                     {item.type === 'discount' ? '-' : ''}
                     {formatTHB(item.amount, locale)}

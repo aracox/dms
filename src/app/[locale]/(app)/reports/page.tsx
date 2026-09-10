@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { StatTile } from '@/components/ui/StatTile';
 import { TD, TH, Table } from '@/components/ui/Table';
 import type { Locale } from '@/i18n/routing';
-import { formatTHB } from '@/lib/billing/money';
+import { formatAmount, formatTHB } from '@/lib/billing/money';
 import {
   getExpiringContracts,
   getMeterUsage,
@@ -184,12 +184,12 @@ export default async function ReportsPage({
                     <SegmentBadge segment={segmentByRoomId.get(row.room_id) ?? null} />
                   </TD>
                   <TD>{t(`meterType.${row.meter_type}`)}</TD>
-                  <TD numeric>{row.previous_reading}</TD>
-                  <TD numeric>{row.current_reading}</TD>
+                  <TD numeric>{formatAmount(row.previous_reading, typedLocale)}</TD>
+                  <TD numeric>{formatAmount(row.current_reading, typedLocale)}</TD>
                   <TD numeric className="font-medium">
-                    {row.usage}
+                    {formatAmount(row.usage, typedLocale)}
                   </TD>
-                  <TD numeric>{row.rate}</TD>
+                  <TD numeric>{formatAmount(row.rate, typedLocale)}</TD>
                   <TD numeric>{formatTHB(row.amount, typedLocale)}</TD>
                 </tr>
               ))}

@@ -3,11 +3,19 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PageHeader } from '@/components/layout/AppShell';
 import { SettingsForm } from '@/components/settings/SettingsForm';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
+import type { Locale } from '@/i18n/routing';
+import { formatAmount } from '@/lib/billing/money';
 import { can } from '@/lib/permissions';
 import { PROPERTY_SEGMENTS } from '@/lib/reporting/segments';
 import { SEGMENT_SETTING_KEYS, type SegmentSettingKey } from '@/lib/settings/segment-keys';
 import { getSettingsBySegment } from '@/lib/settings/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
+
+/** These two keys are day counts, not money -- shown as plain integers. */
+const DAY_COUNT_KEYS: readonly SegmentSettingKey[] = [
+  'default_payment_due_day',
+  'payment_grace_days',
+];
 
 /**
  * Rates, fees and defaults are per segment since migration 0025, so every
@@ -18,6 +26,7 @@ import { getCurrentProfile } from '@/lib/supabase/server';
 export default async function SettingsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const typedLocale = locale as Locale;
 
   const t = await getTranslations();
   const profile = await getCurrentProfile();
@@ -36,9 +45,18 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
               {t(`segment.${segment}`)}
             </h3>
             <FieldGrid>
-              {keys.map((key, index) => (
-                <Field key={key} label={labels[index]!} value={String(values[segment][key])} />
-              ))}
+              {keys.map((key, index) => {
+                const value = values[segment][key];
+                return (
+                  <Field
+                    key={key}
+                    label={labels[index]!}
+                    value={
+                      DAY_COUNT_KEYS.includes(key) ? String(value) : formatAmount(value, typedLocale)
+                    }
+                  />
+                );
+              })}
             </FieldGrid>
           </div>
         ))}

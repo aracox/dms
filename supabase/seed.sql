@@ -484,8 +484,12 @@ select
   i.id,
   mr.meter_type::text::invoice_item_type,
   case mr.meter_type
-    when 'electricity' then 'Electricity ' || mr.usage || ' units @ ' || mr.rate
-    else 'Water ' || mr.usage || ' units @ ' || mr.rate
+    when 'electricity' then
+      'Electricity ' || to_char(mr.usage, 'FM999G999G999D00') || ' units @ ' ||
+      to_char(mr.rate, 'FM999G999G999D00')
+    else
+      'Water ' || to_char(mr.usage, 'FM999G999G999D00') || ' units @ ' ||
+      to_char(mr.rate, 'FM999G999G999D00')
   end,
   mr.usage,
   mr.rate,

@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { InlineEditableField } from '@/components/ui/InlineEditableField';
+import type { Locale } from '@/i18n/routing';
+import { formatAmount } from '@/lib/billing/money';
 import { updateContractRentAction } from '@/lib/contracts/actions';
 
 /** Corrects the active contract's monthly rent. Only future invoices are affected. */
@@ -11,10 +13,12 @@ export function ContractRentField({
   contractId,
   roomId,
   monthlyRent,
+  locale,
 }: {
   contractId: string;
   roomId: string;
   monthlyRent: number;
+  locale: Locale;
 }) {
   const t = useTranslations();
   const [rent, setRent] = useState(monthlyRent);
@@ -36,6 +40,7 @@ export function ContractRentField({
     <InlineEditableField
       label={t('room.monthlyRent')}
       value={String(rent)}
+      displayValue={formatAmount(rent, locale)}
       emptyLabel={t('common.notAvailable')}
       onCommit={commit}
     />
