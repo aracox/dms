@@ -1,5 +1,6 @@
 import {
   Banknote,
+  CalendarClock,
   CreditCard,
   DoorOpen,
   FileWarning,
@@ -98,7 +99,7 @@ export default async function DashboardPage({
         >
           {t('dashboard.rooms')}
         </h2>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
           <StatTile label={t('dashboard.totalRooms')} value={rooms.total_rooms} tone="blue" />
           <StatTile label={t('dashboard.occupied')} value={rooms.occupied} tone="green" />
           <StatTile
@@ -106,6 +107,12 @@ export default async function DashboardPage({
             value={rooms.vacant}
             tone="neutral"
             icon={<DoorOpen size={14} aria-hidden="true" />}
+          />
+          <StatTile
+            label={t('dashboard.reserved')}
+            value={rooms.reserved}
+            tone="blue"
+            icon={<CalendarClock size={14} aria-hidden="true" />}
           />
           <StatTile
             label={t('dashboard.maintenance')}
