@@ -43,6 +43,20 @@ export function Input({
   );
 }
 
+export function Textarea({
+  invalid,
+  className,
+  ...props
+}: ComponentProps<'textarea'> & { invalid?: boolean }) {
+  return (
+    <textarea
+      aria-invalid={invalid || undefined}
+      className={controlClasses(invalid, cn('h-auto min-h-20 resize-y py-2', className))}
+      {...props}
+    />
+  );
+}
+
 export function Select({
   invalid,
   className,

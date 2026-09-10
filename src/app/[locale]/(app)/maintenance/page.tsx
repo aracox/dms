@@ -3,17 +3,20 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
 import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
+import { NewMaintenanceTicketForm } from '@/components/maintenance/NewMaintenanceTicketForm';
 import { MAINTENANCE_TONE, PRIORITY_TONE } from '@/components/room/RoomMaintenanceTab';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardHeader } from '@/components/ui/Card';
-import { ComingSoon } from '@/components/ui/ComingSoon';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
+import { can } from '@/lib/permissions';
 import { getMaintenanceReport } from '@/lib/reporting/queries';
 import { filterByView, parseSegmentView } from '@/lib/reporting/segments';
+import { getRoomBoard } from '@/lib/rooms/queries';
+import { getCurrentProfile } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/utils/date';
 
 export default async function MaintenancePage({
@@ -29,7 +32,12 @@ export default async function MaintenancePage({
   const t = await getTranslations();
   const typedLocale = locale as Locale;
   const view = parseSegmentView((await searchParams).segment);
-  const allTickets = await getMaintenanceReport();
+  const profile = await getCurrentProfile();
+  const canWrite = can(profile?.role, 'maintenance:write');
+  const [allTickets, rooms] = await Promise.all([
+    getMaintenanceReport(),
+    canWrite ? getRoomBoard({ includeTest: false }) : Promise.resolve([]),
+  ]);
   const tickets = filterByView(view, allTickets);
 
   // A ticket with no room has no segment, so filtering to หอพัก or บ้านพัก
@@ -49,9 +57,13 @@ export default async function MaintenancePage({
         action={<SegmentSwitcher current={view} pathname="/maintenance" />}
       />
 
-      <div className="mb-6">
-        <ComingSoon>{t('maintenance.newTicket')}</ComingSoon>
-      </div>
+      {canWrite ? (
+        <div className="mb-6">
+          <NewMaintenanceTicketForm
+            rooms={rooms.map((room) => ({ room_id: room.room_id, room_number: room.room_number }))}
+          />
+        </div>
+      ) : null}
 
       <Card>
         <CardHeader
