@@ -5,15 +5,18 @@ import type { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
 import type { AppRole } from '@/types/database';
 
+import { AppFrame } from './AppFrame';
+import { DesktopSidebar } from './DesktopSidebar';
 import { GlassSettings } from './GlassSettings';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { MobileNavigation } from './MobileNavigation';
-import { Sidebar } from './Sidebar';
+import { SidebarProvider } from './SidebarState';
 import { UserMenu } from './UserMenu';
 
 /**
  * Desktop-first admin chrome with a fixed sidebar on wide screens and a drawer
- * navigation below `lg`.
+ * navigation below `lg`. The sidebar can be hidden/shown on desktop via
+ * SidebarProvider's state, persisted in localStorage.
  */
 export async function AppShell({
   children,
@@ -25,50 +28,43 @@ export async function AppShell({
   const t = await getTranslations();
 
   return (
-    <div className="app-frame min-h-dvh">
-      <header className="app-toolbar border-border bg-surface sticky top-0 z-10 border-b">
-        <div className="flex items-center justify-between gap-4 px-4 py-2.5">
-          <div className="flex min-w-0 items-center gap-1 sm:gap-2">
-            <MobileNavigation role={profile.role} />
-            <Link
-              href="/dashboard"
-              aria-label={t('app.name')}
-              className="text-ink flex min-w-0 items-center gap-2"
-            >
-              <span className="bg-brand-blue border-brand-blue-deep flex size-7 shrink-0 items-center justify-center rounded-md border text-white">
-                <Building2 size={16} aria-hidden="true" />
-              </span>
-              <span className="font-display text-h4 hidden truncate font-semibold sm:inline">
-                {t('app.name')}
-              </span>
-            </Link>
-          </div>
+    <SidebarProvider>
+      <AppFrame>
+        <header className="app-toolbar border-border bg-surface sticky top-0 z-10 border-b">
+          <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+            <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+              <MobileNavigation role={profile.role} />
+              <Link
+                href="/dashboard"
+                aria-label={t('app.name')}
+                className="text-ink flex min-w-0 items-center gap-2"
+              >
+                <span className="bg-brand-blue border-brand-blue-deep flex size-7 shrink-0 items-center justify-center rounded-md border text-white">
+                  <Building2 size={16} aria-hidden="true" />
+                </span>
+                <span className="font-display text-h4 hidden truncate font-semibold sm:inline">
+                  {t('app.name')}
+                </span>
+              </Link>
+            </div>
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-4">
-            <LocaleSwitcher />
-            <UserMenu name={profile.full_name} email={profile.email} role={profile.role} />
-            <GlassSettings />
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-4">
+              <LocaleSwitcher />
+              <UserMenu name={profile.full_name} email={profile.email} role={profile.role} />
+              <GlassSettings />
+            </div>
           </div>
+        </header>
+
+        <div className="app-body flex flex-col lg:flex-row">
+          <DesktopSidebar role={profile.role} />
+
+          <main className="app-workspace bg-surface min-w-0 flex-1 px-4 py-6 lg:px-8 lg:py-8">
+            {children}
+          </main>
         </div>
-      </header>
-
-      <div className="app-body flex flex-col lg:flex-row">
-        <aside className="app-sidebar hidden shrink-0 px-4 py-6 lg:block lg:w-60">
-          <Link
-            href="/dashboard"
-            className="mb-9 flex items-center gap-2 px-3 text-sm font-semibold text-white"
-          >
-            <Building2 size={19} aria-hidden="true" />
-            {t('app.name')}
-          </Link>
-          <Sidebar role={profile.role} />
-        </aside>
-
-        <main className="app-workspace bg-surface min-w-0 flex-1 px-4 py-6 lg:px-8 lg:py-8">
-          {children}
-        </main>
-      </div>
-    </div>
+      </AppFrame>
+    </SidebarProvider>
   );
 }
 

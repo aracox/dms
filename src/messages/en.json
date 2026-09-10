@@ -16,6 +16,8 @@
     "menu": "Menu",
     "openMenu": "Open navigation menu",
     "closeMenu": "Close navigation menu",
+    "hideSidebar": "Hide sidebar",
+    "showSidebar": "Show sidebar",
     "dashboard": "Dashboard",
     "floorPlan": "Floor Plan",
     "rooms": "Rooms",

@@ -16,6 +16,8 @@
     "menu": "เมนู",
     "openMenu": "เปิดเมนูนำทาง",
     "closeMenu": "ปิดเมนูนำทาง",
+    "hideSidebar": "ซ่อนเมนูด้านข้าง",
+    "showSidebar": "แสดงเมนูด้านข้าง",
     "dashboard": "ภาพรวม",
     "floorPlan": "ผังห้องพัก",
     "rooms": "ห้องพัก",

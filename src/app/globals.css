@@ -300,6 +300,10 @@ body {
     display: contents;
   }
 
+  .app-frame[data-sidebar-hidden='true'] {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
   .app-toolbar {
     grid-column: 2;
     grid-row: 1;
