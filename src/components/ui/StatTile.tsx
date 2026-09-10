@@ -12,18 +12,15 @@ const TONE_ACCENT: Record<StatTone, string> = {
   red: 'text-brand-red-deep',
 };
 
-const TONE_RULE: Record<StatTone, string> = {
-  neutral: 'bg-border-strong',
-  blue: 'bg-brand-blue',
-  green: 'bg-brand-green',
-  yellow: 'bg-brand-yellow',
-  red: 'bg-brand-red',
+const TONE_SURFACE: Record<StatTone, string> = {
+  neutral: 'bg-surface-muted',
+  blue: 'bg-brand-blue-soft/50',
+  green: 'bg-brand-green-soft/50',
+  yellow: 'bg-brand-yellow-soft/50',
+  red: 'bg-brand-red-soft/50',
 };
 
-/**
- * Dashboard metric. A 3px coloured rule carries the tone rather than a tinted
- * background, so a row of tiles stays readable at a glance.
- */
+/** Dashboard metric with a subtle status tint and a clear numeric hierarchy. */
 export function StatTile({
   label,
   value,
@@ -42,14 +39,11 @@ export function StatTile({
   return (
     <div
       className={cn(
-        'border-border glass relative overflow-hidden rounded-xl border p-4 shadow-sm',
+        'border-border relative overflow-hidden rounded-xl border p-4',
+        TONE_SURFACE[tone],
         className,
       )}
     >
-      <span
-        className={cn('absolute inset-y-0 left-0 w-[3px]', TONE_RULE[tone])}
-        aria-hidden="true"
-      />
       <div className="flex items-start justify-between gap-2">
         <p className="text-ink-muted text-caption font-medium">{label}</p>
         {icon ? <span className="text-ink-subtle">{icon}</span> : null}

@@ -23,17 +23,12 @@
   --color-brand-green-deep: rgb(38 92 89);
   --color-brand-red-deep: rgb(150 30 26);
 
-  /*
-   * Surface ladder. Warm and deliberately spread: a white card on a 3%-off-white
-   * page has no separation, so panels read as flat page rather than as panels.
-   * Cards stay the lightest step but never pure white, and the page ground sits
-   * far enough below them that elevation is legible without leaning on shadow.
-   */
-  --color-surface: rgb(253 252 250);
-  --color-surface-muted: rgb(239 235 228);
-  --color-surface-sunken: rgb(228 223 214);
-  --color-border: rgb(216 209 197);
-  --color-border-strong: rgb(185 175 158);
+  /* White work surfaces and quiet cool-grey separators. */
+  --color-surface: rgb(255 255 255);
+  --color-surface-muted: rgb(247 247 250);
+  --color-surface-sunken: rgb(239 237 246);
+  --color-border: rgb(233 232 239);
+  --color-border-strong: rgb(202 198 216);
   --color-ink: rgb(24 30 40);
   --color-ink-muted: rgb(96 106 122);
   --color-ink-subtle: rgb(138 147 161);
@@ -281,12 +276,89 @@ html {
 body {
   background-color: var(--color-surface-muted);
   background-image:
-    radial-gradient(circle at 8% 0%, rgb(48 111 199 / 0.2), transparent 30rem),
-    radial-gradient(circle at 100% 18%, rgb(67 147 143 / 0.18), transparent 32rem),
-    linear-gradient(135deg, rgb(239 235 228), rgb(233 240 250) 55%, rgb(232 243 242));
+    radial-gradient(ellipse at 100% 0%, rgb(70 155 177 / 0.85), transparent 60%),
+    radial-gradient(ellipse at 0% 60%, rgb(211 126 126 / 0.9), transparent 65%),
+    linear-gradient(165deg, #594497 5%, #785b9b 35%, #c59a89 72%, #dedde9);
   background-attachment: fixed;
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
+}
+
+/* The reference's glass frame surrounds an opaque, readable workspace. */
+.app-frame {
+  max-width: 1800px;
+  margin-inline: auto;
+}
+
+@media (min-width: 1024px) {
+  .app-frame {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    min-height: calc(100dvh - 64px);
+    margin: 32px;
+    padding: 7px 7px 7px 0;
+    border: 1px solid rgb(255 255 255 / 0.3);
+    border-radius: 20px;
+    background: rgb(255 255 255 / 0.12);
+    box-shadow: 0 24px 80px rgb(37 31 96 / 0.12);
+  }
+
+  .app-body {
+    display: contents;
+  }
+
+  .app-toolbar {
+    grid-column: 2;
+    grid-row: 1;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .app-sidebar {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: auto;
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+  }
+
+  .app-sidebar .sidebar-navigation h2 {
+    color: rgb(255 255 255 / 0.75);
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .app-sidebar .sidebar-navigation a {
+    color: white;
+    border-radius: 6px;
+    font-weight: 400;
+  }
+
+  .app-sidebar .sidebar-navigation a:hover {
+    background: rgb(255 255 255 / 0.12);
+  }
+
+  .app-sidebar .sidebar-navigation a[aria-current='page'] {
+    background: rgb(255 255 255 / 0.22);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.15);
+    font-weight: 500;
+  }
+
+  .app-workspace {
+    grid-column: 2;
+    grid-row: 2;
+    border-radius: 0 0 12px 12px;
+  }
+}
+
+@media (min-width: 1864px) {
+  .app-frame {
+    margin-inline: auto;
+  }
 }
 
 /* Visible keyboard focus. The floor plan is fully keyboard navigable. */

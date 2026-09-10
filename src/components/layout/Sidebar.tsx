@@ -44,7 +44,7 @@ export function Sidebar({ role, onNavigate }: { role: AppRole | null; onNavigate
   const pathname = usePathname();
 
   return (
-    <nav aria-label={t('dashboard')} className="space-y-5">
+    <nav aria-label={t('dashboard')} className="sidebar-navigation space-y-7">
       {NAV_SECTIONS.map((section, sectionIndex) => {
         const visible = section.items.filter(
           (item) => !item.permission || can(role, item.permission as Permission),

@@ -15,11 +15,7 @@ export function Table({
   return (
     <div className="overflow-x-auto">
       <table className={cn('text-body-sm w-full min-w-[32rem] border-collapse', className)}>
-        {/*
-         * Uppercase, tracked, display face -- the spec's treatment for small
-         * labels (Do #10). Reads as inscribed column headings rather than data.
-         */}
-        <thead className="border-border text-ink-muted font-display border-b text-left text-[11px] tracking-[1px] uppercase">
+        <thead className="border-border bg-surface-muted/50 text-ink-muted font-display text-caption border-b text-left">
           {head}
         </thead>
         <tbody className="divide-border [&>tr:hover]:bg-surface-muted divide-y [&>tr]:transition-colors">

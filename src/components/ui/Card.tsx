@@ -23,7 +23,7 @@ export function Card({
   return (
     <section
       className={cn(
-        'glass rounded-md border',
+        'bg-surface overflow-hidden rounded-xl border',
         elevated
           ? 'border-brand-yellow/40 hover:shadow-glow shadow-lg transition-shadow duration-300'
           : 'border-border shadow-sm',

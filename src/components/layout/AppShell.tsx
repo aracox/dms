@@ -25,8 +25,8 @@ export async function AppShell({
   const t = await getTranslations();
 
   return (
-    <div className="min-h-dvh">
-      <header className="border-border glass sticky top-0 z-10 border-b">
+    <div className="app-frame min-h-dvh">
+      <header className="app-toolbar border-border bg-surface sticky top-0 z-10 border-b">
         <div className="flex items-center justify-between gap-4 px-4 py-2.5">
           <div className="flex min-w-0 items-center gap-1 sm:gap-2">
             <MobileNavigation role={profile.role} />
@@ -52,12 +52,21 @@ export async function AppShell({
         </div>
       </header>
 
-      <div className="flex flex-col lg:flex-row">
-        <aside className="border-border glass hidden shrink-0 border-r px-2 py-3 lg:sticky lg:top-[53px] lg:block lg:h-[calc(100dvh-53px)] lg:w-60 lg:overflow-y-auto">
+      <div className="app-body flex flex-col lg:flex-row">
+        <aside className="app-sidebar hidden shrink-0 px-4 py-6 lg:block lg:w-60">
+          <Link
+            href="/dashboard"
+            className="mb-9 flex items-center gap-2 px-3 text-sm font-semibold text-white"
+          >
+            <Building2 size={19} aria-hidden="true" />
+            {t('app.name')}
+          </Link>
           <Sidebar role={profile.role} />
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 py-5 lg:px-6">{children}</main>
+        <main className="app-workspace bg-surface min-w-0 flex-1 px-4 py-6 lg:px-8 lg:py-8">
+          {children}
+        </main>
       </div>
     </div>
   );
