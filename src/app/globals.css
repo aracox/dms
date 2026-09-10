@@ -284,10 +284,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* The reference's glass frame surrounds an opaque, readable workspace. */
 .app-frame {
-  max-width: 1800px;
-  margin-inline: auto;
+  min-height: 100dvh;
 }
 
 @media (min-width: 1024px) {
@@ -295,13 +293,7 @@ body {
     display: grid;
     grid-template-columns: 232px minmax(0, 1fr);
     grid-template-rows: auto 1fr;
-    min-height: calc(100dvh - 64px);
-    margin: 32px;
-    padding: 7px 7px 7px 0;
-    border: 1px solid rgb(255 255 255 / 0.3);
-    border-radius: 20px;
-    background: rgb(255 255 255 / 0.12);
-    box-shadow: 0 24px 80px rgb(37 31 96 / 0.12);
+    min-height: 100dvh;
   }
 
   .app-body {
@@ -311,7 +303,6 @@ body {
   .app-toolbar {
     grid-column: 2;
     grid-row: 1;
-    border-radius: 12px 12px 0 0;
   }
 
   .app-sidebar {
@@ -319,9 +310,9 @@ body {
     grid-row: 1 / span 2;
     width: auto;
     position: sticky;
-    top: 24px;
+    top: 0;
     align-self: start;
-    max-height: calc(100dvh - 48px);
+    max-height: 100dvh;
     overflow-y: auto;
   }
 
@@ -351,13 +342,6 @@ body {
   .app-workspace {
     grid-column: 2;
     grid-row: 2;
-    border-radius: 0 0 12px 12px;
-  }
-}
-
-@media (min-width: 1864px) {
-  .app-frame {
-    margin-inline: auto;
   }
 }
 
