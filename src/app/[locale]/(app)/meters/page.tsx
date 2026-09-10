@@ -1,5 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
+import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
+import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
 import { Badge } from '@/components/ui/Badge';
 import { buttonClasses } from '@/components/ui/Button';
@@ -15,20 +17,29 @@ import {
   meterRoomIsComplete,
 } from '@/lib/meters/room-progress';
 import { getMeterUsage } from '@/lib/reporting/queries';
+import { filterRoomsByView, parseSegmentView, propertySegment } from '@/lib/reporting/segments';
 import { getRoomBoard } from '@/lib/rooms/queries';
-import { currentBillingMonth, formatBillingMonth } from '@/lib/utils/date';
+import { currentBillingMonth, formatBillingMonth, formatBillingPeriod } from '@/lib/utils/date';
 
-export default async function MetersPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function MetersPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ segment?: string | string[] }>;
+}) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const t = await getTranslations();
   const typedLocale = locale as Locale;
+  const view = parseSegmentView((await searchParams).segment);
   const billingMonth = currentBillingMonth();
-  const [rooms, usage] = await Promise.all([
+  const [wholeRooms, usage] = await Promise.all([
     getRoomBoard({ includeTest: false }),
     getMeterUsage(billingMonth),
   ]);
+  const rooms = filterRoomsByView(view, wholeRooms);
   const readingsByRoom = groupMeterReadingsByRoom(usage);
   const activeRooms = rooms
     .filter((room) => room.contract_status === 'active')
@@ -51,15 +62,18 @@ export default async function MetersPage({ params }: { params: Promise<{ locale:
     0,
   );
   const monthLabel = formatBillingMonth(billingMonth, typedLocale);
+  const periodLabel = formatBillingPeriod(billingMonth, typedLocale);
 
   return (
     <>
       <PageHeader
         title={t('meters.title')}
-        description={t('meters.hubSubtitle', { month: monthLabel })}
+        description={t('meters.hubSubtitle', { period: periodLabel })}
+        action={<SegmentSwitcher current={view} pathname="/meters" />}
       />
 
-      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-5">
+        <StatTile label={t('dashboard.totalRooms')} value={rooms.length} tone="blue" />
         <StatTile
           label={t('meters.completeRooms')}
           value={completeRooms}
@@ -90,6 +104,7 @@ export default async function MetersPage({ params }: { params: Promise<{ locale:
           title={t('meters.billingMonth')}
           description={t('meters.activeRoomCount', {
             count: activeRooms.length,
+            total: rooms.length,
             month: monthLabel,
           })}
         />
@@ -102,6 +117,7 @@ export default async function MetersPage({ params }: { params: Promise<{ locale:
             head={
               <tr>
                 <TH>{t('room.roomNumber')}</TH>
+                <TH>{t('segment.column')}</TH>
                 <TH>{t('tenant.title')}</TH>
                 <TH>{t('room.electricity')}</TH>
                 <TH>{t('room.water')}</TH>
@@ -121,6 +137,9 @@ export default async function MetersPage({ params }: { params: Promise<{ locale:
                     <Link href={meterHref} className="text-brand-blue-deep font-semibold underline">
                       {room.room_number}
                     </Link>
+                  </TD>
+                  <TD>
+                    <SegmentBadge segment={propertySegment(room.room_type)} />
                   </TD>
                   <TD>{room.tenant_name ?? t('common.notAvailable')}</TD>
                   <TD>

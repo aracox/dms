@@ -108,3 +108,24 @@ export function formatBillingMonth(month: IsoDate | null | undefined, locale: 't
     year: 'numeric',
   }).format(new Date(`${month}T12:00:00Z`));
 }
+
+/** Display a billing month as its full date range, e.g. '1–30 ก.ย. 2569' / '1–30 Sep 2026'. */
+export function formatBillingPeriod(
+  month: IsoDate | null | undefined,
+  locale: 'th' | 'en',
+): string {
+  if (!month) return '-';
+  const lastDay = addDays(addMonths(month, 1), -1);
+  const intlLocale = locale === 'th' ? 'th-TH-u-ca-buddhist' : 'en-GB';
+  const startDay = new Intl.DateTimeFormat(intlLocale, {
+    timeZone: BANGKOK_TZ,
+    day: 'numeric',
+  }).format(new Date(`${month}T12:00:00Z`));
+  const endLabel = new Intl.DateTimeFormat(intlLocale, {
+    timeZone: BANGKOK_TZ,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(`${lastDay}T12:00:00Z`));
+  return `${startDay}–${endLabel}`;
+}
