@@ -8,15 +8,31 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
+import { confirmedPaid, outstanding } from '@/lib/billing/calc';
 import { formatTHB } from '@/lib/billing/money';
+import { SUBSCRIPTION_FEE_KEYS } from '@/lib/invoices/fees';
 import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
-import { daysBetween, formatDate } from '@/lib/utils/date';
+import { addDays, daysBetween, formatDate } from '@/lib/utils/date';
 import type { ContractStatus } from '@/types/database';
 
 import { ContractRentField } from './ContractRentField';
+import { ContractSubscriptionsCard } from './ContractSubscriptionsCard';
+import { RenewContractForm } from './RenewContractForm';
+import { SettleDepositForm } from './SettleDepositForm';
 import { TenantDocumentsCard, type TenantDocumentView } from './TenantDocumentsCard';
+
+/** Best-effort: a missing name just falls back to blank rather than failing the tab. */
+async function loadTenantName(tenantId: string): Promise<string> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('tenants')
+    .select('full_name')
+    .eq('id', tenantId)
+    .maybeSingle();
+  return data?.full_name ?? '';
+}
 
 /** Admin+ only: matches the tenant_documents RLS and the storage bucket's own policy. */
 async function loadTenantDocuments(tenantId: string): Promise<TenantDocumentView[]> {
@@ -63,12 +79,48 @@ export async function RoomContractTab({
   const t = await getTranslations();
   const { contract, tenant, contractHistory } = detail;
 
+  const subscriptionFees = Object.fromEntries(
+    SUBSCRIPTION_FEE_KEYS.map((key) => [
+      key,
+      typeof detail.settings[key] === 'number' ? (detail.settings[key] as number) : 0,
+    ]),
+  );
+
   const daysRemaining = contract ? daysBetween(today, contract.end_date) : null;
+
+  // Defaults for a 1-year renewal, same as the move-in page's own default term.
+  const renewalStartDate = contract ? addDays(contract.end_date, 1) : '';
+  const [renewalYear, renewalMonth, renewalDay] = renewalStartDate.split('-').map(Number);
+  const renewalEndDate = contract
+    ? `${(renewalYear ?? 0) + 1}-${String(renewalMonth).padStart(2, '0')}-${String(
+        renewalDay,
+      ).padStart(2, '0')}`
+    : '';
   const profile = await getCurrentProfile();
   const canMoveIn = !contract && can(profile?.role, 'contracts:write');
   const canEditContract = can(profile?.role, 'contracts:write');
   const canManageDocuments = can(profile?.role, 'tenants:write');
   const documents = tenant && canManageDocuments ? await loadTenantDocuments(tenant.id) : null;
+
+  // Only the room's single most recent past contract prompts for settlement --
+  // an older one left unsettled from before this feature existed should not
+  // resurface, and a contract that ended via renewal (status 'expired') was
+  // never actually vacated, so it never needs a refund.
+  const mostRecentPast = contract
+    ? contractHistory.find((row) => row.id !== contract.id)
+    : contractHistory[0];
+  const pendingSettlement =
+    mostRecentPast && mostRecentPast.status === 'terminated' && !mostRecentPast.deposit_settled_at
+      ? mostRecentPast
+      : null;
+  const settlementTenantName = pendingSettlement
+    ? await loadTenantName(pendingSettlement.tenant_id)
+    : '';
+  const settlementOutstanding = pendingSettlement
+    ? detail.invoices
+        .filter((invoice) => invoice.contract_id === pendingSettlement.id)
+        .reduce((sum, invoice) => sum + outstanding(invoice.total, confirmedPaid(invoice.payments)), 0)
+    : 0;
 
   return (
     <div className="space-y-4">
@@ -157,6 +209,42 @@ export async function RoomContractTab({
         </CardBody>
       </Card>
 
+      {pendingSettlement && canEditContract ? (
+        <SettleDepositForm
+          contractId={pendingSettlement.id}
+          roomId={detail.room.id}
+          tenantName={settlementTenantName}
+          terminatedAt={pendingSettlement.terminated_at ?? pendingSettlement.end_date}
+          deposit={pendingSettlement.deposit}
+          outstanding={settlementOutstanding}
+          locale={locale}
+        />
+      ) : null}
+
+      {contract && canEditContract ? (
+        <RenewContractForm
+          contractId={contract.id}
+          roomId={detail.room.id}
+          defaultStartDate={renewalStartDate}
+          defaultEndDate={renewalEndDate}
+          defaultMonthlyRent={contract.monthly_rent}
+          defaultDeposit={contract.deposit}
+          defaultPaymentDueDay={contract.payment_due_day}
+          defaultOccupantCount={contract.occupant_count}
+        />
+      ) : null}
+
+      {contract ? (
+        <ContractSubscriptionsCard
+          contractId={contract.id}
+          roomId={detail.room.id}
+          fees={subscriptionFees}
+          active={detail.contractSubscriptions}
+          canEdit={canEditContract}
+          locale={locale}
+        />
+      ) : null}
+
       {tenant && documents ? (
         <TenantDocumentsCard
           tenantId={tenant.id}
@@ -177,6 +265,7 @@ export async function RoomContractTab({
                 <TH numeric>{t('room.monthlyRent')}</TH>
                 <TH numeric>{t('room.occupants')}</TH>
                 <TH>{t('common.status')}</TH>
+                <TH>{t('contract.settleDeposit')}</TH>
               </tr>
             }
           >
@@ -190,6 +279,15 @@ export async function RoomContractTab({
                   <Badge tone={CONTRACT_TONE[row.status]}>
                     {t(`contractStatus.${row.status}`)}
                   </Badge>
+                </TD>
+                <TD>
+                  {row.deposit_refund !== null
+                    ? t('contract.depositRefunded', {
+                        amount: formatTHB(row.deposit_refund, locale),
+                      })
+                    : row.status === 'terminated'
+                      ? '-'
+                      : ''}
                 </TD>
               </tr>
             ))}

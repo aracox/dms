@@ -2,9 +2,16 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { round2 } from '@/lib/billing/money';
+import { SUBSCRIPTION_FEE_KEYS, type SubscriptionFeeKey } from '@/lib/invoices/fees';
 import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
-import { contractRentSchema } from '@/lib/validation/schemas';
+import { bangkokToday } from '@/lib/utils/date';
+import {
+  contractRentSchema,
+  renewContractSchema,
+  settleDepositSchema,
+} from '@/lib/validation/schemas';
 
 export interface UpdateContractRentState {
   error: string | null;
@@ -40,6 +47,157 @@ export async function updateContractRentAction(
     .eq('id', parsed.data.contract_id);
 
   if (error) return { error: 'errors.generic' };
+
+  if (roomId) revalidatePath(`/rooms/${roomId}`);
+  return { error: null };
+}
+
+export interface RenewContractState {
+  error: string | null;
+}
+
+/**
+ * Ends the current contract and opens a new term for the same tenant --
+ * see renew_contract() (0027). Subscriptions do not carry over: a new
+ * term may come with different extras, so the owner re-picks them on the
+ * new contract rather than inheriting the old one's silently.
+ */
+export async function renewContractAction(
+  _previous: RenewContractState,
+  formData: FormData,
+): Promise<RenewContractState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'contracts:write');
+
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const parsed = renewContractSchema.safeParse({
+    contract_id: String(formData.get('contract_id') ?? ''),
+    start_date: String(formData.get('start_date') ?? ''),
+    end_date: String(formData.get('end_date') ?? ''),
+    monthly_rent: Number(formData.get('monthly_rent')),
+    deposit: Number(formData.get('deposit')),
+    payment_due_day: Number(formData.get('payment_due_day')),
+    occupant_count: Number(formData.get('occupant_count')),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('renew_contract', {
+    p_contract_id: parsed.data.contract_id,
+    p_start_date: parsed.data.start_date,
+    p_end_date: parsed.data.end_date,
+    p_monthly_rent: parsed.data.monthly_rent,
+    p_deposit: parsed.data.deposit,
+    p_payment_due_day: parsed.data.payment_due_day,
+    p_occupant_count: parsed.data.occupant_count,
+  });
+
+  if (error) return { error: 'errors.generic' };
+
+  if (roomId) revalidatePath(`/rooms/${roomId}`);
+  return { error: null };
+}
+
+export interface SettleDepositState {
+  error: string | null;
+}
+
+/**
+ * Records how much of a terminated contract's deposit was withheld; the
+ * rest is the refund. A separate step from move-out itself, since the
+ * final figure often is not known (a damage check, the last utility bill)
+ * until after the tenant has already left.
+ */
+export async function settleDepositAction(
+  _previous: SettleDepositState,
+  formData: FormData,
+): Promise<SettleDepositState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'contracts:write');
+
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const parsed = settleDepositSchema.safeParse({
+    contract_id: String(formData.get('contract_id') ?? ''),
+    deduction: Number(formData.get('deduction')),
+    note: String(formData.get('note') ?? '').trim() || null,
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  const supabase = await createClient();
+  const { data: contract } = await supabase
+    .from('contracts')
+    .select('deposit, status')
+    .eq('id', parsed.data.contract_id)
+    .maybeSingle();
+
+  if (!contract) return { error: 'errors.generic' };
+  if (contract.status !== 'terminated') return { error: 'contract.notTerminated' };
+
+  const refund = Math.max(0, round2(contract.deposit - parsed.data.deduction));
+
+  const { error } = await supabase
+    .from('contracts')
+    .update({
+      deposit_deduction: parsed.data.deduction,
+      deposit_refund: refund,
+      deposit_settled_at: bangkokToday(),
+      deposit_settlement_note: parsed.data.note,
+    })
+    .eq('id', parsed.data.contract_id);
+
+  if (error) return { error: 'errors.generic' };
+
+  if (roomId) revalidatePath(`/rooms/${roomId}`);
+  return { error: null };
+}
+
+export interface UpdateSubscriptionsState {
+  error: string | null;
+}
+
+/**
+ * Replaces the contract's whole subscription set with whatever came in on
+ * this submit. A full delete-then-insert rather than a diff -- at most 9
+ * rows, so there is no cost to keeping this simple.
+ */
+export async function updateContractSubscriptionsAction(
+  _previous: UpdateSubscriptionsState,
+  formData: FormData,
+): Promise<UpdateSubscriptionsState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'contracts:write');
+
+  const contractId = String(formData.get('contract_id') ?? '');
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const validKeys: readonly string[] = SUBSCRIPTION_FEE_KEYS;
+  const selected = formData
+    .getAll('subscription')
+    .map(String)
+    .filter((key): key is SubscriptionFeeKey => validKeys.includes(key));
+
+  const supabase = await createClient();
+
+  const { error: deleteError } = await supabase
+    .from('contract_subscriptions')
+    .delete()
+    .eq('contract_id', contractId);
+  if (deleteError) return { error: 'errors.generic' };
+
+  if (selected.length > 0) {
+    const { error: insertError } = await supabase
+      .from('contract_subscriptions')
+      .insert(selected.map((fee_key) => ({ contract_id: contractId, fee_key })));
+    if (insertError) return { error: 'errors.generic' };
+  }
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
   return { error: null };

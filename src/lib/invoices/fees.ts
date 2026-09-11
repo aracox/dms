@@ -21,6 +21,39 @@ export const INVOICE_EXTRA_FEE_KEYS = [
 
 export type InvoiceExtraFeeKey = (typeof INVOICE_EXTRA_FEE_KEYS)[number];
 
+/**
+ * The subset of extra fees that are standing subscriptions rather than
+ * one-off events -- everything except card_replacement_fee, which only
+ * applies the month a card actually gets replaced.
+ */
+export const SUBSCRIPTION_FEE_KEYS = [
+  'internet_fee',
+  'parking_fee_car',
+  'parking_fee_motorcycle',
+  'netflix_fee',
+  'youtube_fee',
+  'disney_fee',
+  'viu_fee',
+  'hbo_fee',
+  'amazon_prime_fee',
+] as const satisfies readonly InvoiceExtraFeeKey[];
+
+export type SubscriptionFeeKey = (typeof SUBSCRIPTION_FEE_KEYS)[number];
+
+/** Settings label key for each extra fee, reusing the existing Settings page copy. */
+export const EXTRA_FEE_LABEL_KEY: Record<InvoiceExtraFeeKey, string> = {
+  internet_fee: 'settings.internetFee',
+  parking_fee_car: 'settings.parkingFeeCar',
+  parking_fee_motorcycle: 'settings.parkingFeeMotorcycle',
+  card_replacement_fee: 'settings.cardReplacementFee',
+  netflix_fee: 'settings.netflixFee',
+  youtube_fee: 'settings.youtubeFee',
+  disney_fee: 'settings.disneyFee',
+  viu_fee: 'settings.viuFee',
+  hbo_fee: 'settings.hboFee',
+  amazon_prime_fee: 'settings.amazonPrimeFee',
+};
+
 export const EXTRA_FEE_META: Record<
   InvoiceExtraFeeKey,
   { type: InvoiceItemType; description: string }

@@ -183,9 +183,24 @@ export type ContractRow = {
   terminated_at: string | null;
   termination_reason: string | null;
   notes: string | null;
+  /** Withheld from the deposit for damages/unpaid dues. 0 until settled. */
+  deposit_deduction: number;
+  /** Null until settled: deposit - deposit_deduction, floored at 0. */
+  deposit_refund: number | null;
+  deposit_settled_at: string | null;
+  deposit_settlement_note: string | null;
   is_test: boolean;
   created_at: string;
   updated_at: string;
+};
+
+/** Row presence = subscribed. See fee_key's check constraint for the allowed set. */
+export type ContractSubscriptionRow = {
+  id: string;
+  contract_id: string;
+  fee_key: string;
+  is_test: boolean;
+  created_at: string;
 };
 
 export type AccessCardRow = {
@@ -593,6 +608,14 @@ export type Database = {
         },
         Partial<Writable<ContractRow, 'id'>>
       >;
+      contract_subscriptions: TableDef<
+        ContractSubscriptionRow,
+        Partial<Omit<ContractSubscriptionRow, 'id' | 'created_at'>> & {
+          contract_id: string;
+          fee_key: string;
+        },
+        NoWrites
+      >;
       access_cards: TableDef<
         AccessCardRow,
         Partial<Writable<AccessCardRow, 'id'>> & { room_id: string; card_number: string },
@@ -640,7 +663,10 @@ export type Database = {
       >;
       payments: TableDef<
         PaymentRow,
-        Partial<Writable<PaymentRow, 'id'>> & {
+        // 'id' is insertable (not just server-generated) so the slip's storage
+        // path -- which is keyed by payment id -- can be uploaded before the
+        // row exists and included in one insert.
+        Partial<Writable<PaymentRow>> & {
           invoice_id: string;
           payment_date: string;
           amount: number;
@@ -734,6 +760,18 @@ export type Database = {
           p_return_cards: boolean;
         };
         Returns: undefined;
+      };
+      renew_contract: {
+        Args: {
+          p_contract_id: string;
+          p_start_date: string;
+          p_end_date: string;
+          p_monthly_rent: number;
+          p_deposit: number;
+          p_payment_due_day: number;
+          p_occupant_count: number;
+        };
+        Returns: string;
       };
     };
     Enums: {

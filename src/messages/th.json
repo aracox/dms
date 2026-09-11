@@ -362,7 +362,18 @@
     "terminate": "ยกเลิกสัญญา",
     "terminatedAt": "วันที่ยกเลิก",
     "terminationReason": "เหตุผลการยกเลิก",
-    "roomAlreadyOccupied": "ห้องนี้มีสัญญาที่ใช้งานอยู่แล้ว กรุณารีเฟรชหน้านี้"
+    "roomAlreadyOccupied": "ห้องนี้มีสัญญาที่ใช้งานอยู่แล้ว กรุณารีเฟรชหน้านี้",
+    "subscriptions": "บริการเสริมรายเดือน",
+    "subscriptionsHint": "บริการเสริมที่ห้องนี้ต้องจ่ายทุกเดือน",
+    "noSubscriptions": "ไม่มีบริการเสริม",
+    "settleDeposit": "คืนเงินประกัน",
+    "settleDepositHint": "{tenant} ย้ายออกเมื่อ {date} เงินประกันที่วางไว้: {deposit}",
+    "deduction": "หักเงินประกัน (ค่าเสียหาย/ค้างชำระ)",
+    "refundAmount": "ยอดคืน",
+    "outstandingHint": "ผู้เช่ารายนี้ยังค้างชำระ {amount} จากใบแจ้งหนี้",
+    "depositSettledOn": "คืนเงินประกันเมื่อ {date}",
+    "depositRefunded": "คืนเงินแล้ว {amount}",
+    "notTerminated": "สัญญานี้ยังไม่ถูกยกเลิก"
   },
   "cards": {
     "title": "คีย์การ์ด",

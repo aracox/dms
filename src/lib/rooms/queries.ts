@@ -104,6 +104,8 @@ export interface RoomDetail {
   tickets: MaintenanceTicketRow[];
   /** Utility rates and optional extra fees, keyed by settings.key. See ROOM_DETAIL_SETTINGS_KEYS. */
   settings: Record<string, Json>;
+  /** fee_keys the active contract currently subscribes to. Empty when there is no active contract. */
+  contractSubscriptions: string[];
 }
 
 /**
@@ -160,10 +162,13 @@ export async function getRoomDetail(roomId: string): Promise<RoomDetail | null> 
   const invoiceIds = invoiceRows.map((invoice) => invoice.id);
   const cardIds = cardRows.map((card) => card.id);
 
-  const [tenant, items, payments, cardEvents] = await Promise.all([
+  const [tenant, subscriptions, items, payments, cardEvents] = await Promise.all([
     activeContract
       ? supabase.from('tenants').select('*').eq('id', activeContract.tenant_id).maybeSingle()
       : Promise.resolve({ data: null }),
+    activeContract
+      ? supabase.from('contract_subscriptions').select('fee_key').eq('contract_id', activeContract.id)
+      : Promise.resolve({ data: [] as { fee_key: string }[] }),
     invoiceIds.length
       ? supabase.from('invoice_items').select('*').in('invoice_id', invoiceIds).order('sort_order')
       : Promise.resolve({ data: [] as InvoiceItemRow[] }),
@@ -203,6 +208,7 @@ export async function getRoomDetail(roomId: string): Promise<RoomDetail | null> 
     })),
     tickets: tickets.data ?? [],
     settings: Object.fromEntries((settingsRows.data ?? []).map((row) => [row.key, row.value])),
+    contractSubscriptions: (subscriptions.data ?? []).map((row) => row.fee_key),
   };
 }
 

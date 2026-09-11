@@ -362,7 +362,18 @@
     "terminate": "Terminate contract",
     "terminatedAt": "Terminated on",
     "terminationReason": "Termination reason",
-    "roomAlreadyOccupied": "This room already has an active contract. Refresh the page."
+    "roomAlreadyOccupied": "This room already has an active contract. Refresh the page.",
+    "subscriptions": "Subscriptions",
+    "subscriptionsHint": "Recurring extras this contract pays for every month",
+    "noSubscriptions": "No recurring extras",
+    "settleDeposit": "Settle deposit",
+    "settleDepositHint": "{tenant} moved out on {date}. Deposit paid: {deposit}.",
+    "deduction": "Deduction (damages, unpaid dues)",
+    "refundAmount": "Refund",
+    "outstandingHint": "This tenant still has {amount} outstanding across their invoices.",
+    "depositSettledOn": "Deposit settled on {date}",
+    "depositRefunded": "Refunded {amount}",
+    "notTerminated": "This contract has not been terminated yet."
   },
   "cards": {
     "title": "Access Cards",

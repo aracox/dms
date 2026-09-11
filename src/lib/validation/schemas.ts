@@ -143,6 +143,27 @@ export const contractRentSchema = z.object({
 
 export type ContractRentInput = z.infer<typeof contractRentSchema>;
 
+/** Ends the named contract and opens a new term for the same tenant and room. */
+export const renewContractSchema = z
+  .object({
+    contract_id: uuid,
+    start_date: isoDate,
+    end_date: isoDate,
+    monthly_rent: money,
+    deposit: money,
+    payment_due_day: z
+      .int()
+      .min(1, 'validation.contract.dueDayRange')
+      .max(28, 'validation.contract.dueDayRange'),
+    occupant_count: z.int().min(1, 'validation.contract.occupantsMin').max(20),
+  })
+  .refine((value) => value.end_date > value.start_date, {
+    error: 'validation.contract.endBeforeStart',
+    path: ['end_date'],
+  });
+
+export type RenewContractInput = z.infer<typeof renewContractSchema>;
+
 // --- Access cards ----------------------------------------------------------
 
 export const accessCardSchema = z.object({
@@ -352,3 +373,12 @@ export const moveOutSchema = z.object({
 });
 
 export type MoveOutInput = z.infer<typeof moveOutSchema>;
+
+/** Deducts from a terminated contract's deposit; the rest is the refund. */
+export const settleDepositSchema = z.object({
+  contract_id: uuid,
+  deduction: money,
+  note: z.string().trim().max(1000).nullable().optional(),
+});
+
+export type SettleDepositInput = z.infer<typeof settleDepositSchema>;
