@@ -4,6 +4,7 @@ import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
 import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
 import { NewMaintenanceTicketForm } from '@/components/maintenance/NewMaintenanceTicketForm';
+import { TicketActionCells } from '@/components/maintenance/TicketActionCells';
 import { MAINTENANCE_TONE, PRIORITY_TONE } from '@/components/room/RoomMaintenanceTab';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardHeader } from '@/components/ui/Card';
@@ -91,6 +92,7 @@ export default async function MaintenancePage({
                 <TH>{t('common.status')}</TH>
                 <TH>{t('maintenance.technician')}</TH>
                 <TH numeric>{t('maintenance.cost')}</TH>
+                {canWrite ? <TH>{t('common.actions')}</TH> : null}
               </tr>
             }
           >
@@ -119,13 +121,27 @@ export default async function MaintenancePage({
                     {t(`maintenancePriority.${ticket.priority}`)}
                   </Badge>
                 </TD>
-                <TD>
-                  <Badge tone={MAINTENANCE_TONE[ticket.status]}>
-                    {t(`maintenanceStatus.${ticket.status}`)}
-                  </Badge>
-                </TD>
-                <TD>{ticket.technician ?? '-'}</TD>
-                <TD numeric>{ticket.cost === null ? '-' : formatTHB(ticket.cost, typedLocale)}</TD>
+                {canWrite ? (
+                  <TicketActionCells
+                    ticketId={ticket.ticket_id}
+                    roomId={ticket.room_id}
+                    status={ticket.status}
+                    technician={ticket.technician}
+                    cost={ticket.cost}
+                  />
+                ) : (
+                  <>
+                    <TD>
+                      <Badge tone={MAINTENANCE_TONE[ticket.status]}>
+                        {t(`maintenanceStatus.${ticket.status}`)}
+                      </Badge>
+                    </TD>
+                    <TD>{ticket.technician ?? '-'}</TD>
+                    <TD numeric>
+                      {ticket.cost === null ? '-' : formatTHB(ticket.cost, typedLocale)}
+                    </TD>
+                  </>
+                )}
               </tr>
             ))}
           </Table>

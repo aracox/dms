@@ -53,3 +53,59 @@ export async function createMaintenanceTicketAction(
   if (parsed.data.room_id) revalidatePath(`/rooms/${parsed.data.room_id}`);
   return { error: null };
 }
+
+export interface UpdateMaintenanceTicketState {
+  error: string | null;
+}
+
+const updateTicketSchema = maintenanceSchema.pick({
+  status: true,
+  technician: true,
+  cost: true,
+});
+
+/**
+ * Updates a ticket's status/technician/cost together in one save. Setting
+ * status to 'completed' also stamps completed_at; any other status clears
+ * it, matching the maintenance_completed_consistency_ck constraint.
+ * completed_at is a timestamptz (an instant, not a calendar date), so the
+ * Bangkok/UTC ambiguity bangkokToday() guards against does not apply here.
+ */
+export async function updateMaintenanceTicketAction(
+  _previous: UpdateMaintenanceTicketState,
+  formData: FormData,
+): Promise<UpdateMaintenanceTicketState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'maintenance:write');
+
+  const ticketId = String(formData.get('ticket_id') ?? '');
+  const roomId = String(formData.get('room_id') ?? '').trim() || null;
+  const costInput = String(formData.get('cost') ?? '').trim();
+
+  const parsed = updateTicketSchema.safeParse({
+    status: String(formData.get('status') ?? ''),
+    technician: String(formData.get('technician') ?? '').trim() || null,
+    cost: costInput ? Number(costInput) : null,
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('maintenance_tickets')
+    .update({
+      status: parsed.data.status,
+      technician: parsed.data.technician,
+      cost: parsed.data.cost,
+      completed_at: parsed.data.status === 'completed' ? new Date().toISOString() : null,
+    })
+    .eq('id', ticketId);
+
+  if (error) return { error: 'errors.generic' };
+
+  revalidatePath('/maintenance');
+  if (roomId) revalidatePath(`/rooms/${roomId}`);
+  return { error: null };
+}
