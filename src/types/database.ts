@@ -152,10 +152,23 @@ export type TenantRow = {
   emergency_contact: string | null;
   emergency_phone: string | null;
   line_id: string | null;
+  /** Real LINE Messaging API userId, captured via webhook. Null until linked. */
+  line_user_id: string | null;
+  /** One-time code given to the tenant so the webhook can match them. Cleared once linked. */
+  line_link_code: string | null;
   notes: string | null;
   is_test: boolean;
   created_at: string;
   updated_at: string;
+};
+
+/** Row in line_reminders_sent -- dedup log for the LINE reminder sweep. */
+export type LineReminderSentRow = {
+  id: string;
+  entity_type: 'invoice_due' | 'contract_expiring';
+  entity_id: string;
+  tenant_id: string;
+  sent_at: string;
 };
 
 /** Tracks files under the tenant-documents storage bucket (0008). */
@@ -597,6 +610,15 @@ export type Database = {
         },
         NoWrites
       >;
+      line_reminders_sent: TableDef<
+        LineReminderSentRow,
+        Partial<Omit<LineReminderSentRow, 'id' | 'sent_at'>> & {
+          entity_type: 'invoice_due' | 'contract_expiring';
+          entity_id: string;
+          tenant_id: string;
+        },
+        NoWrites
+      >;
       contracts: TableDef<
         ContractRow,
         Partial<Writable<ContractRow, 'id'>> & {
@@ -732,6 +754,29 @@ export type Database = {
       recalc_invoice: { Args: { p_invoice_id: string }; Returns: undefined };
       mark_overdue_invoices: { Args: Record<string, never>; Returns: number };
       current_app_role: { Args: Record<string, never>; Returns: AppRole };
+      due_soon_invoices_for_line: {
+        Args: { p_days_ahead: number };
+        Returns: {
+          invoice_id: string;
+          tenant_id: string;
+          line_user_id: string;
+          room_number: string;
+          tenant_name: string;
+          due_date: string;
+          outstanding: number;
+        }[];
+      };
+      expiring_contracts_for_line: {
+        Args: { p_days_ahead: number };
+        Returns: {
+          contract_id: string;
+          tenant_id: string;
+          line_user_id: string;
+          room_number: string;
+          tenant_name: string;
+          end_date: string;
+        }[];
+      };
       move_in_room: {
         Args: {
           p_room_id: string;

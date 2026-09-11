@@ -1,10 +1,25 @@
 'use server';
 
+import { randomInt } from 'node:crypto';
+
 import { revalidatePath } from 'next/cache';
 
 import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { tenantContactSchema } from '@/lib/validation/schemas';
+
+// Excludes 0/O/1/I so a staff member reading the code aloud can't confuse them.
+const LINE_LINK_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const LINE_LINK_CODE_LENGTH = 6;
+const UNIQUE_VIOLATION = '23505';
+
+function generateLineLinkCode(): string {
+  let code = '';
+  for (let i = 0; i < LINE_LINK_CODE_LENGTH; i += 1) {
+    code += LINE_LINK_CODE_CHARS[randomInt(LINE_LINK_CODE_CHARS.length)];
+  }
+  return code;
+}
 
 export interface UpdateTenantContactState {
   error: string | null;
@@ -51,4 +66,48 @@ export async function updateTenantContactAction(
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
   return { error: null };
+}
+
+export interface GenerateLineLinkCodeState {
+  error: string | null;
+  code: string | null;
+}
+
+/**
+ * Generates a one-time code staff relay to the tenant to send to the LINE
+ * Official Account, which the webhook (src/lib/line/webhook.ts) matches to
+ * capture the tenant's real LINE userId. Retries on a code collision against
+ * the partial unique index; refuses to overwrite an already-linked tenant.
+ */
+export async function generateLineLinkCodeAction(
+  _previous: GenerateLineLinkCodeState,
+  formData: FormData,
+): Promise<GenerateLineLinkCodeState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'tenants:write');
+
+  const tenantId = String(formData.get('tenant_id') ?? '');
+  const roomId = String(formData.get('room_id') ?? '');
+  if (!tenantId) return { error: 'errors.generic', code: null };
+
+  const supabase = await createClient();
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const code = generateLineLinkCode();
+    const { data, error } = await supabase
+      .from('tenants')
+      .update({ line_link_code: code })
+      .eq('id', tenantId)
+      .is('line_user_id', null)
+      .select('line_link_code')
+      .single();
+
+    if (!error) {
+      if (roomId) revalidatePath(`/rooms/${roomId}`);
+      return { error: null, code: data.line_link_code };
+    }
+    if (error.code !== UNIQUE_VIOLATION) return { error: 'errors.generic', code: null };
+  }
+
+  return { error: 'errors.generic', code: null };
 }

@@ -1,15 +1,79 @@
 'use client';
 
-import { Lock } from 'lucide-react';
+import { CheckCircle2, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, type ReactNode } from 'react';
 
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { InlineEditableField } from '@/components/ui/InlineEditableField';
 import type { Locale } from '@/i18n/routing';
-import { updateTenantContactAction } from '@/lib/tenants/actions';
+import { generateLineLinkCodeAction, updateTenantContactAction } from '@/lib/tenants/actions';
 import { formatDate } from '@/lib/utils/date';
 import type { ContractRow, TenantRow } from '@/types/database';
+
+/** LINE link status: linked badge, a pending code with instructions, or a button to generate one. */
+function LineLinkSection({
+  tenantId,
+  roomId,
+  lineUserId,
+  lineLinkCode,
+}: {
+  tenantId: string;
+  roomId: string;
+  lineUserId: string | null;
+  lineLinkCode: string | null;
+}) {
+  const t = useTranslations();
+  const [code, setCode] = useState(lineLinkCode);
+  const [linked] = useState(Boolean(lineUserId));
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleGenerate() {
+    setPending(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.set('tenant_id', tenantId);
+    formData.set('room_id', roomId);
+
+    const result = await generateLineLinkCodeAction({ error: null, code: null }, formData);
+    setPending(false);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    setCode(result.code);
+  }
+
+  return (
+    <div className="py-2">
+      <dt className="text-ink-subtle text-caption">{t('tenant.lineLink')}</dt>
+      <dd className="mt-0.5">
+        {linked ? (
+          <Badge tone="green" icon={<CheckCircle2 size={12} aria-hidden="true" />}>
+            {t('tenant.lineLinked')}
+          </Badge>
+        ) : code ? (
+          <div>
+            <p className="text-ink font-mono text-lg font-semibold tracking-widest">{code}</p>
+            <p className="text-ink-subtle text-caption mt-0.5">{t('tenant.lineLinkInstructions')}</p>
+            <Button type="button" variant="ghost" size="sm" onClick={handleGenerate} disabled={pending}>
+              {t('tenant.regenerateLineLinkCode')}
+            </Button>
+          </div>
+        ) : (
+          <Button type="button" variant="secondary" size="sm" onClick={handleGenerate} disabled={pending}>
+            {t('tenant.generateLineLinkCode')}
+          </Button>
+        )}
+        {error ? <p className="text-brand-red-deep text-caption mt-0.5">{t(error)}</p> : null}
+      </dd>
+    </div>
+  );
+}
 
 /** A field the tenant record fixes at move-in -- plain text with a lock, never clickable. */
 function ReadOnlyField({
@@ -156,6 +220,20 @@ export function TenantContactCard({
             <ReadOnlyField
               label={t('tenant.emergencyPhone')}
               value={tenant.emergency_phone ?? t('common.notAvailable')}
+            />
+          )}
+
+          {canEdit ? (
+            <LineLinkSection
+              tenantId={tenant.id}
+              roomId={roomId}
+              lineUserId={tenant.line_user_id}
+              lineLinkCode={tenant.line_link_code}
+            />
+          ) : (
+            <ReadOnlyField
+              label={t('tenant.lineLink')}
+              value={tenant.line_user_id ? t('tenant.lineLinked') : t('common.notAvailable')}
             />
           )}
         </dl>
