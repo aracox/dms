@@ -20,25 +20,17 @@ import type { PropertySegment } from '@/types/database';
 
 const INITIAL_STATE: SettingsState = { message: null, error: null };
 
-/** 9rem per visible segment column, plus the label column. */
-function gridCols(visibleCount: number): string {
-  return visibleCount === 1
-    ? 'sm:grid-cols-[minmax(0,1fr)_9rem]'
-    : 'sm:grid-cols-[minmax(0,1fr)_9rem_9rem]';
-}
-
 /**
- * One setting, with a field per segment side by side.
- *
- * Laid out as a row rather than two separate forms so the หอพัก and บ้านพัก
- * prices for the same thing sit next to each other -- the whole reason the
- * owner wanted them split is to compare and diverge them deliberately.
+ * One setting as a tile: label on top, one input per visible segment below.
+ * Tiles sit in a grid rather than one full-width row per setting, so a card
+ * of six settings reads as two or three short rows instead of a long
+ * vertical list -- much better use of screen width above phone size.
  *
  * A segment the SegmentSwitcher has filtered out still renders, as a hidden
  * input carrying its current value, so submitting the filtered form does not
  * clobber it.
  */
-function SegmentPair({
+function SettingTile({
   settingKey,
   label,
   values,
@@ -53,69 +45,51 @@ function SegmentPair({
   visibleSegments: readonly PropertySegment[];
   step?: string;
 }) {
+  const showSegmentLabels = visibleSegments.length > 1;
+
   return (
-    <div
-      className={cn(
-        'border-border grid grid-cols-1 items-end gap-3 border-b pb-3 last:border-0 last:pb-0',
-        gridCols(visibleSegments.length),
-      )}
-    >
-      <span className="text-ink text-body-sm font-medium">
+    <div className="border-border rounded-md border p-3">
+      <span className="text-ink text-body-sm mb-2 block font-medium">
         {label}
         <RequiredMark />
       </span>
-      {PROPERTY_SEGMENTS.map((segment) => {
-        const name = segmentFieldName(segment, settingKey);
-        // A segment filtered out of view still needs its value submitted
-        // unchanged, or updateSettingsAction would read it as missing (0).
-        if (!visibleSegments.includes(segment)) {
+      <div className={cn('grid gap-2', showSegmentLabels ? 'grid-cols-2' : 'grid-cols-1')}>
+        {PROPERTY_SEGMENTS.map((segment) => {
+          const name = segmentFieldName(segment, settingKey);
+          // A segment filtered out of view still needs its value submitted
+          // unchanged, or updateSettingsAction would read it as missing (0).
+          if (!visibleSegments.includes(segment)) {
+            return (
+              <input key={segment} type="hidden" name={name} value={values[segment][settingKey]} />
+            );
+          }
           return (
-            <input key={segment} type="hidden" name={name} value={values[segment][settingKey]} />
+            <div key={segment}>
+              {showSegmentLabels ? (
+                <span className="text-ink-subtle font-display mb-1 flex items-center gap-1 text-[10px] tracking-[1px] uppercase">
+                  <span
+                    className={cn('size-2 rounded-sm', SEGMENT_STYLES[segment].fill)}
+                    aria-hidden="true"
+                  />
+                  {segmentLabels[segment]}
+                </span>
+              ) : null}
+              <Input
+                id={name}
+                name={name}
+                type="number"
+                min={0}
+                step={step}
+                defaultValue={values[segment][settingKey]}
+                required
+                // Every tile shows its own label, but each input still needs its
+                // own accessible name -- and the segment half must be translated.
+                aria-label={`${label} (${segmentLabels[segment]})`}
+              />
+            </div>
           );
-        }
-        return (
-          <Input
-            key={segment}
-            id={name}
-            name={name}
-            type="number"
-            min={0}
-            step={step}
-            defaultValue={values[segment][settingKey]}
-            required
-            // Visible headers exist per card, but each input still needs its own
-            // accessible name -- and the segment half of it must be translated.
-            aria-label={`${label} (${segmentLabels[segment]})`}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-/** Column headers naming each visible segment, above each card's rows. */
-function SegmentHeadings({
-  labels,
-  visibleSegments,
-}: {
-  labels: Record<string, string>;
-  visibleSegments: readonly PropertySegment[];
-}) {
-  return (
-    <div className={cn('mb-2 hidden gap-3 sm:grid', gridCols(visibleSegments.length))}>
-      <span />
-      {visibleSegments.map((segment) => (
-        <span
-          key={segment}
-          className="text-ink-muted font-display inline-flex items-center gap-1.5 text-[11px] tracking-[1px] uppercase"
-        >
-          <span
-            className={cn('size-2.5 rounded-sm', SEGMENT_STYLES[segment].fill)}
-            aria-hidden="true"
-          />
-          {labels[segment]}
-        </span>
-      ))}
+        })}
+      </div>
     </div>
   );
 }
@@ -129,8 +103,8 @@ export function SettingsForm({ values, view }: { values: SettingsBySegment; view
     PROPERTY_SEGMENTS.map((segment) => [segment, t(`segment.${segment}`)]),
   );
 
-  const pair = (settingKey: SegmentSettingKey, label: string, step?: string) => (
-    <SegmentPair
+  const tile = (settingKey: SegmentSettingKey, label: string, step?: string) => (
+    <SettingTile
       key={settingKey}
       settingKey={settingKey}
       label={label}
@@ -146,14 +120,13 @@ export function SettingsForm({ values, view }: { values: SettingsBySegment; view
       <Card>
         <CardHeader title={t('settings.utilityRates')} description={t('settings.perSegmentHint')} />
         <CardBody>
-          <SegmentHeadings labels={segmentLabels} visibleSegments={visibleSegments} />
-          <div className="space-y-3">
-            {pair('electricity_rate', t('meters.electricityRate'))}
-            {pair('water_rate', t('meters.waterRate'))}
-            {pair('default_monthly_rent', t('settings.defaultMonthlyRent'))}
-            {pair('default_deposit', t('settings.defaultDeposit'))}
-            {pair('default_payment_due_day', t('settings.defaultPaymentDueDay'), '1')}
-            {pair('payment_grace_days', t('settings.paymentGraceDays'), '1')}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {tile('electricity_rate', t('meters.electricityRate'))}
+            {tile('water_rate', t('meters.waterRate'))}
+            {tile('default_monthly_rent', t('settings.defaultMonthlyRent'))}
+            {tile('default_deposit', t('settings.defaultDeposit'))}
+            {tile('default_payment_due_day', t('settings.defaultPaymentDueDay'), '1')}
+            {tile('payment_grace_days', t('settings.paymentGraceDays'), '1')}
           </div>
         </CardBody>
       </Card>
@@ -161,12 +134,11 @@ export function SettingsForm({ values, view }: { values: SettingsBySegment; view
       <Card>
         <CardHeader title={t('settings.fees')} />
         <CardBody>
-          <SegmentHeadings labels={segmentLabels} visibleSegments={visibleSegments} />
-          <div className="space-y-3">
-            {pair('internet_fee', t('settings.internetFee'))}
-            {pair('parking_fee_car', t('settings.parkingFeeCar'))}
-            {pair('parking_fee_motorcycle', t('settings.parkingFeeMotorcycle'))}
-            {pair('card_replacement_fee', t('settings.cardReplacementFee'))}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {tile('internet_fee', t('settings.internetFee'))}
+            {tile('parking_fee_car', t('settings.parkingFeeCar'))}
+            {tile('parking_fee_motorcycle', t('settings.parkingFeeMotorcycle'))}
+            {tile('card_replacement_fee', t('settings.cardReplacementFee'))}
           </div>
         </CardBody>
       </Card>
@@ -174,14 +146,13 @@ export function SettingsForm({ values, view }: { values: SettingsBySegment; view
       <Card>
         <CardHeader title={t('settings.streamingServices')} />
         <CardBody>
-          <SegmentHeadings labels={segmentLabels} visibleSegments={visibleSegments} />
-          <div className="space-y-3">
-            {pair('netflix_fee', t('settings.netflixFee'))}
-            {pair('youtube_fee', t('settings.youtubeFee'))}
-            {pair('disney_fee', t('settings.disneyFee'))}
-            {pair('viu_fee', t('settings.viuFee'))}
-            {pair('hbo_fee', t('settings.hboFee'))}
-            {pair('amazon_prime_fee', t('settings.amazonPrimeFee'))}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {tile('netflix_fee', t('settings.netflixFee'))}
+            {tile('youtube_fee', t('settings.youtubeFee'))}
+            {tile('disney_fee', t('settings.disneyFee'))}
+            {tile('viu_fee', t('settings.viuFee'))}
+            {tile('hbo_fee', t('settings.hboFee'))}
+            {tile('amazon_prime_fee', t('settings.amazonPrimeFee'))}
           </div>
         </CardBody>
       </Card>
