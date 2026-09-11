@@ -14,7 +14,7 @@ describe('main navigation', () => {
       { section: 'monthlyWorkflow', routes: ['/meters', '/billing', '/payments'] },
       { section: 'operations', routes: ['/access-cards', '/maintenance'] },
       { section: 'financeInsights', routes: ['/expenses', '/reports'] },
-      { section: 'system', routes: ['/settings', '/test'] },
+      { section: 'system', routes: ['/settings', '/test', '/audit'] },
     ]);
   });
 

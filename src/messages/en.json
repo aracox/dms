@@ -33,6 +33,7 @@
     "profile": "Profile",
     "settings": "Settings",
     "testMode": "Test Mode",
+    "auditLog": "Audit Log",
     "operations": "Operations",
     "monthlyWorkflow": "Monthly workflow",
     "financeInsights": "Finance & insights",
@@ -529,6 +530,21 @@
     "maintenance": "Maintenance",
     "cardStatus": "Access card status",
     "export": "Export CSV"
+  },
+  "audit": {
+    "title": "Audit Log",
+    "subtitle": "The last {count} recorded changes to contracts, invoices, payments, access cards, and meter readings",
+    "time": "Time",
+    "actor": "Actor",
+    "entity": "Record",
+    "action": "Action",
+    "changes": "Changed fields",
+    "system": "System"
+  },
+  "auditAction": {
+    "insert": "Created",
+    "update": "Updated",
+    "delete": "Deleted"
   },
   "settings": {
     "title": "Settings",

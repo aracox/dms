@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   Map,
   ReceiptText,
+  ScrollText,
   Settings,
   Wrench,
   type LucideIcon,
@@ -37,6 +38,7 @@ const ICONS: Record<string, LucideIcon> = {
   ChartColumn,
   Settings,
   FlaskConical,
+  ScrollText,
 };
 
 export function Sidebar({ role, onNavigate }: { role: AppRole | null; onNavigate?: () => void }) {
