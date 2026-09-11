@@ -448,7 +448,11 @@
     "invoiceAlreadyExistsHint": "An invoice already exists for {month}. Cancel or delete it below to generate a new one.",
     "invoiceHasPayments": "This invoice has a payment recorded against it. Cancel it instead of deleting.",
     "cancelInvoice": "Cancel invoice",
-    "print": "Print invoice"
+    "print": "Print invoice",
+    "bulkGenerateCreated": "Created {count} invoices",
+    "bulkGenerateNoneCreated": "No new invoices were created",
+    "bulkGenerateSkipped": "Already invoiced ({count})",
+    "bulkGenerateFailed": "Failed ({count})"
   },
   "payments": {
     "title": "Payments",

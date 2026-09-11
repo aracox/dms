@@ -2,31 +2,18 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { buildMonthlyInvoiceItems } from '@/lib/billing/calc';
-import {
-  EXTRA_FEE_META,
-  INVOICE_EXTRA_FEE_KEYS,
-  type InvoiceExtraFeeKey,
-} from '@/lib/invoices/fees';
+import { INVOICE_EXTRA_FEE_KEYS, type InvoiceExtraFeeKey } from '@/lib/invoices/fees';
+import { generateInvoiceForRoom } from '@/lib/invoices/generate';
 import { assertCan } from '@/lib/permissions';
-import { propertySegment } from '@/lib/reporting/segments';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
-import { bangkokToday, dueDateFor } from '@/lib/utils/date';
+import { currentBillingMonth } from '@/lib/utils/date';
 import { generateInvoiceSchema } from '@/lib/validation/schemas';
 
 export interface GenerateInvoiceState {
   error: string | null;
 }
 
-/**
- * Generates a room's invoice for one billing month: rent from the active
- * contract, that month's recorded electricity/water usage (if any), and
- * whichever extra fees the caller ticked, priced from current settings.
- *
- * One live invoice per room per month is enforced by a DB unique index
- * (invoices_one_live_per_room_month_idx); recalc_invoice then totals the
- * items this inserts.
- */
+/** Thin form wrapper around generateInvoiceForRoom: parse, generate, revalidate. */
 export async function generateInvoiceAction(
   _previous: GenerateInvoiceState,
   formData: FormData,
@@ -34,18 +21,14 @@ export async function generateInvoiceAction(
   const profile = await getCurrentProfile();
   assertCan(profile?.role, 'invoices:write');
 
-  const roomId = String(formData.get('room_id') ?? '');
-
   const parsed = generateInvoiceSchema.safeParse({
-    room_id: roomId,
+    room_id: String(formData.get('room_id') ?? ''),
     billing_month: String(formData.get('billing_month') ?? ''),
   });
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
   }
-
-  const { room_id, billing_month } = parsed.data;
 
   const feeKeys: readonly string[] = INVOICE_EXTRA_FEE_KEYS;
   const extraKeys = formData
@@ -54,126 +37,99 @@ export async function generateInvoiceAction(
     .filter((key): key is InvoiceExtraFeeKey => feeKeys.includes(key));
 
   const supabase = await createClient();
-
-  const [{ data: contract }, { data: room }] = await Promise.all([
-    supabase
-      .from('contracts')
-      .select('id, monthly_rent, payment_due_day')
-      .eq('room_id', room_id)
-      .eq('status', 'active')
-      .maybeSingle(),
-    // The room's type decides which segment's fees apply -- a house is priced
-    // from the บ้านพัก column, not the building-wide one that no longer exists.
-    supabase.from('rooms').select('room_type').eq('id', room_id).maybeSingle(),
-  ]);
-
-  if (!contract) return { error: 'billing.noActiveContract' };
-  if (!room) return { error: 'errors.generic' };
-
-  const segment = propertySegment(room.room_type);
-
-  const [{ data: readings }, { data: settingsRows }] = await Promise.all([
-    supabase
-      .from('meter_readings')
-      .select('*')
-      .eq('room_id', room_id)
-      .eq('billing_month', billing_month)
-      .in('meter_type', ['electricity', 'water']),
-    extraKeys.length
-      ? supabase
-          .from('segment_settings')
-          .select('key, value')
-          .eq('segment', segment)
-          .in('key', extraKeys)
-      : Promise.resolve({ data: [] }),
-  ]);
-
-  const electricityReading = readings?.find((reading) => reading.meter_type === 'electricity');
-  const waterReading = readings?.find((reading) => reading.meter_type === 'water');
-
-  const feeValue = (key: string) => {
-    const value = settingsRows?.find((row) => row.key === key)?.value;
-    return typeof value === 'number' ? value : 0;
-  };
-
-  const items = buildMonthlyInvoiceItems({
-    monthlyRent: contract.monthly_rent,
-    electricity: electricityReading
-      ? {
-          previousReading: electricityReading.previous_reading,
-          currentReading: electricityReading.current_reading,
-          rate: electricityReading.rate,
-        }
-      : undefined,
-    water: waterReading
-      ? {
-          previousReading: waterReading.previous_reading,
-          currentReading: waterReading.current_reading,
-          rate: waterReading.rate,
-        }
-      : undefined,
+  const result = await generateInvoiceForRoom(supabase, {
+    roomId: parsed.data.room_id,
+    billingMonth: parsed.data.billing_month,
+    extraKeys,
   });
 
-  const dueDate = dueDateFor(billing_month, contract.payment_due_day);
+  if (!result.error) revalidatePath(`/rooms/${parsed.data.room_id}`);
+  return result;
+}
 
-  const { data: invoiceNumber, error: numberError } = await supabase.rpc('next_invoice_number', {
-    p_billing_month: billing_month,
-  });
-  if (numberError || !invoiceNumber) return { error: 'errors.generic' };
+export interface BulkGenerateOutcome {
+  roomNumber: string;
+  error: string;
+}
 
-  const { data: invoice, error: invoiceError } = await supabase
-    .from('invoices')
-    .insert({
-      room_id,
-      contract_id: contract.id,
-      billing_month,
-      invoice_number: invoiceNumber,
-      issue_date: bangkokToday(),
-      due_date: dueDate,
-      status: 'issued',
-    })
-    .select('id')
-    .single();
+export interface BulkGenerateInvoicesState {
+  error: string | null;
+  result: {
+    createdCount: number;
+    /** Room already had a live invoice for the month -- not a failure. */
+    skipped: BulkGenerateOutcome[];
+    failed: BulkGenerateOutcome[];
+  } | null;
+}
 
-  if (invoiceError || !invoice) {
-    return {
-      error: invoiceError?.code === '23505' ? 'billing.invoiceAlreadyExists' : 'errors.generic',
-    };
+/**
+ * Generates this month's invoice for every active, non-test contract that
+ * doesn't already have one, pricing each room's subscribed extras from
+ * contract_subscriptions instead of a human re-ticking checkboxes. Every room
+ * is independent: one failing (or already invoiced) never blocks the rest.
+ */
+export async function bulkGenerateInvoicesAction(
+  _previous: BulkGenerateInvoicesState,
+  _formData: FormData,
+): Promise<BulkGenerateInvoicesState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'invoices:write');
+
+  const billingMonth = currentBillingMonth();
+  const supabase = await createClient();
+
+  const { data: contracts } = await supabase
+    .from('contracts')
+    .select('id, room_id')
+    .eq('status', 'active')
+    .eq('is_test', false);
+
+  if (!contracts || contracts.length === 0) {
+    return { error: null, result: { createdCount: 0, skipped: [], failed: [] } };
   }
 
-  const itemRows = items.map((item, index) => ({
-    invoice_id: invoice.id,
-    type: item.type,
-    description: '',
-    quantity: item.quantity,
-    unit_price: item.unitPrice,
-    meter_reading_id:
-      item.type === 'electricity'
-        ? (electricityReading?.id ?? null)
-        : item.type === 'water'
-          ? (waterReading?.id ?? null)
-          : null,
-    sort_order: index,
-  }));
+  const roomIds = contracts.map((contract) => contract.room_id);
+  const contractIds = contracts.map((contract) => contract.id);
 
-  extraKeys.forEach((key, index) => {
-    const meta = EXTRA_FEE_META[key];
-    itemRows.push({
-      invoice_id: invoice.id,
-      type: meta.type,
-      description: meta.description,
-      quantity: 1,
-      unit_price: feeValue(key),
-      meter_reading_id: null,
-      sort_order: items.length + index,
-    });
-  });
+  const [{ data: rooms }, { data: subscriptionRows }] = await Promise.all([
+    supabase.from('rooms').select('id, room_number').in('id', roomIds),
+    supabase
+      .from('contract_subscriptions')
+      .select('contract_id, fee_key')
+      .in('contract_id', contractIds),
+  ]);
 
-  const { error: itemsError } = await supabase.from('invoice_items').insert(itemRows);
-  if (itemsError) return { error: 'errors.generic' };
+  const roomNumberById = new Map((rooms ?? []).map((room) => [room.id, room.room_number]));
+  const subscriptionsByContract = new Map<string, InvoiceExtraFeeKey[]>();
+  for (const row of subscriptionRows ?? []) {
+    const list = subscriptionsByContract.get(row.contract_id) ?? [];
+    list.push(row.fee_key as InvoiceExtraFeeKey);
+    subscriptionsByContract.set(row.contract_id, list);
+  }
 
-  revalidatePath(`/rooms/${room_id}`);
-  return { error: null };
+  const outcomes = await Promise.all(
+    contracts.map(async (contract) => {
+      const roomNumber = roomNumberById.get(contract.room_id) ?? contract.room_id;
+      const { error } = await generateInvoiceForRoom(supabase, {
+        roomId: contract.room_id,
+        billingMonth,
+        extraKeys: subscriptionsByContract.get(contract.id) ?? [],
+      });
+      return { roomNumber, error };
+    }),
+  );
+
+  const skipped = outcomes.filter(
+    (outcome): outcome is BulkGenerateOutcome => outcome.error === 'billing.invoiceAlreadyExists',
+  );
+  const failed = outcomes.filter(
+    (outcome): outcome is BulkGenerateOutcome =>
+      outcome.error !== null && outcome.error !== 'billing.invoiceAlreadyExists',
+  );
+  const createdCount = outcomes.length - skipped.length - failed.length;
+
+  revalidatePath('/billing');
+  return { error: null, result: { createdCount, skipped, failed } };
 }
 
 export interface CancelInvoiceState {

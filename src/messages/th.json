@@ -448,7 +448,11 @@
     "invoiceAlreadyExistsHint": "มีใบแจ้งหนี้ของเดือน {month} อยู่แล้ว ยกเลิกหรือลบใบเดิมด้านล่างก่อนออกใบใหม่",
     "invoiceHasPayments": "ใบแจ้งหนี้นี้มีการชำระเงินแล้ว กรุณายกเลิกใบแจ้งหนี้แทนการลบ",
     "cancelInvoice": "ยกเลิกใบแจ้งหนี้",
-    "print": "พิมพ์บิล"
+    "print": "พิมพ์บิล",
+    "bulkGenerateCreated": "สร้างใบแจ้งหนี้แล้ว {count} ใบ",
+    "bulkGenerateNoneCreated": "ไม่มีใบแจ้งหนี้ใหม่ที่ต้องสร้าง",
+    "bulkGenerateSkipped": "มีใบแจ้งหนี้อยู่แล้ว ({count})",
+    "bulkGenerateFailed": "ล้มเหลว ({count})"
   },
   "payments": {
     "title": "การชำระเงิน",

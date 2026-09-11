@@ -8,24 +8,10 @@ import { Input } from '@/components/ui/Input';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
 import { generateInvoiceAction, type GenerateInvoiceState } from '@/lib/invoices/actions';
-import { INVOICE_EXTRA_FEE_KEYS, type InvoiceExtraFeeKey } from '@/lib/invoices/fees';
+import { EXTRA_FEE_LABEL_KEY, INVOICE_EXTRA_FEE_KEYS } from '@/lib/invoices/fees';
 import { currentBillingMonth, formatBillingMonth } from '@/lib/utils/date';
 
 const INITIAL_STATE: GenerateInvoiceState = { error: null };
-
-/** Settings label key for each extra fee, reusing the existing Settings page copy. */
-const EXTRA_FEE_LABEL_KEY: Record<InvoiceExtraFeeKey, string> = {
-  internet_fee: 'settings.internetFee',
-  parking_fee_car: 'settings.parkingFeeCar',
-  parking_fee_motorcycle: 'settings.parkingFeeMotorcycle',
-  card_replacement_fee: 'settings.cardReplacementFee',
-  netflix_fee: 'settings.netflixFee',
-  youtube_fee: 'settings.youtubeFee',
-  disney_fee: 'settings.disneyFee',
-  viu_fee: 'settings.viuFee',
-  hbo_fee: 'settings.hboFee',
-  amazon_prime_fee: 'settings.amazonPrimeFee',
-};
 
 /**
  * Collapsed by default: a "+ Generate invoice" button reveals a month picker.
@@ -36,11 +22,14 @@ export function GenerateInvoiceForm({
   roomId,
   fees,
   liveInvoiceMonths,
+  subscribedKeys,
   locale,
 }: {
   roomId: string;
   fees: Record<string, number>;
   liveInvoiceMonths: readonly string[];
+  /** Extra fees the room's contract currently subscribes to -- pre-checked so staff don't have to remember. */
+  subscribedKeys: readonly string[];
   locale: Locale;
 }) {
   const t = useTranslations();
@@ -95,6 +84,7 @@ export function GenerateInvoiceForm({
                   type="checkbox"
                   name="extra"
                   value={key}
+                  defaultChecked={subscribedKeys.includes(key)}
                   className="accent-brand-blue size-5 rounded-sm"
                 />
                 {t(EXTRA_FEE_LABEL_KEY[key])} · {formatTHB(fees[key] ?? 0, locale)}

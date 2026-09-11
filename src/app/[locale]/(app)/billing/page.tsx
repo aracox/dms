@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
+import { BulkGenerateInvoicesButton } from '@/components/billing/BulkGenerateInvoicesButton';
 import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
 import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
@@ -14,8 +15,10 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
 import { compareBillingRooms } from '@/lib/billing/room-priority';
+import { can } from '@/lib/permissions';
 import { filterRoomsByView, parseSegmentView, propertySegment } from '@/lib/reporting/segments';
 import { getRoomBoard } from '@/lib/rooms/queries';
+import { getCurrentProfile } from '@/lib/supabase/server';
 import { formatBillingMonth } from '@/lib/utils/date';
 
 export default async function BillingPage({
@@ -31,6 +34,8 @@ export default async function BillingPage({
   const t = await getTranslations();
   const typedLocale = locale as Locale;
   const view = parseSegmentView((await searchParams).segment);
+  const profile = await getCurrentProfile();
+  const canGenerate = can(profile?.role, 'invoices:write');
   const rooms = filterRoomsByView(view, await getRoomBoard({ includeTest: false }));
   // Every tile below derives from activeRooms, so they follow the filter too.
   const activeRooms = rooms
@@ -47,6 +52,12 @@ export default async function BillingPage({
         description={t('billing.hubSubtitle')}
         action={<SegmentSwitcher current={view} pathname="/billing" />}
       />
+
+      {canGenerate ? (
+        <div className="mb-6">
+          <BulkGenerateInvoicesButton />
+        </div>
+      ) : null}
 
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatTile label={t('billing.activeRooms')} value={activeRooms.length} tone="blue" />

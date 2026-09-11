@@ -54,6 +54,7 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
               roomId={detail.room.id}
               fees={fees}
               liveInvoiceMonths={liveInvoiceMonths}
+              subscribedKeys={detail.contractSubscriptions}
               locale={locale}
             />
           </CardBody>
