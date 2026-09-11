@@ -147,7 +147,11 @@ export function FloorPlanSvg({
           );
         }
 
-        const displayStatus = toDisplayStatus(room.room_status, room.financial_status);
+        const displayStatus = toDisplayStatus(
+          room.room_status,
+          room.financial_status,
+          Boolean(room.notice_given_at),
+        );
         const style = STATUS_STYLES[displayStatus];
         const Icon = STATUS_ICONS[style.icon];
         const isSelected = selectedRoomNumber === roomLayout.roomNumber;

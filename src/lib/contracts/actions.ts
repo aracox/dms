@@ -168,8 +168,9 @@ export interface GiveMoveOutNoticeState {
  * Records that an active contract's tenant plans to leave early, on a date
  * that may be well before the lease's end_date. The contract stays active
  * and the room stays occupied -- this is only a heads-up so staff can start
- * lining up the next tenant. The actual move-out (move_out_room) is a
- * separate, later step.
+ * lining up the next tenant. The daily process_due_move_out_notices sweep
+ * (0032) runs the actual move-out once that date arrives; staff can still
+ * move out earlier via move_out_room if needed.
  */
 export async function giveMoveOutNoticeAction(
   _previous: GiveMoveOutNoticeState,

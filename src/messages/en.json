@@ -120,6 +120,7 @@
     "occupiedDue": "Occupied • Payment due",
     "occupiedOverdue": "Occupied • Overdue",
     "occupiedNoBill": "Occupied • Not yet invoiced",
+    "occupiedNotice": "Occupied • Notice given",
     "reserved": "Reserved",
     "maintenance": "Maintenance"
   },
@@ -386,7 +387,7 @@
     "depositRefunded": "Refunded {amount}",
     "notTerminated": "This contract has not been terminated yet.",
     "giveNotice": "Give move-out notice",
-    "giveNoticeHint": "Records that the tenant plans to leave. The contract and room stay active until you record the actual move-out.",
+    "giveNoticeHint": "Records that the tenant plans to leave. The room stays occupied until that date, then moves out automatically — you can still move out earlier if needed.",
     "plannedMoveOutDate": "Planned move-out date",
     "noticeGiven": "Notice given — leaving {date}",
     "cancelNotice": "Cancel notice"

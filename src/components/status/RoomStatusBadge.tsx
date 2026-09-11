@@ -3,6 +3,7 @@ import {
   CircleCheck,
   Clock,
   DoorOpen,
+  LogOut,
   TriangleAlert,
   User,
   Wrench,
@@ -28,6 +29,7 @@ export const STATUS_ICONS: Record<StatusIconName, LucideIcon> = {
   CircleCheck,
   Clock,
   TriangleAlert,
+  LogOut,
 };
 
 const TONE_BY_STATUS: Record<RoomDisplayStatus, BadgeTone> = {
@@ -36,6 +38,7 @@ const TONE_BY_STATUS: Record<RoomDisplayStatus, BadgeTone> = {
   maintenance: 'neutral',
   occupied_no_bill: 'blue',
   occupied_paid: 'green',
+  occupied_notice: 'blue',
   occupied_due: 'yellow',
   occupied_overdue: 'red',
 };
@@ -47,14 +50,16 @@ const TONE_BY_STATUS: Record<RoomDisplayStatus, BadgeTone> = {
 export function RoomStatusBadge({
   roomStatus,
   financialStatus,
+  hasNotice = false,
   className,
 }: {
   roomStatus: RoomStatus;
   financialStatus: FinancialStatus;
+  hasNotice?: boolean;
   className?: string;
 }) {
   const t = useTranslations('combinedStatus');
-  const displayStatus = toDisplayStatus(roomStatus, financialStatus);
+  const displayStatus = toDisplayStatus(roomStatus, financialStatus, hasNotice);
   const style = STATUS_STYLES[displayStatus];
   const Icon = STATUS_ICONS[style.icon];
 

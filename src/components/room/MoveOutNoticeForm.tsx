@@ -21,9 +21,10 @@ const CANCEL_INITIAL: CancelMoveOutNoticeState = { error: null };
 /**
  * A tenant on an active contract can tell staff today they're leaving on a
  * future date, well before the lease naturally ends. Recording it here does
- * not touch the room or contract status -- both stay occupied/active until
- * the actual move-out (MoveOutForm) is recorded later. This is only a
- * heads-up so staff can start lining up the next tenant.
+ * not touch the room or contract status -- both stay occupied/active. The
+ * daily process_due_move_out_notices sweep (0032) runs the actual move-out
+ * once that date arrives; MoveOutForm is still available if staff need to
+ * move out earlier than planned.
  */
 export function MoveOutNoticeForm({
   contractId,

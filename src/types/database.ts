@@ -399,6 +399,9 @@ export type RoomBoardRow = {
   lost_card_count: number;
   active_card_count: number;
   total_card_count: number;
+
+  notice_given_at: string | null;
+  planned_move_out_date: string | null;
 };
 
 /** report_rooms. v_room_board minus test rooms, plus the derived segment (0024). */
@@ -774,6 +777,7 @@ export type Database = {
       next_invoice_number: { Args: { p_billing_month: string }; Returns: string };
       recalc_invoice: { Args: { p_invoice_id: string }; Returns: undefined };
       mark_overdue_invoices: { Args: Record<string, never>; Returns: number };
+      process_due_move_out_notices: { Args: Record<string, never>; Returns: number };
       current_app_role: { Args: Record<string, never>; Returns: AppRole };
       due_soon_invoices_for_line: {
         Args: { p_days_ahead: number };

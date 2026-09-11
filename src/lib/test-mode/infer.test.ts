@@ -38,6 +38,8 @@ function board(overrides: Partial<RoomBoardRow> = {}): RoomBoardRow {
     lost_card_count: 0,
     active_card_count: 2,
     total_card_count: 2,
+    notice_given_at: null,
+    planned_move_out_date: null,
     ...overrides,
   };
 }

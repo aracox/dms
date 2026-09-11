@@ -16,6 +16,21 @@ describe('toDisplayStatus', () => {
     expect(toDisplayStatus('occupied', 'overdue')).toBe('occupied_overdue');
     expect(toDisplayStatus('occupied', 'none')).toBe('occupied_no_bill');
   });
+
+  it('shows a move-out notice once nothing more urgent is going on', () => {
+    expect(toDisplayStatus('occupied', 'paid', true)).toBe('occupied_notice');
+    expect(toDisplayStatus('occupied', 'none', true)).toBe('occupied_notice');
+  });
+
+  it('lets unpaid rent still win over a move-out notice', () => {
+    expect(toDisplayStatus('occupied', 'payment_due', true)).toBe('occupied_due');
+    expect(toDisplayStatus('occupied', 'overdue', true)).toBe('occupied_overdue');
+  });
+
+  it('ignores a notice on a room that is not occupied', () => {
+    expect(toDisplayStatus('vacant', 'none', true)).toBe('vacant');
+    expect(toDisplayStatus('maintenance', 'none', true)).toBe('maintenance');
+  });
 });
 
 describe('status styles', () => {

@@ -14,12 +14,20 @@ export type RoomDisplayStatus =
   | 'maintenance'
   | 'occupied_no_bill'
   | 'occupied_paid'
+  | 'occupied_notice'
   | 'occupied_due'
   | 'occupied_overdue';
 
 /** Lucide icon names, resolved by the components that render them. */
 export type StatusIconName =
-  'DoorOpen' | 'CalendarClock' | 'Wrench' | 'User' | 'CircleCheck' | 'Clock' | 'TriangleAlert';
+  | 'DoorOpen'
+  | 'CalendarClock'
+  | 'Wrench'
+  | 'User'
+  | 'CircleCheck'
+  | 'Clock'
+  | 'TriangleAlert'
+  | 'LogOut';
 
 export interface StatusStyle {
   /** Translation key under `combinedStatus`. */
@@ -86,6 +94,15 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     text: 'fill-status-paid-ink',
     swatch: 'bg-status-paid border-status-paid-edge',
   },
+  occupied_notice: {
+    labelKey: 'occupiedNotice',
+    icon: 'LogOut',
+    badge: 'bg-brand-blue-soft text-brand-blue-deep border-brand-blue',
+    fill: 'fill-brand-blue-soft',
+    stroke: 'stroke-brand-blue',
+    text: 'fill-brand-blue-deep',
+    swatch: 'bg-brand-blue-soft border-brand-blue',
+  },
   occupied_due: {
     labelKey: 'occupiedDue',
     icon: 'Clock',
@@ -111,24 +128,30 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
  *
  * Room status wins for anything that is not `occupied`: a room withdrawn for
  * maintenance reads as maintenance even if an old invoice is outstanding.
+ *
+ * `hasNotice` (an occupied room whose tenant has given move-out notice) only
+ * wins over 'paid' or 'none' -- unpaid rent stays visible as due/overdue even
+ * for a tenant who is already leaving, since that is still the more urgent
+ * thing for the owner to see.
  */
 export function toDisplayStatus(
   roomStatus: RoomStatus,
   financialStatus: FinancialStatus,
+  hasNotice = false,
 ): RoomDisplayStatus {
   if (roomStatus === 'vacant') return 'vacant';
   if (roomStatus === 'reserved') return 'reserved';
   if (roomStatus === 'maintenance') return 'maintenance';
 
   switch (financialStatus) {
-    case 'paid':
-      return 'occupied_paid';
     case 'payment_due':
       return 'occupied_due';
     case 'overdue':
       return 'occupied_overdue';
+    case 'paid':
+      return hasNotice ? 'occupied_notice' : 'occupied_paid';
     case 'none':
-      return 'occupied_no_bill';
+      return hasNotice ? 'occupied_notice' : 'occupied_no_bill';
   }
 }
 
@@ -136,6 +159,7 @@ export function toDisplayStatus(
 export const LEGEND_ORDER: RoomDisplayStatus[] = [
   'occupied_overdue',
   'occupied_due',
+  'occupied_notice',
   'occupied_paid',
   'occupied_no_bill',
   'reserved',

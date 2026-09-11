@@ -47,6 +47,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
             <RoomStatusBadge
               roomStatus={room.status}
               financialStatus={board?.financial_status ?? 'none'}
+              hasNotice={Boolean(contract?.notice_given_at)}
             />
           }
         />

@@ -138,6 +138,7 @@ export function RoomsTable({ rooms, locale }: { rooms: RoomBoardRow[]; locale: L
                   <RoomStatusBadge
                     roomStatus={room.room_status}
                     financialStatus={room.financial_status}
+                    hasNotice={Boolean(room.notice_given_at)}
                   />
                 </TD>
                 <TD>
