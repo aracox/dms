@@ -475,7 +475,7 @@
     "confirm": "Confirm",
     "reject": "Reject",
     "viewSlip": "View slip",
-    "recordPaymentHint": "Record a payment or upload a slip from a room's billing tab. Printable receipts are not yet available.",
+    "recordPaymentHint": "Record a payment or upload a slip from a room's billing tab. Receipts are downloadable from that room's payment history.",
     "confirmExceedsTotal": "Confirmed payments would exceed the invoice total.",
     "alreadyProcessed": "This payment has already been confirmed or rejected.",
     "invoiceCancelled": "This invoice has been cancelled.",

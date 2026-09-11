@@ -4,6 +4,7 @@ import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
+import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
 import { can } from '@/lib/permissions';
@@ -64,6 +65,7 @@ export async function RoomPaymentsTab({ detail, locale }: { detail: RoomDetail; 
             <TH>{t('payments.reference')}</TH>
             <TH numeric>{t('common.amount')}</TH>
             <TH>{t('common.status')}</TH>
+            <TH>{t('common.actions')}</TH>
           </tr>
         }
       >
@@ -101,6 +103,16 @@ export async function RoomPaymentsTab({ detail, locale }: { detail: RoomDetail; 
                   />
                 ) : null}
               </div>
+            </TD>
+            <TD>
+              {payment.status === 'confirmed' ? (
+                <Link
+                  href={`/payments/${payment.id}/receipt`}
+                  className="text-brand-blue-deep text-caption underline"
+                >
+                  {t('payments.receipt')}
+                </Link>
+              ) : null}
             </TD>
           </tr>
         ))}
