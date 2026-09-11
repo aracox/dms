@@ -146,7 +146,8 @@
     "draft": "ฉบับร่าง",
     "active": "ใช้งานอยู่",
     "expired": "หมดอายุ",
-    "terminated": "ยกเลิกแล้ว"
+    "terminated": "ยกเลิกแล้ว",
+    "awaiting_refund": "รอคืนเงินประกัน"
   },
   "cardStatus": {
     "available": "พร้อมใช้งาน",

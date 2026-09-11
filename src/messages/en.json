@@ -146,7 +146,8 @@
     "draft": "Draft",
     "active": "Active",
     "expired": "Expired",
-    "terminated": "Terminated"
+    "terminated": "Terminated",
+    "awaiting_refund": "Awaiting deposit refund"
   },
   "cardStatus": {
     "available": "Available",

@@ -10,12 +10,12 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { confirmedPaid, outstanding } from '@/lib/billing/calc';
 import { formatTHB } from '@/lib/billing/money';
+import { contractDisplayStatus, type ContractDisplayStatus } from '@/lib/contracts/status';
 import { SUBSCRIPTION_FEE_KEYS } from '@/lib/invoices/fees';
 import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { addDays, daysBetween, formatDate } from '@/lib/utils/date';
-import type { ContractStatus } from '@/types/database';
 
 import { ContractRentField } from './ContractRentField';
 import { ContractSubscriptionsCard } from './ContractSubscriptionsCard';
@@ -60,11 +60,12 @@ async function loadTenantDocuments(tenantId: string): Promise<TenantDocumentView
   return withUrls;
 }
 
-const CONTRACT_TONE: Record<ContractStatus, BadgeTone> = {
+const CONTRACT_TONE: Record<ContractDisplayStatus, BadgeTone> = {
   draft: 'neutral',
   active: 'green',
   expired: 'yellow',
   terminated: 'neutral',
+  awaiting_refund: 'yellow',
 };
 
 export async function RoomContractTab({
@@ -119,7 +120,10 @@ export async function RoomContractTab({
   const settlementOutstanding = pendingSettlement
     ? detail.invoices
         .filter((invoice) => invoice.contract_id === pendingSettlement.id)
-        .reduce((sum, invoice) => sum + outstanding(invoice.total, confirmedPaid(invoice.payments)), 0)
+        .reduce(
+          (sum, invoice) => sum + outstanding(invoice.total, confirmedPaid(invoice.payments)),
+          0,
+        )
     : 0;
 
   return (
@@ -269,28 +273,31 @@ export async function RoomContractTab({
               </tr>
             }
           >
-            {contractHistory.map((row) => (
-              <tr key={row.id}>
-                <TD>{formatDate(row.start_date, locale)}</TD>
-                <TD>{formatDate(row.end_date, locale)}</TD>
-                <TD numeric>{formatTHB(row.monthly_rent, locale)}</TD>
-                <TD numeric>{row.occupant_count}</TD>
-                <TD>
-                  <Badge tone={CONTRACT_TONE[row.status]}>
-                    {t(`contractStatus.${row.status}`)}
-                  </Badge>
-                </TD>
-                <TD>
-                  {row.deposit_refund !== null
-                    ? t('contract.depositRefunded', {
-                        amount: formatTHB(row.deposit_refund, locale),
-                      })
-                    : row.status === 'terminated'
-                      ? '-'
-                      : ''}
-                </TD>
-              </tr>
-            ))}
+            {contractHistory.map((row) => {
+              const displayStatus = contractDisplayStatus(row);
+              return (
+                <tr key={row.id}>
+                  <TD>{formatDate(row.start_date, locale)}</TD>
+                  <TD>{formatDate(row.end_date, locale)}</TD>
+                  <TD numeric>{formatTHB(row.monthly_rent, locale)}</TD>
+                  <TD numeric>{row.occupant_count}</TD>
+                  <TD>
+                    <Badge tone={CONTRACT_TONE[displayStatus]}>
+                      {t(`contractStatus.${displayStatus}`)}
+                    </Badge>
+                  </TD>
+                  <TD>
+                    {row.deposit_refund !== null
+                      ? t('contract.depositRefunded', {
+                          amount: formatTHB(row.deposit_refund, locale),
+                        })
+                      : row.status === 'terminated'
+                        ? '-'
+                        : ''}
+                  </TD>
+                </tr>
+              );
+            })}
           </Table>
         </Card>
       ) : null}
