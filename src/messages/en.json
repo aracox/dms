@@ -392,6 +392,18 @@
     "noticeGiven": "Notice given — leaving {date}",
     "cancelNotice": "Cancel notice"
   },
+  "reservation": {
+    "title": "Reservation",
+    "hint": "Hold this room for a prospect who pays a fee upfront. Applied to their deposit if they move in, kept if they don't.",
+    "reserve": "Reserve room",
+    "heldFor": "Held for {name} — {amount}",
+    "forfeit": "Mark as forfeited",
+    "prospectName": "Prospect's name",
+    "prospectPhone": "Prospect's phone",
+    "amount": "Reservation fee (THB)",
+    "applyingHint": "Applying {name}'s {amount} reservation toward the deposit below. Collect the rest at signing.",
+    "alreadyHeld": "This room already has an open reservation."
+  },
   "cards": {
     "title": "Access Cards",
     "subtitle": "Each room has 2 cards. Cards belong to the room, not to a person.",

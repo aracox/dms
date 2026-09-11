@@ -186,12 +186,26 @@ export async function moveInAction(
   }
 
   const tenantId = data?.[0]?.tenant_id;
+  const contractId = data?.[0]?.contract_id;
   const documentFiles = formData
     .getAll('documents')
     .filter((entry): entry is File => entry instanceof File && entry.size > 0);
 
   if (tenantId && documentFiles.length > 0) {
     await uploadTenantDocuments(supabase, tenantId, documentFiles, profile!.id);
+  }
+
+  const reservationId = String(formData.get('reservation_id') ?? '');
+  if (reservationId && contractId) {
+    await supabase
+      .from('room_reservations')
+      .update({
+        status: 'applied',
+        applied_contract_id: contractId,
+        resolved_at: contractFields.start_date,
+      })
+      .eq('id', reservationId)
+      .eq('status', 'held');
   }
 
   revalidatePath('/rooms');

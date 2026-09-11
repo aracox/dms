@@ -24,7 +24,7 @@ export default async function RoomDetailPage({
 
   if (!detail) notFound();
 
-  const { room, board } = detail;
+  const { room, board, contract } = detail;
 
   return (
     <>
@@ -45,6 +45,7 @@ export default async function RoomDetailPage({
             <RoomStatusBadge
               roomStatus={room.status}
               financialStatus={board?.financial_status ?? 'none'}
+              hasNotice={Boolean(contract?.notice_given_at)}
             />
           </div>
         }

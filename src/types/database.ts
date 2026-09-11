@@ -212,6 +212,25 @@ export type ContractRow = {
   updated_at: string;
 };
 
+export type RoomReservationStatus = 'held' | 'applied' | 'forfeited';
+
+export type RoomReservationRow = {
+  id: string;
+  room_id: string;
+  prospect_name: string;
+  prospect_phone: string | null;
+  amount: number;
+  status: RoomReservationStatus;
+  note: string | null;
+  /** Set once status becomes 'applied' -- the contract the fee was credited toward. */
+  applied_contract_id: string | null;
+  resolved_at: string | null;
+  is_test: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 /** Row presence = subscribed. See fee_key's check constraint for the allowed set. */
 export type ContractSubscriptionRow = {
   id: string;
@@ -652,6 +671,15 @@ export type Database = {
           monthly_rent: number;
         },
         Partial<Writable<ContractRow, 'id'>>
+      >;
+      room_reservations: TableDef<
+        RoomReservationRow,
+        Partial<Writable<RoomReservationRow, 'id'>> & {
+          room_id: string;
+          prospect_name: string;
+          amount: number;
+        },
+        Partial<Writable<RoomReservationRow, 'id'>>
       >;
       contract_subscriptions: TableDef<
         ContractSubscriptionRow,

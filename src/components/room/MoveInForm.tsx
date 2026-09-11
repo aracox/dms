@@ -7,7 +7,10 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { RequiredMark } from '@/components/ui/RequiredMark';
+import type { Locale } from '@/i18n/routing';
+import { formatTHB } from '@/lib/billing/money';
 import { moveInAction, type MoveInState } from '@/lib/rooms/actions';
+import type { RoomReservationRow } from '@/types/database';
 
 const INITIAL_STATE: MoveInState = { error: null };
 
@@ -57,6 +60,8 @@ export function MoveInForm({
   defaultDueDay,
   startDate,
   endDate,
+  reservation,
+  locale,
 }: {
   roomId: string;
   defaultRent: number;
@@ -64,6 +69,8 @@ export function MoveInForm({
   defaultDueDay: number;
   startDate: string;
   endDate: string;
+  reservation: RoomReservationRow | null;
+  locale: Locale;
 }) {
   const t = useTranslations();
   const [state, formAction, isPending] = useActionState(moveInAction, INITIAL_STATE);
@@ -71,13 +78,33 @@ export function MoveInForm({
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="room_id" value={roomId} />
+      {reservation ? <input type="hidden" name="reservation_id" value={reservation.id} /> : null}
+
+      {reservation ? (
+        <p className="border-brand-blue bg-brand-blue-soft text-brand-blue-deep text-caption rounded-md border px-3 py-2">
+          {t('reservation.applyingHint', {
+            name: reservation.prospect_name,
+            amount: formatTHB(reservation.amount, locale),
+          })}
+        </p>
+      ) : null}
 
       <Card>
         <CardHeader title={t('tenant.title')} description={t('tenant.singleTenantNotice')} />
         <CardBody>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <TextField name="full_name" label={t('tenant.fullName')} required />
-            <TextField name="phone" label={t('room.phone')} required />
+            <TextField
+              name="full_name"
+              label={t('tenant.fullName')}
+              defaultValue={reservation?.prospect_name}
+              required
+            />
+            <TextField
+              name="phone"
+              label={t('room.phone')}
+              defaultValue={reservation?.prospect_phone ?? undefined}
+              required
+            />
             <TextField name="email" label={t('room.email')} type="email" />
             <TextField name="id_card_or_passport" label={t('tenant.idCard')} />
             <TextField name="nationality" label={t('tenant.nationality')} />

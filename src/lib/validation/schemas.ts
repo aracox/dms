@@ -400,6 +400,21 @@ export const giveMoveOutNoticeSchema = z.object({
 
 export type GiveMoveOutNoticeInput = z.infer<typeof giveMoveOutNoticeSchema>;
 
+// --- Room reservations -------------------------------------------------------
+
+export const createReservationSchema = z.object({
+  room_id: uuid,
+  prospect_name: z.string().trim().min(1, 'validation.required').max(200),
+  prospect_phone: z
+    .union([z.literal(''), z.string().trim().regex(THAI_PHONE, 'validation.phone.format')])
+    .nullable()
+    .optional(),
+  amount: money,
+  note: z.string().trim().max(500).nullable().optional(),
+});
+
+export type CreateReservationInput = z.infer<typeof createReservationSchema>;
+
 // --- Staff -------------------------------------------------------------------
 
 export const createStaffUserSchema = z.object({

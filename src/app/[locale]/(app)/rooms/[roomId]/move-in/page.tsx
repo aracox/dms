@@ -5,8 +5,10 @@ import { notFound } from 'next/navigation';
 import { PageHeader } from '@/components/layout/AppShell';
 import { MoveInForm } from '@/components/room/MoveInForm';
 import { Link, redirect } from '@/i18n/navigation';
+import type { Locale } from '@/i18n/routing';
 import { assertCan } from '@/lib/permissions';
 import { propertySegment } from '@/lib/reporting/segments';
+import { getHeldReservation } from '@/lib/reservations/queries';
 import { getRoomDetail } from '@/lib/rooms/queries';
 import { getSegmentSettings } from '@/lib/settings/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
@@ -41,6 +43,7 @@ export default async function MoveInPage({
   const defaultDueDay = defaults.default_payment_due_day || 5;
   const defaultRent = defaults.default_monthly_rent;
   const defaultDeposit = defaults.default_deposit;
+  const reservation = await getHeldReservation(room.id);
 
   const startDate = bangkokToday();
   const [year, month, day] = startDate.split('-').map(Number);
@@ -68,6 +71,8 @@ export default async function MoveInPage({
         defaultDueDay={defaultDueDay}
         startDate={startDate}
         endDate={endDate}
+        reservation={reservation}
+        locale={locale as Locale}
       />
     </>
   );

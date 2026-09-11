@@ -8,6 +8,7 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatAmount, formatTHB } from '@/lib/billing/money';
 import { can } from '@/lib/permissions';
+import { getHeldReservation } from '@/lib/reservations/queries';
 import type { RoomDetail } from '@/lib/rooms/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
 import { bangkokToday, formatBillingMonth, formatDate } from '@/lib/utils/date';
@@ -15,6 +16,7 @@ import { bangkokToday, formatBillingMonth, formatDate } from '@/lib/utils/date';
 import { ContractRentField } from './ContractRentField';
 import { MoveOutForm } from './MoveOutForm';
 import { MoveOutNoticeForm } from './MoveOutNoticeForm';
+import { ReservationCard } from './ReservationCard';
 import { RoomStatusButtons } from './RoomStatusButtons';
 import { RoomVehiclesCard } from './RoomVehiclesCard';
 import { TenantContactCard } from './TenantContactCard';
@@ -34,6 +36,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
   );
   const latestWater = detail.meterReadings.find((reading) => reading.meter_type === 'water');
   const currentInvoice = detail.invoices[0];
+  const reservation = await getHeldReservation(room.id);
 
   return (
     <div className="space-y-4">
@@ -106,6 +109,13 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
           ) : null}
         </CardBody>
       </Card>
+
+      <ReservationCard
+        roomId={room.id}
+        reservation={reservation}
+        canEdit={canEditRoom}
+        locale={locale}
+      />
 
       <RoomVehiclesCard
         roomId={room.id}
