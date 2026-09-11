@@ -9,28 +9,12 @@ import {
   type SettingsBySegment,
 } from './segment-keys';
 
-export interface DormitoryIdentity {
+export interface PropertyIdentity {
   name_th: string;
   name_en: string;
 }
 
-const FALLBACK: DormitoryIdentity = { name_th: '', name_en: '' };
-
-/** The dormitory's own name (settings.dormitory), for documents that need it. */
-export async function getDormitoryIdentity(): Promise<DormitoryIdentity> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('settings')
-    .select('value')
-    .eq('key', 'dormitory')
-    .maybeSingle();
-
-  const value = (data?.value ?? {}) as Partial<DormitoryIdentity>;
-  return {
-    name_th: value.name_th ?? FALLBACK.name_th,
-    name_en: value.name_en ?? FALLBACK.name_en,
-  };
-}
+const FALLBACK: PropertyIdentity = { name_th: '', name_en: '' };
 
 /**
  * Both segments' rates, fees and defaults.
@@ -70,4 +54,39 @@ export async function getSettingsBySegment(): Promise<SettingsBySegment> {
  */
 export async function getSegmentSettings(segment: PropertySegment): Promise<SegmentSettingValues> {
   return (await getSettingsBySegment())[segment];
+}
+
+/**
+ * Both segments' property name (migration 0030), shown on that segment's
+ * contract and receipt PDFs instead of the one whole-property `dormitory`
+ * name. Segment-scoped like the rates above, so both rows are guaranteed
+ * present by the same settings_seed_segments trigger.
+ */
+export async function getPropertyNamesBySegment(): Promise<
+  Record<PropertySegment, PropertyIdentity>
+> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('segment_settings')
+    .select('segment, value')
+    .eq('key', 'property_name');
+
+  const read = (segment: PropertySegment): PropertyIdentity => {
+    const value = (data?.find((row) => row.segment === segment)?.value ??
+      {}) as Partial<PropertyIdentity>;
+    return {
+      name_th: value.name_th ?? FALLBACK.name_th,
+      name_en: value.name_en ?? FALLBACK.name_en,
+    };
+  };
+
+  return Object.fromEntries(PROPERTY_SEGMENTS.map((segment) => [segment, read(segment)])) as Record<
+    PropertySegment,
+    PropertyIdentity
+  >;
+}
+
+/** One segment's property name, for a document that already knows its segment. */
+export async function getPropertyName(segment: PropertySegment): Promise<PropertyIdentity> {
+  return (await getPropertyNamesBySegment())[segment];
 }

@@ -337,6 +337,14 @@ export const settingsSchema = z.object({
 
 export type SettingsInput = z.infer<typeof settingsSchema>;
 
+/** One segment's property name, shown on that segment's contract/receipt PDFs. */
+export const propertyNameSchema = z.object({
+  name_th: z.string().trim().min(1, 'validation.required').max(200),
+  name_en: z.string().trim().max(200).nullable().optional(),
+});
+
+export type PropertyNameInput = z.infer<typeof propertyNameSchema>;
+
 // --- Move-in / move-out ----------------------------------------------------
 
 /**

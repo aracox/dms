@@ -1,7 +1,8 @@
 import { renderContractPdf } from '@/lib/pdf/ContractDocument';
 import { can } from '@/lib/permissions';
+import { propertySegment } from '@/lib/reporting/segments';
 import { getRoomDetail } from '@/lib/rooms/queries';
-import { getDormitoryIdentity } from '@/lib/settings/queries';
+import { getPropertyName } from '@/lib/settings/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
 import { bangkokToday } from '@/lib/utils/date';
 
@@ -19,7 +20,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ roo
     return new Response('Not found', { status: 404 });
   }
 
-  const { name_th, name_en } = await getDormitoryIdentity();
+  const { name_th, name_en } = await getPropertyName(propertySegment(detail.room.room_type));
   const buffer = await renderContractPdf({
     dormitoryName: name_th || name_en || 'หอพัก',
     generatedDate: bangkokToday(),

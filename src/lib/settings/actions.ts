@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { assertCan } from '@/lib/permissions';
 import { PROPERTY_SEGMENTS } from '@/lib/reporting/segments';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
-import { settingsSchema } from '@/lib/validation/schemas';
+import { propertyNameSchema, settingsSchema } from '@/lib/validation/schemas';
 import type { PropertySegment } from '@/types/database';
 
 import { SEGMENT_SETTING_KEYS, segmentFieldName, type SegmentSettingValues } from './segment-keys';
@@ -69,6 +69,51 @@ export async function updateSettingsAction(
       updated_by: profile.id,
     })),
   );
+
+  const { error } = await supabase
+    .from('segment_settings')
+    .upsert(rows, { onConflict: 'key,segment' });
+  if (error) return { message: null, error: 'errors.generic' };
+
+  revalidatePath('/settings');
+  return { message: 'settings.saved', error: null };
+}
+
+/**
+ * Updates the property name shown on that segment's contract/receipt PDFs
+ * (migration 0030). A single key, `property_name`, with a segment_settings
+ * row per segment -- unlike the numeric settings above, its value is a
+ * {name_th, name_en} object, so it gets its own schema and action rather than
+ * folding into SEGMENT_SETTING_KEYS.
+ */
+export async function updatePropertyNamesAction(
+  _previous: SettingsState,
+  formData: FormData,
+): Promise<SettingsState> {
+  const profile = await requireOwner();
+
+  const bySegment = {} as Record<PropertySegment, { name_th: string; name_en: string }>;
+
+  for (const segment of PROPERTY_SEGMENTS) {
+    const parsed = propertyNameSchema.safeParse({
+      name_th: String(formData.get(`${segment}.name_th`) ?? ''),
+      name_en: String(formData.get(`${segment}.name_en`) ?? '').trim() || null,
+    });
+
+    if (!parsed.success) {
+      return { message: null, error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+    }
+
+    bySegment[segment] = { name_th: parsed.data.name_th, name_en: parsed.data.name_en ?? '' };
+  }
+
+  const supabase = await createClient();
+  const rows = PROPERTY_SEGMENTS.map((segment) => ({
+    key: 'property_name',
+    segment,
+    value: bySegment[segment],
+    updated_by: profile.id,
+  }));
 
   const { error } = await supabase
     .from('segment_settings')

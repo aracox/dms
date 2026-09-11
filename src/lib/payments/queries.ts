@@ -1,13 +1,15 @@
 import 'server-only';
 
+import { propertySegment } from '@/lib/reporting/segments';
 import { createClient } from '@/lib/supabase/server';
-import type { PaymentRow } from '@/types/database';
+import type { PaymentRow, PropertySegment } from '@/types/database';
 
 export interface PaymentReceiptData {
   payment: PaymentRow;
   invoiceNumber: string;
   billingMonth: string;
   roomNumber: string;
+  propertySegment: PropertySegment;
   /** '' when the contract or tenant can no longer be found (e.g. very old test data). */
   tenantName: string;
 }
@@ -36,7 +38,7 @@ export async function getPaymentReceipt(paymentId: string): Promise<PaymentRecei
   if (!invoice) return null;
 
   const [{ data: room }, { data: contract }] = await Promise.all([
-    supabase.from('rooms').select('room_number').eq('id', invoice.room_id).maybeSingle(),
+    supabase.from('rooms').select('room_number, room_type').eq('id', invoice.room_id).maybeSingle(),
     invoice.contract_id
       ? supabase.from('contracts').select('tenant_id').eq('id', invoice.contract_id).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -52,6 +54,7 @@ export async function getPaymentReceipt(paymentId: string): Promise<PaymentRecei
     invoiceNumber: invoice.invoice_number,
     billingMonth: invoice.billing_month,
     roomNumber: room.room_number,
+    propertySegment: propertySegment(room.room_type),
     tenantName: tenant?.full_name ?? '',
   };
 }

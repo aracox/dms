@@ -567,6 +567,10 @@
   },
   "settings": {
     "title": "Settings",
+    "propertyNames": "Property name",
+    "propertyNamesHint": "Shown on that segment's contract and receipt PDFs.",
+    "nameTh": "Name (Thai)",
+    "nameEn": "Name (English)",
     "utilityRates": "Utility rates",
     "fees": "Other fees",
     "internetFee": "Internet fee (THB per month)",

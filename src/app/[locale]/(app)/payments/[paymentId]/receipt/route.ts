@@ -1,7 +1,7 @@
 import { renderReceiptPdf } from '@/lib/pdf/ReceiptDocument';
 import { can } from '@/lib/permissions';
 import { getPaymentReceipt } from '@/lib/payments/queries';
-import { getDormitoryIdentity } from '@/lib/settings/queries';
+import { getPropertyName } from '@/lib/settings/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
 import { bangkokToday } from '@/lib/utils/date';
 
@@ -22,7 +22,7 @@ export async function GET(
     return new Response('Not found', { status: 404 });
   }
 
-  const { name_th, name_en } = await getDormitoryIdentity();
+  const { name_th, name_en } = await getPropertyName(receipt.propertySegment);
   const typedLocale = locale === 'en' ? 'en' : 'th';
   const buffer = await renderReceiptPdf({
     locale: typedLocale,
