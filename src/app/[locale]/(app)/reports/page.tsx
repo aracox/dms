@@ -1,14 +1,16 @@
+import { Download } from 'lucide-react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
 import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
 import { RoomStatusBadge } from '@/components/status/RoomStatusBadge';
+import { buttonClasses } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
-import { ComingSoon } from '@/components/ui/ComingSoon';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatTile } from '@/components/ui/StatTile';
 import { TD, TH, Table } from '@/components/ui/Table';
+import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatAmount, formatTHB } from '@/lib/billing/money';
 import {
@@ -74,6 +76,10 @@ export default async function ReportsPage({
       ? allMeterUsage
       : allMeterUsage.filter((row) => segmentByRoomId.get(row.room_id) === view);
 
+  function exportHref(type: 'rooms' | 'meters' | 'contracts'): string {
+    return `/reports/export?type=${type}&segment=${view}`;
+  }
+
   const electricityUnits = meterUsage
     .filter((row) => row.meter_type === 'electricity')
     .reduce((sum, row) => sum + row.usage, 0);
@@ -111,15 +117,17 @@ export default async function ReportsPage({
         />
       </div>
 
-      <div className="mb-6">
-        <ComingSoon>{t('reports.export')}</ComingSoon>
-      </div>
-
       <div className="space-y-6">
         <Card>
           <CardHeader
             title={t('reports.occupancy')}
             description={t('rooms.subtitle', { count: rooms.length })}
+            action={
+              <Link href={exportHref('rooms')} className={buttonClasses('secondary', 'sm')}>
+                <Download size={12} aria-hidden="true" />
+                {t('reports.export')}
+              </Link>
+            }
           />
           <Table
             head={
@@ -157,6 +165,12 @@ export default async function ReportsPage({
           <CardHeader
             title={t('reports.meterUsage')}
             description={formatBillingMonth(month, typedLocale)}
+            action={
+              <Link href={exportHref('meters')} className={buttonClasses('secondary', 'sm')}>
+                <Download size={12} aria-hidden="true" />
+                {t('reports.export')}
+              </Link>
+            }
           />
           {meterUsage.length === 0 ? (
             <div className="p-3">
@@ -198,7 +212,15 @@ export default async function ReportsPage({
         </Card>
 
         <Card>
-          <CardHeader title={t('reports.contractExpiry')} />
+          <CardHeader
+            title={t('reports.contractExpiry')}
+            action={
+              <Link href={exportHref('contracts')} className={buttonClasses('secondary', 'sm')}>
+                <Download size={12} aria-hidden="true" />
+                {t('reports.export')}
+              </Link>
+            }
+          />
           {expiring.length === 0 ? (
             <div className="p-3">
               <EmptyState message={t('dashboard.noExpiringContracts')} />
