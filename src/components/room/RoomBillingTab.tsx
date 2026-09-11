@@ -16,6 +16,7 @@ import type { InvoiceStatus } from '@/types/database';
 
 import { GenerateInvoiceForm } from './GenerateInvoiceForm';
 import { InvoiceActions } from './InvoiceActions';
+import { RecordPaymentForm } from './RecordPaymentForm';
 
 export const INVOICE_TONE: Record<InvoiceStatus, BadgeTone> = {
   draft: 'neutral',
@@ -33,6 +34,7 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
   const canGenerate = can(profile?.role, 'invoices:write') && Boolean(detail.contract);
   const canCancel = can(profile?.role, 'invoices:write');
   const canDeleteInvoices = can(profile?.role, 'invoices:delete');
+  const canRecordPayment = can(profile?.role, 'payments:record');
 
   const liveInvoiceMonths = detail.invoices
     .filter((invoice) => invoice.status !== 'cancelled')
@@ -66,6 +68,7 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
       {detail.invoices.map((invoice) => {
         const paid = confirmedPaid(invoice.payments);
         const hasPayments = invoice.payments.length > 0;
+        const invoiceOutstanding = outstanding(invoice.total, paid);
 
         return (
           <Card key={invoice.id}>
@@ -137,11 +140,18 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
                 </div>
                 <div className="flex justify-between gap-4 font-semibold">
                   <dt>{t('billing.outstanding')}</dt>
-                  <dd className="tabular-nums">
-                    {formatTHB(outstanding(invoice.total, paid), locale)}
-                  </dd>
+                  <dd className="tabular-nums">{formatTHB(invoiceOutstanding, locale)}</dd>
                 </div>
               </dl>
+
+              {canRecordPayment && invoice.status !== 'cancelled' && invoiceOutstanding > 0 ? (
+                <RecordPaymentForm
+                  roomId={detail.room.id}
+                  invoiceId={invoice.id}
+                  outstanding={invoiceOutstanding}
+                  locale={locale}
+                />
+              ) : null}
             </CardBody>
           </Card>
         );

@@ -466,7 +466,15 @@
     "history": "Payment history",
     "partialPayment": "Partial payment",
     "maxAllowed": "Maximum {amount}",
-    "collectionBuildingWide": "Collection by method is building-wide and is not split by property segment."
+    "collectionBuildingWide": "Collection by method is building-wide and is not split by property segment.",
+    "confirm": "Confirm",
+    "reject": "Reject",
+    "viewSlip": "View slip",
+    "recordPaymentHint": "Record a payment or upload a slip from a room's billing tab. Printable receipts are not yet available.",
+    "confirmExceedsTotal": "Confirmed payments would exceed the invoice total.",
+    "alreadyProcessed": "This payment has already been confirmed or rejected.",
+    "invoiceCancelled": "This invoice has been cancelled.",
+    "invalidSlipFile": "The slip file must be a JPG, PNG, WEBP, or PDF under 5 MB."
   },
   "maintenance": {
     "title": "Maintenance",

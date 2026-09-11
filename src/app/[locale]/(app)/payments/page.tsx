@@ -49,9 +49,7 @@ export default async function PaymentsPage({
       />
 
       <div className="mb-4">
-        <ComingSoon>
-          {t('payments.recordPayment')} · {t('payments.uploadSlip')} · {t('payments.receipt')}
-        </ComingSoon>
+        <ComingSoon>{t('payments.recordPaymentHint')}</ComingSoon>
       </div>
 
       <div className="space-y-4">

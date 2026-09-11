@@ -35,6 +35,7 @@ export type Permission =
   | 'invoices:delete'
   | 'payments:read'
   | 'payments:record'
+  | 'payments:confirm'
   | 'payments:delete'
   | 'maintenance:read'
   | 'maintenance:write'
@@ -75,6 +76,8 @@ const REQUIRED_ROLE: Record<Permission, AppRole> = {
 
   'payments:read': 'staff',
   'payments:record': 'staff',
+  // Mirrors the payments_update RLS policy (is_admin_or_owner()).
+  'payments:confirm': 'admin',
   // Deleting a payment destroys financial evidence.
   'payments:delete': 'owner',
 

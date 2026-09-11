@@ -12,6 +12,7 @@ describe('permissions', () => {
   it('gives admin operational access but not destructive access', () => {
     expect(can('admin', 'contracts:write')).toBe(true);
     expect(can('admin', 'invoices:write')).toBe(true);
+    expect(can('admin', 'payments:confirm')).toBe(true);
     expect(can('admin', 'payments:delete')).toBe(false);
     expect(can('admin', 'settings:write')).toBe(false);
     expect(can('admin', 'rooms:delete')).toBe(false);
@@ -27,6 +28,7 @@ describe('permissions', () => {
     expect(can('staff', 'cards:write')).toBe(false);
     expect(can('staff', 'settings:write')).toBe(false);
     expect(can('staff', 'audit:read')).toBe(false);
+    expect(can('staff', 'payments:confirm')).toBe(false);
   });
 
   it('denies everything to a user with no profile', () => {
