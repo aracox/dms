@@ -23,6 +23,7 @@ import type {
   FinanceSummaryRow,
   MaintenanceReportRow,
   MeterUsageRow,
+  MoveOutNoticeRow,
   OutstandingRow,
   PaymentCollectionRow,
   PropertySegment,
@@ -154,6 +155,15 @@ export async function getExpiringContracts(withinDays = 60): Promise<ContractExp
   return data ?? [];
 }
 
+/** Active contracts whose tenant has given move-out notice, soonest first. */
+export async function getMoveOutNotices(): Promise<MoveOutNoticeRow[]> {
+  const supabase = await createClient();
+  const data = await read('report_move_out_notices', () =>
+    supabase.from('report_move_out_notices').select('*').order('planned_move_out_date'),
+  );
+  return data ?? [];
+}
+
 /** Unsettled invoices, oldest due date first. */
 export async function getOutstandingInvoices(limit = 50): Promise<OutstandingRow[]> {
   const supabase = await createClient();
@@ -255,6 +265,7 @@ export async function getDashboardData() {
     tenants,
     tenantsBySegment,
     expiring,
+    moveOutNotices,
     maintenance,
     lostCards,
     overdue,
@@ -268,6 +279,7 @@ export async function getDashboardData() {
     getTenantSummary(),
     getTenantSummaryBySegment(),
     getExpiringContracts(60),
+    getMoveOutNotices(),
     getOpenMaintenance(10),
     getLostCards(),
     getOverdueInvoices(10),
@@ -283,6 +295,7 @@ export async function getDashboardData() {
     tenants,
     tenantsBySegment,
     expiring,
+    moveOutNotices,
     maintenance,
     lostCards,
     overdue,

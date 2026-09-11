@@ -391,6 +391,15 @@ export const settleDepositSchema = z.object({
 
 export type SettleDepositInput = z.infer<typeof settleDepositSchema>;
 
+/** Records that an active contract's tenant plans to leave early. */
+export const giveMoveOutNoticeSchema = z.object({
+  contract_id: uuid,
+  planned_move_out_date: isoDate,
+  note: z.string().trim().max(1000).nullable().optional(),
+});
+
+export type GiveMoveOutNoticeInput = z.infer<typeof giveMoveOutNoticeSchema>;
+
 // --- Staff -------------------------------------------------------------------
 
 export const createStaffUserSchema = z.object({

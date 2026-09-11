@@ -243,6 +243,7 @@
     "noOverviewData": "No monthly business history is available",
     "operations": "Needs attention",
     "contractsExpiring": "Contracts expiring soon",
+    "moveOutNotices": "Move-out notices",
     "openTickets": "Open maintenance tickets",
     "lostCards": "Lost access cards",
     "paymentsDue": "Payments due",
@@ -253,6 +254,8 @@
     "expired": "Expired",
     "daysOverdue": "{days} days overdue",
     "noExpiringContracts": "No contracts expiring soon",
+    "noMoveOutNotices": "No move-out notices",
+    "leavingToday": "Leaving today",
     "noOpenTickets": "No open maintenance tickets",
     "noLostCards": "No lost access cards",
     "noOverdue": "Nothing overdue",
@@ -381,7 +384,12 @@
     "outstandingHint": "This tenant still has {amount} outstanding across their invoices.",
     "depositSettledOn": "Deposit settled on {date}",
     "depositRefunded": "Refunded {amount}",
-    "notTerminated": "This contract has not been terminated yet."
+    "notTerminated": "This contract has not been terminated yet.",
+    "giveNotice": "Give move-out notice",
+    "giveNoticeHint": "Records that the tenant plans to leave. The contract and room stay active until you record the actual move-out.",
+    "plannedMoveOutDate": "Planned move-out date",
+    "noticeGiven": "Notice given — leaving {date}",
+    "cancelNotice": "Cancel notice"
   },
   "cards": {
     "title": "Access Cards",
@@ -633,7 +641,8 @@
     "required": "This field is required",
     "date": {
       "format": "Date must be in YYYY-MM-DD format",
-      "firstOfMonth": "Billing month must be the first day of the month"
+      "firstOfMonth": "Billing month must be the first day of the month",
+      "pastDate": "Date cannot be in the past"
     },
     "money": {
       "negative": "Amount cannot be negative",

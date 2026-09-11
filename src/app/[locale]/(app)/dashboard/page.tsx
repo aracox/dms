@@ -55,6 +55,7 @@ export default async function DashboardPage({
     tenants: wholeTenants,
     tenantsBySegment,
     expiring: allExpiring,
+    moveOutNotices: allMoveOutNotices,
     maintenance: allMaintenance,
     lostCards: allLostCards,
     overdue: allOverdue,
@@ -67,6 +68,7 @@ export default async function DashboardPage({
   const finance = forView(view, wholeFinance, financeBySegment);
   const tenants = forView(view, wholeTenants, tenantsBySegment);
   const expiring = filterByView(view, allExpiring);
+  const moveOutNotices = filterByView(view, allMoveOutNotices);
   const maintenance = filterByView(view, allMaintenance);
   const lostCards = filterByView(view, allLostCards);
   const overdue = filterByView(view, allOverdue);
@@ -331,6 +333,54 @@ export default async function DashboardPage({
                     </Badge>
                   </TD>
                   <TD numeric>{money(contract.monthly_rent)}</TD>
+                </tr>
+              ))}
+            </Table>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader title={t('dashboard.moveOutNotices')} />
+          {moveOutNotices.length === 0 ? (
+            <div className="p-3">
+              <EmptyState message={t('dashboard.noMoveOutNotices')} />
+            </div>
+          ) : (
+            <Table
+              head={
+                <tr>
+                  <TH>{t('room.roomNumber')}</TH>
+                  <TH>{t('segment.column')}</TH>
+                  <TH>{t('tenant.title')}</TH>
+                  <TH>{t('contract.plannedMoveOutDate')}</TH>
+                </tr>
+              }
+            >
+              {moveOutNotices.map((notice) => (
+                <tr key={notice.contract_id}>
+                  <TD>
+                    <Link
+                      href={`/rooms/${notice.room_id}`}
+                      className="text-brand-blue-deep font-medium underline"
+                    >
+                      {notice.room_number}
+                    </Link>
+                  </TD>
+                  <TD>
+                    <SegmentBadge segment={notice.property_segment} />
+                  </TD>
+                  <TD>{notice.tenant_name}</TD>
+                  <TD>
+                    {formatDate(notice.planned_move_out_date, typedLocale)}
+                    <Badge
+                      tone={notice.days_remaining <= 7 ? 'yellow' : 'neutral'}
+                      className="ml-1.5"
+                    >
+                      {notice.days_remaining <= 0
+                        ? t('dashboard.leavingToday')
+                        : t('dashboard.daysRemaining', { days: notice.days_remaining })}
+                    </Badge>
+                  </TD>
                 </tr>
               ))}
             </Table>

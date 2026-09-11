@@ -202,6 +202,11 @@ export type ContractRow = {
   deposit_refund: number | null;
   deposit_settled_at: string | null;
   deposit_settlement_note: string | null;
+  /** When the tenant told staff they're leaving early. Null until notice is given. */
+  notice_given_at: string | null;
+  /** The date the tenant said they will vacate. Independent of end_date. */
+  planned_move_out_date: string | null;
+  notice_note: string | null;
   is_test: boolean;
   created_at: string;
   updated_at: string;
@@ -457,6 +462,21 @@ export type ContractExpiringRow = {
   end_date: string;
   monthly_rent: number;
   occupant_count: number;
+  days_remaining: number;
+  property_segment: PropertySegment;
+};
+
+/** report_move_out_notices. Active contracts whose tenant has given move-out notice. */
+export type MoveOutNoticeRow = {
+  contract_id: string;
+  room_id: string;
+  room_number: string;
+  floor: number;
+  tenant_name: string;
+  tenant_phone: string;
+  notice_given_at: string;
+  planned_move_out_date: string;
+  notice_note: string | null;
   days_remaining: number;
   property_segment: PropertySegment;
 };
@@ -740,6 +760,7 @@ export type Database = {
       report_business_overview: ViewDef<BusinessOverviewRow>;
       report_business_overview_by_segment: ViewDef<BusinessOverviewBySegmentRow>;
       report_contracts_expiring: ViewDef<ContractExpiringRow>;
+      report_move_out_notices: ViewDef<MoveOutNoticeRow>;
       report_outstanding: ViewDef<OutstandingRow>;
       report_payment_collection: ViewDef<PaymentCollectionRow>;
       report_meter_usage: ViewDef<MeterUsageRow>;

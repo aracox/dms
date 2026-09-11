@@ -9,6 +9,7 @@ import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { bangkokToday } from '@/lib/utils/date';
 import {
   contractRentSchema,
+  giveMoveOutNoticeSchema,
   renewContractSchema,
   settleDepositSchema,
 } from '@/lib/validation/schemas';
@@ -152,6 +153,92 @@ export async function settleDepositAction(
       deposit_settlement_note: parsed.data.note,
     })
     .eq('id', parsed.data.contract_id);
+
+  if (error) return { error: 'errors.generic' };
+
+  if (roomId) revalidatePath(`/rooms/${roomId}`);
+  return { error: null };
+}
+
+export interface GiveMoveOutNoticeState {
+  error: string | null;
+}
+
+/**
+ * Records that an active contract's tenant plans to leave early, on a date
+ * that may be well before the lease's end_date. The contract stays active
+ * and the room stays occupied -- this is only a heads-up so staff can start
+ * lining up the next tenant. The actual move-out (move_out_room) is a
+ * separate, later step.
+ */
+export async function giveMoveOutNoticeAction(
+  _previous: GiveMoveOutNoticeState,
+  formData: FormData,
+): Promise<GiveMoveOutNoticeState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'contracts:write');
+
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const parsed = giveMoveOutNoticeSchema.safeParse({
+    contract_id: String(formData.get('contract_id') ?? ''),
+    planned_move_out_date: String(formData.get('planned_move_out_date') ?? ''),
+    note: String(formData.get('note') ?? '').trim() || null,
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  if (parsed.data.planned_move_out_date < bangkokToday()) {
+    return { error: 'validation.date.pastDate' };
+  }
+
+  const supabase = await createClient();
+  const { data: contract } = await supabase
+    .from('contracts')
+    .select('status')
+    .eq('id', parsed.data.contract_id)
+    .maybeSingle();
+
+  if (!contract) return { error: 'errors.generic' };
+  if (contract.status !== 'active') return { error: 'errors.generic' };
+
+  const { error } = await supabase
+    .from('contracts')
+    .update({
+      notice_given_at: bangkokToday(),
+      planned_move_out_date: parsed.data.planned_move_out_date,
+      notice_note: parsed.data.note,
+    })
+    .eq('id', parsed.data.contract_id);
+
+  if (error) return { error: 'errors.generic' };
+
+  if (roomId) revalidatePath(`/rooms/${roomId}`);
+  return { error: null };
+}
+
+export interface CancelMoveOutNoticeState {
+  error: string | null;
+}
+
+/** Clears a notice -- the tenant changed their mind and is staying. */
+export async function cancelMoveOutNoticeAction(
+  _previous: CancelMoveOutNoticeState,
+  formData: FormData,
+): Promise<CancelMoveOutNoticeState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'contracts:write');
+
+  const contractId = String(formData.get('contract_id') ?? '');
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('contracts')
+    .update({ notice_given_at: null, planned_move_out_date: null, notice_note: null })
+    .eq('id', contractId);
 
   if (error) return { error: 'errors.generic' };
 

@@ -14,6 +14,7 @@ import { bangkokToday, formatBillingMonth, formatDate } from '@/lib/utils/date';
 
 import { ContractRentField } from './ContractRentField';
 import { MoveOutForm } from './MoveOutForm';
+import { MoveOutNoticeForm } from './MoveOutNoticeForm';
 import { RoomStatusButtons } from './RoomStatusButtons';
 import { RoomVehiclesCard } from './RoomVehiclesCard';
 import { TenantContactCard } from './TenantContactCard';
@@ -89,7 +90,16 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
           ) : null}
 
           {contract && contract.status === 'active' && canEditContract ? (
-            <div className="border-border mt-3 border-t pt-3">
+            <div className="border-border mt-3 space-y-3 border-t pt-3">
+              <MoveOutNoticeForm
+                contractId={contract.id}
+                roomId={room.id}
+                today={bangkokToday()}
+                noticeGivenAt={contract.notice_given_at}
+                plannedMoveOutDate={contract.planned_move_out_date}
+                noticeNote={contract.notice_note}
+                locale={locale}
+              />
               <MoveOutForm contractId={contract.id} roomId={room.id} today={bangkokToday()} />
             </div>
           ) : null}
@@ -129,7 +139,9 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
                 label={t('room.electricity')}
                 value={
                   latestElectricity
-                    ? t('meters.usageUnits', { units: formatAmount(latestElectricity.usage, locale) })
+                    ? t('meters.usageUnits', {
+                        units: formatAmount(latestElectricity.usage, locale),
+                      })
                     : t('room.noMeterReading')
                 }
                 hint={
