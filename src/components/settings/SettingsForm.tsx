@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { RequiredMark } from '@/components/ui/RequiredMark';
-import { PROPERTY_SEGMENTS } from '@/lib/reporting/segments';
+import { PROPERTY_SEGMENTS, viewSegments, type SegmentView } from '@/lib/reporting/segments';
 import { updateSettingsAction, type SettingsState } from '@/lib/settings/actions';
 import {
   segmentFieldName,
@@ -16,8 +16,16 @@ import {
   type SettingsBySegment,
 } from '@/lib/settings/segment-keys';
 import { cn } from '@/lib/utils/cn';
+import type { PropertySegment } from '@/types/database';
 
 const INITIAL_STATE: SettingsState = { message: null, error: null };
+
+/** 9rem per visible segment column, plus the label column. */
+function gridCols(visibleCount: number): string {
+  return visibleCount === 1
+    ? 'sm:grid-cols-[minmax(0,1fr)_9rem]'
+    : 'sm:grid-cols-[minmax(0,1fr)_9rem_9rem]';
+}
 
 /**
  * One setting, with a field per segment side by side.
@@ -25,28 +33,46 @@ const INITIAL_STATE: SettingsState = { message: null, error: null };
  * Laid out as a row rather than two separate forms so the หอพัก and บ้านพัก
  * prices for the same thing sit next to each other -- the whole reason the
  * owner wanted them split is to compare and diverge them deliberately.
+ *
+ * A segment the SegmentSwitcher has filtered out still renders, as a hidden
+ * input carrying its current value, so submitting the filtered form does not
+ * clobber it.
  */
 function SegmentPair({
   settingKey,
   label,
   values,
   segmentLabels,
+  visibleSegments,
   step = '0.01',
 }: {
   settingKey: SegmentSettingKey;
   label: string;
   values: SettingsBySegment;
   segmentLabels: Record<string, string>;
+  visibleSegments: readonly PropertySegment[];
   step?: string;
 }) {
   return (
-    <div className="border-border grid grid-cols-1 items-end gap-3 border-b pb-3 last:border-0 last:pb-0 sm:grid-cols-[minmax(0,1fr)_9rem_9rem]">
+    <div
+      className={cn(
+        'border-border grid grid-cols-1 items-end gap-3 border-b pb-3 last:border-0 last:pb-0',
+        gridCols(visibleSegments.length),
+      )}
+    >
       <span className="text-ink text-body-sm font-medium">
         {label}
         <RequiredMark />
       </span>
       {PROPERTY_SEGMENTS.map((segment) => {
         const name = segmentFieldName(segment, settingKey);
+        // A segment filtered out of view still needs its value submitted
+        // unchanged, or updateSettingsAction would read it as missing (0).
+        if (!visibleSegments.includes(segment)) {
+          return (
+            <input key={segment} type="hidden" name={name} value={values[segment][settingKey]} />
+          );
+        }
         return (
           <Input
             key={segment}
@@ -67,12 +93,18 @@ function SegmentPair({
   );
 }
 
-/** Column headers naming the two segments, above each card's rows. */
-function SegmentHeadings({ labels }: { labels: Record<string, string> }) {
+/** Column headers naming each visible segment, above each card's rows. */
+function SegmentHeadings({
+  labels,
+  visibleSegments,
+}: {
+  labels: Record<string, string>;
+  visibleSegments: readonly PropertySegment[];
+}) {
   return (
-    <div className="mb-2 hidden grid-cols-[minmax(0,1fr)_9rem_9rem] gap-3 sm:grid">
+    <div className={cn('mb-2 hidden gap-3 sm:grid', gridCols(visibleSegments.length))}>
       <span />
-      {PROPERTY_SEGMENTS.map((segment) => (
+      {visibleSegments.map((segment) => (
         <span
           key={segment}
           className="text-ink-muted font-display inline-flex items-center gap-1.5 text-[11px] tracking-[1px] uppercase"
@@ -88,10 +120,11 @@ function SegmentHeadings({ labels }: { labels: Record<string, string> }) {
   );
 }
 
-export function SettingsForm({ values }: { values: SettingsBySegment }) {
+export function SettingsForm({ values, view }: { values: SettingsBySegment; view: SegmentView }) {
   const t = useTranslations();
   const [state, formAction, isPending] = useActionState(updateSettingsAction, INITIAL_STATE);
 
+  const visibleSegments = viewSegments(view);
   const segmentLabels = Object.fromEntries(
     PROPERTY_SEGMENTS.map((segment) => [segment, t(`segment.${segment}`)]),
   );
@@ -103,6 +136,7 @@ export function SettingsForm({ values }: { values: SettingsBySegment }) {
       label={label}
       values={values}
       segmentLabels={segmentLabels}
+      visibleSegments={visibleSegments}
       step={step}
     />
   );
@@ -112,7 +146,7 @@ export function SettingsForm({ values }: { values: SettingsBySegment }) {
       <Card>
         <CardHeader title={t('settings.utilityRates')} description={t('settings.perSegmentHint')} />
         <CardBody>
-          <SegmentHeadings labels={segmentLabels} />
+          <SegmentHeadings labels={segmentLabels} visibleSegments={visibleSegments} />
           <div className="space-y-3">
             {pair('electricity_rate', t('meters.electricityRate'))}
             {pair('water_rate', t('meters.waterRate'))}
@@ -127,7 +161,7 @@ export function SettingsForm({ values }: { values: SettingsBySegment }) {
       <Card>
         <CardHeader title={t('settings.fees')} />
         <CardBody>
-          <SegmentHeadings labels={segmentLabels} />
+          <SegmentHeadings labels={segmentLabels} visibleSegments={visibleSegments} />
           <div className="space-y-3">
             {pair('internet_fee', t('settings.internetFee'))}
             {pair('parking_fee_car', t('settings.parkingFeeCar'))}
@@ -140,7 +174,7 @@ export function SettingsForm({ values }: { values: SettingsBySegment }) {
       <Card>
         <CardHeader title={t('settings.streamingServices')} />
         <CardBody>
-          <SegmentHeadings labels={segmentLabels} />
+          <SegmentHeadings labels={segmentLabels} visibleSegments={visibleSegments} />
           <div className="space-y-3">
             {pair('netflix_fee', t('settings.netflixFee'))}
             {pair('youtube_fee', t('settings.youtubeFee'))}
