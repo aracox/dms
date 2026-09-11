@@ -46,6 +46,7 @@ export type Permission =
   | 'settings:read'
   | 'settings:write'
   | 'audit:read'
+  | 'users:manage'
   | 'test-mode:use';
 
 /** Minimum role required for each permission. */
@@ -95,6 +96,9 @@ const REQUIRED_ROLE: Record<Permission, AppRole> = {
   'settings:write': 'owner',
 
   'audit:read': 'admin',
+
+  // Mirrors the profiles_owner_all RLS policy (is_owner()).
+  'users:manage': 'owner',
 
   'test-mode:use': 'admin',
 };

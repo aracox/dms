@@ -80,6 +80,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/settings', labelKey: 'settings', icon: 'Settings', permission: 'settings:read' },
       { href: '/test', labelKey: 'testMode', icon: 'FlaskConical', permission: 'test-mode:use' },
       { href: '/audit', labelKey: 'auditLog', icon: 'ScrollText', permission: 'audit:read' },
+      { href: '/staff', labelKey: 'staff', icon: 'Users', permission: 'users:manage' },
     ],
   },
 ];

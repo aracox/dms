@@ -34,6 +34,7 @@
     "settings": "Settings",
     "testMode": "Test Mode",
     "auditLog": "Audit Log",
+    "staff": "Staff",
     "operations": "Operations",
     "monthlyWorkflow": "Monthly workflow",
     "financeInsights": "Finance & insights",
@@ -545,6 +546,24 @@
     "insert": "Created",
     "update": "Updated",
     "delete": "Deleted"
+  },
+  "staff": {
+    "title": "Staff",
+    "subtitle": "Who can sign in, and what they can do",
+    "addTitle": "Add an account",
+    "addHint": "Creates a login with a one-time temporary password. The new user must set their own password at first sign-in.",
+    "email": "Email",
+    "role": "Role",
+    "create": "Create account",
+    "createdNotice": "Account created for {email}. Give them this temporary password:",
+    "tempPasswordHint": "This is shown once and cannot be retrieved later.",
+    "listTitle": "Accounts",
+    "createdAt": "Created",
+    "you": "(you)",
+    "active": "Active",
+    "inactive": "Inactive",
+    "cannotEditSelf": "You cannot change your own role or status here.",
+    "emailTaken": "That email is already registered."
   },
   "settings": {
     "title": "Settings",

@@ -382,3 +382,21 @@ export const settleDepositSchema = z.object({
 });
 
 export type SettleDepositInput = z.infer<typeof settleDepositSchema>;
+
+// --- Staff -------------------------------------------------------------------
+
+export const createStaffUserSchema = z.object({
+  email: z.email('validation.email.format'),
+  full_name: z.string().trim().min(1, 'validation.required').max(200),
+  role: z.enum(['staff', 'admin', 'owner']),
+});
+
+export type CreateStaffUserInput = z.infer<typeof createStaffUserSchema>;
+
+export const updateStaffUserSchema = z.object({
+  profile_id: uuid,
+  role: z.enum(['staff', 'admin', 'owner']),
+  is_active: z.boolean(),
+});
+
+export type UpdateStaffUserInput = z.infer<typeof updateStaffUserSchema>;

@@ -7,6 +7,7 @@ describe('permissions', () => {
     expect(can('owner', 'payments:delete')).toBe(true);
     expect(can('owner', 'settings:write')).toBe(true);
     expect(can('owner', 'rooms:delete')).toBe(true);
+    expect(can('owner', 'users:manage')).toBe(true);
   });
 
   it('gives admin operational access but not destructive access', () => {
@@ -16,6 +17,7 @@ describe('permissions', () => {
     expect(can('admin', 'payments:delete')).toBe(false);
     expect(can('admin', 'settings:write')).toBe(false);
     expect(can('admin', 'rooms:delete')).toBe(false);
+    expect(can('admin', 'users:manage')).toBe(false);
   });
 
   it('limits staff to recording day-to-day work', () => {
