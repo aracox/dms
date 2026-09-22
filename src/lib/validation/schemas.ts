@@ -80,6 +80,7 @@ export const tenantSchema = z.object({
     .optional(),
   id_card_or_passport: z.string().trim().max(50).nullable().optional(),
   nationality: z.string().trim().max(60).nullable().optional(),
+  address: z.string().trim().max(500).nullable().optional(),
   emergency_contact: z.string().trim().max(200).nullable().optional(),
   emergency_phone: z
     .union([z.literal(''), z.string().trim().regex(THAI_PHONE, 'validation.phone.format')])
@@ -317,6 +318,7 @@ export const settingsSchema = z.object({
   parking_fee_car: money,
   parking_fee_motorcycle: money,
   card_replacement_fee: money,
+  late_fee_per_day: money,
   netflix_fee: money,
   youtube_fee: money,
   disney_fee: money,
@@ -344,6 +346,36 @@ export const propertyNameSchema = z.object({
 });
 
 export type PropertyNameInput = z.infer<typeof propertyNameSchema>;
+
+/** One segment's owner identity -- the lessor party shown on that segment's contract. */
+export const ownerIdentitySchema = z.object({
+  name_th: z.string().trim().min(1, 'validation.required').max(200),
+  name_en: z.string().trim().max(200).nullable().optional(),
+  id_card: z.string().trim().max(50).nullable().optional(),
+  address: z.string().trim().max(500).nullable().optional(),
+  phone: z
+    .union([z.literal(''), z.string().trim().regex(THAI_PHONE, 'validation.phone.format')])
+    .nullable()
+    .optional(),
+});
+
+export type OwnerIdentityInput = z.infer<typeof ownerIdentitySchema>;
+
+/** One segment's bank account, shown in the contract's payment clause. */
+export const paymentBankSchema = z.object({
+  bank_name: z.string().trim().max(200).nullable().optional(),
+  account_number: z.string().trim().max(50).nullable().optional(),
+  account_name: z.string().trim().max(200).nullable().optional(),
+});
+
+export type PaymentBankInput = z.infer<typeof paymentBankSchema>;
+
+/** One segment's property address, shown alongside property_name on the contract. */
+export const propertyAddressSchema = z.object({
+  address: z.string().trim().max(500).nullable().optional(),
+});
+
+export type PropertyAddressInput = z.infer<typeof propertyAddressSchema>;
 
 // --- Move-in / move-out ----------------------------------------------------
 

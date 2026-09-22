@@ -167,7 +167,10 @@ export async function getRoomDetail(roomId: string): Promise<RoomDetail | null> 
       ? supabase.from('tenants').select('*').eq('id', activeContract.tenant_id).maybeSingle()
       : Promise.resolve({ data: null }),
     activeContract
-      ? supabase.from('contract_subscriptions').select('fee_key').eq('contract_id', activeContract.id)
+      ? supabase
+          .from('contract_subscriptions')
+          .select('fee_key')
+          .eq('contract_id', activeContract.id)
       : Promise.resolve({ data: [] as { fee_key: string }[] }),
     invoiceIds.length
       ? supabase.from('invoice_items').select('*').in('invoice_id', invoiceIds).order('sort_order')

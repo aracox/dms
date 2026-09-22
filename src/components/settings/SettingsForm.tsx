@@ -139,6 +139,7 @@ export function SettingsForm({ values, view }: { values: SettingsBySegment; view
             {tile('parking_fee_car', t('settings.parkingFeeCar'))}
             {tile('parking_fee_motorcycle', t('settings.parkingFeeMotorcycle'))}
             {tile('card_replacement_fee', t('settings.cardReplacementFee'))}
+            {tile('late_fee_per_day', t('settings.lateFeePerDay'))}
           </div>
         </CardBody>
       </Card>

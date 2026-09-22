@@ -62,6 +62,26 @@ export function addDays(date: IsoDate, days: number): IsoDate {
 }
 
 /**
+ * Whole calendar months from `start` to `end`, treating `end` as the
+ * contract's inclusive last day (matching contracts.end_date, e.g. a 3-year
+ * lease from 2025-01-01 is stored ending 2027-12-31, one day short of the
+ * anniversary) -- shown on the contract's "ระยะเวลาเช่า" clause.
+ */
+export function monthsBetween(start: IsoDate, end: IsoDate): number {
+  const exclusiveEnd = addDays(end, 1);
+  const startYear = Number(start.slice(0, 4));
+  const startMonth = Number(start.slice(5, 7));
+  const startDay = Number(start.slice(8, 10));
+  const endYear = Number(exclusiveEnd.slice(0, 4));
+  const endMonth = Number(exclusiveEnd.slice(5, 7));
+  const endDay = Number(exclusiveEnd.slice(8, 10));
+
+  let months = (endYear - startYear) * 12 + (endMonth - startMonth);
+  if (endDay < startDay) months -= 1;
+  return months;
+}
+
+/**
  * True when `dueDate`, plus an optional grace period, is strictly before
  * `today`. Mirrors recalc_invoice() / payment_grace_days().
  */

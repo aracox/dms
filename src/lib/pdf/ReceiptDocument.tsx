@@ -5,7 +5,9 @@ import { registerContractFonts } from '@/lib/pdf/registerFonts';
 import { formatBillingMonth, formatDate, type IsoDate } from '@/lib/utils/date';
 import type { PaymentMethod, PaymentRow } from '@/types/database';
 
-export interface ReceiptDocumentProps {
+interface ReceiptDocumentProps {
+  /** Registered by renderReceiptPdf; never pass a literal font family here. */
+  fontFamily: string;
   locale: 'th' | 'en';
   dormitoryName: string;
   generatedDate: IsoDate;
@@ -59,7 +61,6 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     paddingBottom: 48,
     paddingHorizontal: 56,
-    fontFamily: 'Sarabun',
     fontSize: 11,
     lineHeight: 1.5,
     color: '#1a1a1a',
@@ -99,6 +100,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 export function ReceiptDocument({
+  fontFamily,
   locale,
   dormitoryName,
   generatedDate,
@@ -112,9 +114,11 @@ export function ReceiptDocument({
 
   return (
     <Document title={`${t.title} ${invoiceNumber}`} language={locale}>
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" style={[styles.page, { fontFamily }]}>
         <Text style={styles.title}>{t.title}</Text>
-        <Text style={styles.subtitle}>{t.issuedAt(dormitoryName, formatDate(generatedDate, locale))}</Text>
+        <Text style={styles.subtitle}>
+          {t.issuedAt(dormitoryName, formatDate(generatedDate, locale))}
+        </Text>
 
         <View style={styles.section}>
           <InfoRow label={t.room} value={roomNumber} />
@@ -154,8 +158,10 @@ export function ReceiptDocument({
   );
 }
 
+export type RenderReceiptPdfProps = Omit<ReceiptDocumentProps, 'fontFamily'>;
+
 /** Renders the receipt to a PDF buffer. JSX must live in a .tsx file, hence the wrapper here. */
-export async function renderReceiptPdf(props: ReceiptDocumentProps): Promise<Buffer> {
-  registerContractFonts();
-  return renderToBuffer(<ReceiptDocument {...props} />);
+export async function renderReceiptPdf(props: RenderReceiptPdfProps): Promise<Buffer> {
+  const fontFamily = registerContractFonts();
+  return renderToBuffer(<ReceiptDocument {...props} fontFamily={fontFamily} />);
 }

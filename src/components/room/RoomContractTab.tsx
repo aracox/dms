@@ -1,4 +1,4 @@
-import { Download } from 'lucide-react';
+import { Download, Eye } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
@@ -139,6 +139,14 @@ export async function RoomContractTab({
                   {t(`contractStatus.${contract.status}`)}
                 </Badge>
                 <Link
+                  href={`/rooms/${detail.room.id}/contract?view=1`}
+                  target="_blank"
+                  className={buttonClasses('secondary', 'sm')}
+                >
+                  <Eye size={12} aria-hidden="true" />
+                  {t('contract.viewPdf')}
+                </Link>
+                <Link
                   href={`/rooms/${detail.room.id}/contract`}
                   className={buttonClasses('secondary', 'sm')}
                 >
@@ -164,6 +172,10 @@ export async function RoomContractTab({
               <Field
                 label={t('tenant.idCard')}
                 value={tenant.id_card_or_passport ?? t('common.notAvailable')}
+              />
+              <Field
+                label={t('tenant.address')}
+                value={tenant.address ?? t('common.notAvailable')}
               />
               <Field
                 label={t('tenant.lineId')}

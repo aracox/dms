@@ -149,6 +149,7 @@ export type TenantRow = {
   email: string | null;
   id_card_or_passport: string | null;
   nationality: string | null;
+  address: string | null;
   emergency_contact: string | null;
   emergency_phone: string | null;
   line_id: string | null;
@@ -847,6 +848,8 @@ export type Database = {
           p_payment_due_day: number;
           p_occupant_count: number;
           p_activate_cards: boolean;
+          p_line_id?: string | null;
+          p_address?: string | null;
         };
         Returns: { contract_id: string; tenant_id: string }[];
       };

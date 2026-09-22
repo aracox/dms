@@ -7,9 +7,9 @@ import type { PropertySegment } from '@/types/database';
  * change both. Only `currency` and `dormitory` describe the whole property and
  * stay in `settings`.
  *
- * `late_fee_per_day` is segment-scoped in the database for consistency but is
- * absent here: it is not charged in v1, so there is no field for it. It keeps
- * whatever value the migration backfilled.
+ * `late_fee_per_day` is exposed here since migration 0035, printed on the
+ * contract's payment clause. It is still not enforced by billing -- setting it
+ * does not make recalc_invoice charge it.
  */
 export const SEGMENT_SETTING_KEYS = [
   'electricity_rate',
@@ -22,6 +22,7 @@ export const SEGMENT_SETTING_KEYS = [
   'parking_fee_car',
   'parking_fee_motorcycle',
   'card_replacement_fee',
+  'late_fee_per_day',
   'netflix_fee',
   'youtube_fee',
   'disney_fee',

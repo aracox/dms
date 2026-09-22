@@ -108,6 +108,7 @@ export function MoveInForm({
             <TextField name="email" label={t('room.email')} type="email" />
             <TextField name="id_card_or_passport" label={t('tenant.idCard')} />
             <TextField name="nationality" label={t('tenant.nationality')} />
+            <TextField name="address" label={t('tenant.address')} />
             <TextField name="emergency_contact" label={t('tenant.emergencyContact')} />
             <TextField name="emergency_phone" label={t('tenant.emergencyPhone')} />
             <TextField name="line_id" label={t('tenant.lineId')} />

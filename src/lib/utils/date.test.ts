@@ -9,6 +9,7 @@ import {
   daysBetween,
   dueDateFor,
   isPastDue,
+  monthsBetween,
 } from './date';
 
 describe('bangkokToday', () => {
@@ -85,6 +86,17 @@ describe('daysBetween', () => {
 
   it('spans a leap day', () => {
     expect(daysBetween('2028-02-28', '2028-03-01')).toBe(2);
+  });
+});
+
+describe('monthsBetween', () => {
+  it('treats end_date as the inclusive last day, one short of the anniversary', () => {
+    expect(monthsBetween('2025-01-01', '2027-12-31')).toBe(36);
+    expect(monthsBetween('2026-01-01', '2026-12-31')).toBe(12);
+  });
+
+  it('handles a mid-month lease', () => {
+    expect(monthsBetween('2026-03-15', '2026-09-14')).toBe(6);
   });
 });
 

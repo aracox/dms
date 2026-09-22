@@ -2,6 +2,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
+import { OwnerNamesForm } from '@/components/settings/OwnerNamesForm';
+import { PaymentBankForm } from '@/components/settings/PaymentBankForm';
+import { PropertyAddressForm } from '@/components/settings/PropertyAddressForm';
 import { PropertyNamesForm } from '@/components/settings/PropertyNamesForm';
 import { SettingsForm } from '@/components/settings/SettingsForm';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
@@ -10,7 +13,13 @@ import { formatAmount } from '@/lib/billing/money';
 import { can } from '@/lib/permissions';
 import { parseSegmentView, viewSegments } from '@/lib/reporting/segments';
 import { SEGMENT_SETTING_KEYS, type SegmentSettingKey } from '@/lib/settings/segment-keys';
-import { getPropertyNamesBySegment, getSettingsBySegment } from '@/lib/settings/queries';
+import {
+  getOwnerNamesBySegment,
+  getPaymentBanksBySegment,
+  getPropertyAddressesBySegment,
+  getPropertyNamesBySegment,
+  getSettingsBySegment,
+} from '@/lib/settings/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
 
 /** These two keys are day counts, not money -- shown as plain integers. */
@@ -38,9 +47,12 @@ export default async function SettingsPage({
 
   const t = await getTranslations();
   const profile = await getCurrentProfile();
-  const [values, propertyNames] = await Promise.all([
+  const [values, propertyNames, ownerNames, paymentBanks, propertyAddresses] = await Promise.all([
     getSettingsBySegment(),
     getPropertyNamesBySegment(),
+    getOwnerNamesBySegment(),
+    getPaymentBanksBySegment(),
+    getPropertyAddressesBySegment(),
   ]);
   const view = parseSegmentView((await searchParams).segment);
   const segments = viewSegments(view);
@@ -62,6 +74,78 @@ export default async function SettingsPage({
             <FieldGrid>
               <Field label={t('settings.nameTh')} value={propertyNames[segment].name_th} />
               <Field label={t('settings.nameEn')} value={propertyNames[segment].name_en || '-'} />
+            </FieldGrid>
+          </div>
+        ))}
+      </CardBody>
+    </Card>
+  );
+
+  const readOnlyOwnerNames = (
+    <Card>
+      <CardHeader title={t('settings.ownerNames')} description={t('settings.ownerNamesHint')} />
+      <CardBody>
+        {segments.map((segment) => (
+          <div key={segment} className="mb-4 last:mb-0">
+            <h3 className="text-ink-muted font-display mb-2 text-[11px] tracking-[1px] uppercase">
+              {t(`segment.${segment}`)}
+            </h3>
+            <FieldGrid>
+              <Field label={t('settings.nameTh')} value={ownerNames[segment].name_th || '-'} />
+              <Field label={t('settings.nameEn')} value={ownerNames[segment].name_en || '-'} />
+              <Field label={t('settings.idCard')} value={ownerNames[segment].id_card || '-'} />
+              <Field label={t('settings.phone')} value={ownerNames[segment].phone || '-'} />
+              <Field label={t('settings.address')} value={ownerNames[segment].address || '-'} />
+            </FieldGrid>
+          </div>
+        ))}
+      </CardBody>
+    </Card>
+  );
+
+  const readOnlyPaymentBank = (
+    <Card>
+      <CardHeader title={t('settings.paymentBank')} description={t('settings.paymentBankHint')} />
+      <CardBody>
+        {segments.map((segment) => (
+          <div key={segment} className="mb-4 last:mb-0">
+            <h3 className="text-ink-muted font-display mb-2 text-[11px] tracking-[1px] uppercase">
+              {t(`segment.${segment}`)}
+            </h3>
+            <FieldGrid>
+              <Field
+                label={t('settings.bankName')}
+                value={paymentBanks[segment].bank_name || '-'}
+              />
+              <Field
+                label={t('settings.accountNumber')}
+                value={paymentBanks[segment].account_number || '-'}
+              />
+              <Field
+                label={t('settings.accountName')}
+                value={paymentBanks[segment].account_name || '-'}
+              />
+            </FieldGrid>
+          </div>
+        ))}
+      </CardBody>
+    </Card>
+  );
+
+  const readOnlyPropertyAddress = (
+    <Card>
+      <CardHeader
+        title={t('settings.propertyAddress')}
+        description={t('settings.propertyAddressHint')}
+      />
+      <CardBody>
+        {segments.map((segment) => (
+          <div key={segment} className="mb-4 last:mb-0">
+            <h3 className="text-ink-muted font-display mb-2 text-[11px] tracking-[1px] uppercase">
+              {t(`segment.${segment}`)}
+            </h3>
+            <FieldGrid>
+              <Field label={t('settings.address')} value={propertyAddresses[segment] || '-'} />
             </FieldGrid>
           </div>
         ))}
@@ -112,11 +196,17 @@ export default async function SettingsPage({
       {canWrite ? (
         <div className="space-y-4">
           <PropertyNamesForm values={propertyNames} view={view} />
+          <PropertyAddressForm values={propertyAddresses} view={view} />
+          <OwnerNamesForm values={ownerNames} view={view} />
+          <PaymentBankForm values={paymentBanks} view={view} />
           <SettingsForm values={values} view={view} />
         </div>
       ) : (
         <div className="space-y-4">
           {readOnlyPropertyNames}
+          {readOnlyPropertyAddress}
+          {readOnlyOwnerNames}
+          {readOnlyPaymentBank}
 
           {readOnlyGroup(t('settings.utilityRates'), SEGMENT_SETTING_KEYS.slice(0, 6), [
             t('meters.electricityRate'),
@@ -127,14 +217,15 @@ export default async function SettingsPage({
             t('settings.paymentGraceDays'),
           ])}
 
-          {readOnlyGroup(t('settings.fees'), SEGMENT_SETTING_KEYS.slice(6, 10), [
+          {readOnlyGroup(t('settings.fees'), SEGMENT_SETTING_KEYS.slice(6, 11), [
             t('settings.internetFee'),
             t('settings.parkingFeeCar'),
             t('settings.parkingFeeMotorcycle'),
             t('settings.cardReplacementFee'),
+            t('settings.lateFeePerDay'),
           ])}
 
-          {readOnlyGroup(t('settings.streamingServices'), SEGMENT_SETTING_KEYS.slice(10), [
+          {readOnlyGroup(t('settings.streamingServices'), SEGMENT_SETTING_KEYS.slice(11), [
             t('settings.netflixFee'),
             t('settings.youtubeFee'),
             t('settings.disneyFee'),
