@@ -1,6 +1,7 @@
 import { Building2 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { Suspense } from 'react';
 
 import { Link } from '@/i18n/navigation';
 import type { AppRole } from '@/types/database';
@@ -10,6 +11,7 @@ import { DesktopSidebar } from './DesktopSidebar';
 import { GlassSettings } from './GlassSettings';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { MobileNavigation } from './MobileNavigation';
+import { RouteChangeIndicator } from './RouteChangeIndicator';
 import { SidebarProvider } from './SidebarState';
 import { UserMenu } from './UserMenu';
 
@@ -29,6 +31,9 @@ export async function AppShell({
 
   return (
     <SidebarProvider>
+      <Suspense fallback={null}>
+        <RouteChangeIndicator />
+      </Suspense>
       <AppFrame>
         <header className="app-toolbar border-border bg-surface sticky top-0 z-10 border-b">
           <div className="flex items-center justify-between gap-4 px-4 py-2.5">
