@@ -5,15 +5,17 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 /**
- * Shows a small spinner the instant an in-app link is clicked, until the URL
- * actually changes.
+ * Blocks the whole page with a centered spinner the instant an in-app link is
+ * clicked, until the URL actually changes.
  *
  * `loading.tsx` alone only fires while a page segment is still fetching --
  * Next's Link prefetching means most in-app navigations (e.g. a room list row
  * to that room's own page) already have their data by the time you click, so
  * Suspense never suspends and no loading state appears at all. This listens
  * for the click itself instead, so every navigation gets immediate feedback
- * regardless of how fast the target page turns out to be.
+ * regardless of how fast the target page turns out to be, and the full-screen
+ * overlay stops a second click (e.g. double-clicking a "save" button) from
+ * firing again mid-navigation.
  */
 export function RouteChangeIndicator() {
   const pathname = usePathname();
@@ -71,13 +73,11 @@ export function RouteChangeIndicator() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center pt-3"
+      className="glass fixed inset-0 z-[100] flex items-center justify-center"
       role="status"
       aria-live="polite"
     >
-      <div className="bg-surface border-border flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-lg">
-        <Loader2 className="text-brand-blue size-4 animate-spin" aria-label="Loading" />
-      </div>
+      <Loader2 className="text-brand-blue size-10 animate-spin" aria-label="Loading" />
     </div>
   );
 }
