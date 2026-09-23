@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
 
-import { RoomStatusBadge } from '@/components/status/RoomStatusBadge';
 import { Badge } from '@/components/ui/Badge';
 import { buttonClasses } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
@@ -46,13 +45,6 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
           description={`${t('floorPlan.floor', { floor: room.floor })} · ${t(`roomType.${room.room_type}`)}${
             room.size_sqm ? ` · ${room.size_sqm} ${t('room.sqm')}` : ''
           }`}
-          action={
-            <RoomStatusBadge
-              roomStatus={room.status}
-              financialStatus={board?.financial_status ?? 'none'}
-              hasNotice={Boolean(contract?.notice_given_at)}
-            />
-          }
         />
         <CardBody>
           <FieldGrid>
@@ -73,7 +65,6 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
               label={t('room.deposit')}
               value={formatTHB(board?.deposit ?? contract?.deposit ?? 0, locale)}
             />
-            <Field label={t('room.status')} value={t(`roomStatus.${room.status}`)} />
           </FieldGrid>
 
           {canEditRoom &&
