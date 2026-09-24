@@ -156,6 +156,18 @@ export const contractOccupantsSchema = z.object({
     .max(20, 'validation.contract.occupantsRange'),
 });
 
+/** Corrects the active contract's start/end dates (a typo fix, not a renewal). */
+export const contractPeriodSchema = z
+  .object({
+    contract_id: uuid,
+    start_date: isoDate,
+    end_date: isoDate,
+  })
+  .refine((value) => value.end_date > value.start_date, {
+    error: 'validation.contract.endBeforeStart',
+    path: ['end_date'],
+  });
+
 /** Ends the named contract and opens a new term for the same tenant and room. */
 export const renewContractSchema = z
   .object({

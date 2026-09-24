@@ -10,11 +10,20 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { InlineEditableField } from '@/components/ui/InlineEditableField';
 import type { Locale } from '@/i18n/routing';
 import { updateContractOccupantsAction } from '@/lib/contracts/actions';
-import { generateLineLinkCodeAction, updateTenantContactAction } from '@/lib/tenants/actions';
+import {
+  generateLineLinkCodeAction,
+  unlinkLineAction,
+  updateTenantContactAction,
+} from '@/lib/tenants/actions';
 import { formatDate } from '@/lib/utils/date';
 import type { ContractRow, TenantRow } from '@/types/database';
 
-/** LINE link status: linked badge, a pending code with instructions, or a button to generate one. */
+import { ContractPeriodField } from './ContractPeriodField';
+
+/**
+ * LINE link status: linked badge (with unlink, for a changed or wrong
+ * account), a pending code with instructions, or a button to generate one.
+ */
 function LineLinkSection({
   tenantId,
   roomId,
@@ -28,9 +37,29 @@ function LineLinkSection({
 }) {
   const t = useTranslations();
   const [code, setCode] = useState(lineLinkCode);
-  const [linked] = useState(Boolean(lineUserId));
+  const [linked, setLinked] = useState(Boolean(lineUserId));
+  const [confirmingUnlink, setConfirmingUnlink] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function handleUnlink() {
+    setPending(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.set('tenant_id', tenantId);
+    formData.set('room_id', roomId);
+
+    const result = await unlinkLineAction({ error: null }, formData);
+    setPending(false);
+    setConfirmingUnlink(false);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    setLinked(false);
+    setCode(null);
+  }
 
   async function handleGenerate() {
     setPending(true);
@@ -54,9 +83,45 @@ function LineLinkSection({
       <dt className="text-ink-subtle text-caption">{t('tenant.lineLink')}</dt>
       <dd className="mt-0.5">
         {linked ? (
-          <Badge tone="green" icon={<CheckCircle2 size={12} aria-hidden="true" />}>
-            {t('tenant.lineLinked')}
-          </Badge>
+          confirmingUnlink ? (
+            <div className="space-y-1">
+              <p className="text-ink text-caption">{t('tenant.lineUnlinkConfirm')}</p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleUnlink}
+                  disabled={pending}
+                >
+                  {pending ? t('common.loading') : t('tenant.lineUnlink')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  onClick={() => setConfirmingUnlink(false)}
+                  disabled={pending}
+                >
+                  {t('common.cancel')}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone="green" icon={<CheckCircle2 size={12} aria-hidden="true" />}>
+                {t('tenant.lineLinked')}
+              </Badge>
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                onClick={() => setConfirmingUnlink(true)}
+              >
+                {t('tenant.lineUnlink')}
+              </Button>
+            </div>
+          )
         ) : code ? (
           <div>
             <p className="text-ink font-mono text-lg font-semibold tracking-widest">{code}</p>
@@ -113,9 +178,9 @@ function ReadOnlyField({
 }
 
 /**
- * The main-tenant card. Phone, LINE ID, emergency contact/phone and the
- * contract's occupant count edit in place (click the value); everything else
- * is fixed at move-in and shown read-only with a lock icon.
+ * The main-tenant card. Phone, LINE ID, emergency contact/phone, the LINE
+ * link, and the contract's occupant count and period edit in place (click the
+ * value); everything else is fixed at move-in and shown read-only with a lock.
  */
 export function TenantContactCard({
   roomId,
@@ -234,10 +299,20 @@ export function TenantContactCard({
               hint={occupantsHint}
             />
           )}
-          <ReadOnlyField
-            label={t('room.contractPeriod')}
-            value={`${formatDate(contract.start_date, locale)} — ${formatDate(contract.end_date, locale)}`}
-          />
+          {canEditContract ? (
+            <ContractPeriodField
+              contractId={contract.id}
+              roomId={roomId}
+              startDate={contract.start_date}
+              endDate={contract.end_date}
+              locale={locale}
+            />
+          ) : (
+            <ReadOnlyField
+              label={t('room.contractPeriod')}
+              value={`${formatDate(contract.start_date, locale)} — ${formatDate(contract.end_date, locale)}`}
+            />
+          )}
           <ReadOnlyField label={t('room.paymentDueDay')} value={contract.payment_due_day} />
 
           {canEdit ? (

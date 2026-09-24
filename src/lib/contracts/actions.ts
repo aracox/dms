@@ -9,6 +9,7 @@ import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { bangkokToday } from '@/lib/utils/date';
 import {
   contractOccupantsSchema,
+  contractPeriodSchema,
   contractRentSchema,
   giveMoveOutNoticeSchema,
   renewContractSchema,
@@ -92,6 +93,56 @@ export async function updateContractOccupantsAction(
   if (roomId) revalidatePath(`/rooms/${roomId}`);
   revalidatePath('/rooms');
   revalidatePath('/floor-plan');
+  return { error: null };
+}
+
+export interface UpdateContractPeriodState {
+  error: string | null;
+  /** Which date input the error belongs to, so the form can mark it. */
+  field?: 'start_date' | 'end_date';
+}
+
+/**
+ * Corrects the active contract's start/end dates. Reports, the floor plan and
+ * the "contract expiring" LINE reminder all read these live, so nothing else
+ * needs recomputing. Extending a lease into a new term is renewContractAction.
+ */
+export async function updateContractPeriodAction(
+  _previous: UpdateContractPeriodState,
+  formData: FormData,
+): Promise<UpdateContractPeriodState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'contracts:write');
+
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const parsed = contractPeriodSchema.safeParse({
+    contract_id: String(formData.get('contract_id') ?? ''),
+    start_date: String(formData.get('start_date') ?? ''),
+    end_date: String(formData.get('end_date') ?? ''),
+  });
+
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    const field = issue?.path.at(-1);
+    return {
+      error: issue?.message ?? 'errors.generic',
+      field: field === 'start_date' || field === 'end_date' ? field : undefined,
+    };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('contracts')
+    .update({ start_date: parsed.data.start_date, end_date: parsed.data.end_date })
+    .eq('id', parsed.data.contract_id);
+
+  if (error) return { error: 'errors.generic' };
+
+  if (roomId) revalidatePath(`/rooms/${roomId}`);
+  revalidatePath('/rooms');
+  revalidatePath('/floor-plan');
+  revalidatePath('/dashboard');
   return { error: null };
 }
 

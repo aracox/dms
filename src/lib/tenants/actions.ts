@@ -111,3 +111,35 @@ export async function generateLineLinkCodeAction(
 
   return { error: 'errors.generic', code: null };
 }
+
+export interface UnlinkLineState {
+  error: string | null;
+}
+
+/**
+ * Detaches the tenant's LINE account (and any pending link code) so a new one
+ * can be linked -- e.g. the tenant changed LINE accounts, or the wrong one was
+ * linked. Reminders stop until a new code is redeemed.
+ */
+export async function unlinkLineAction(
+  _previous: UnlinkLineState,
+  formData: FormData,
+): Promise<UnlinkLineState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'tenants:write');
+
+  const tenantId = String(formData.get('tenant_id') ?? '');
+  const roomId = String(formData.get('room_id') ?? '');
+  if (!tenantId) return { error: 'errors.generic' };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('tenants')
+    .update({ line_user_id: null, line_link_code: null })
+    .eq('id', tenantId);
+
+  if (error) return { error: 'errors.generic' };
+
+  if (roomId) revalidatePath(`/rooms/${roomId}`);
+  return { error: null };
+}
