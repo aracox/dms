@@ -43,6 +43,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/meters', labelKey: 'meters', icon: 'Gauge', permission: 'meters:read' },
       { href: '/billing', labelKey: 'billing', icon: 'ReceiptText', permission: 'invoices:read' },
       { href: '/payments', labelKey: 'payments', icon: 'Banknote', permission: 'payments:read' },
+      { href: '/deposits', labelKey: 'deposits', icon: 'Wallet', permission: 'contracts:read' },
     ],
   },
   {

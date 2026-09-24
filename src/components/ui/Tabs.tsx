@@ -44,7 +44,11 @@ export function Tabs({
     const url = new URL(window.location.href);
     if (id === tabs[0]?.id) url.searchParams.delete(urlParam);
     else url.searchParams.set(urlParam, id);
-    window.history.replaceState(window.history.state, '', url);
+    // `null`, not window.history.state: Next.js syncs a replaceState into its
+    // router only when the state isn't its own internal object. Passing that
+    // object back makes Next ignore the change, and the next server-action
+    // refresh restores the old ?tab= -- the URL then disagrees with the tab.
+    window.history.replaceState(null, '', url);
   }
 
   const activeIndex = Math.max(

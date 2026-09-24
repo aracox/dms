@@ -250,6 +250,7 @@ export async function settleDepositAction(
   if (error) return { error: 'errors.generic' };
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
+  revalidatePath('/deposits');
   return { error: null };
 }
 

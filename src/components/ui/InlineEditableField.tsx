@@ -4,7 +4,7 @@ import { Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 
-import { Input } from './Input';
+import { Input, Textarea } from './Input';
 
 /**
  * A field that edits in place, DataTables-Editor style: click the value to
@@ -21,6 +21,7 @@ export function InlineEditableField({
   emptyLabel,
   hint,
   inputType = 'text',
+  multiline = false,
   onCommit,
 }: {
   label: string;
@@ -30,6 +31,8 @@ export function InlineEditableField({
   emptyLabel: string;
   hint?: ReactNode;
   inputType?: 'text' | 'number';
+  /** Textarea: Enter adds a line; blur or Ctrl/Cmd+Enter saves, Escape reverts. */
+  multiline?: boolean;
   onCommit: (value: string) => Promise<string | null>;
 }) {
   const t = useTranslations();
@@ -37,7 +40,7 @@ export function InlineEditableField({
   const [draft, setDraft] = useState(value);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
   const skipCommitRef = useRef(false);
 
   useEffect(() => {
@@ -62,8 +65,8 @@ export function InlineEditableField({
     if (!nextError) setEditing(false);
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Enter') {
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    if (event.key === 'Enter' && (!multiline || event.metaKey || event.ctrlKey)) {
       event.preventDefault();
       inputRef.current?.blur();
     } else if (event.key === 'Escape') {
@@ -88,17 +91,31 @@ export function InlineEditableField({
     <div className="py-2">
       <dt className="text-ink-muted text-caption">{label}</dt>
       {editing ? (
-        <Input
-          ref={inputRef}
-          type={inputType}
-          value={draft}
-          disabled={pending}
-          invalid={Boolean(error)}
-          onChange={(event) => setDraft(event.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          className="mt-0.5"
-        />
+        multiline ? (
+          <Textarea
+            ref={inputRef}
+            rows={3}
+            value={draft}
+            disabled={pending}
+            invalid={Boolean(error)}
+            onChange={(event) => setDraft(event.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="mt-0.5"
+          />
+        ) : (
+          <Input
+            ref={inputRef}
+            type={inputType}
+            value={draft}
+            disabled={pending}
+            invalid={Boolean(error)}
+            onChange={(event) => setDraft(event.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="mt-0.5"
+          />
+        )
       ) : (
         <dd
           role="button"
@@ -109,7 +126,7 @@ export function InlineEditableField({
           }}
           className="group text-ink hover:bg-surface-sunken hover:ring-border -mx-1 mt-0.5 flex cursor-pointer items-center gap-1.5 rounded-md px-1 py-0.5 text-sm font-medium ring-1 ring-transparent"
         >
-          <span>
+          <span className={multiline ? 'whitespace-pre-line' : undefined}>
             {(displayValue ?? value) || <span className="text-ink-subtle">{emptyLabel}</span>}
           </span>
           <Pencil

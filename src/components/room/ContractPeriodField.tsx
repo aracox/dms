@@ -2,7 +2,7 @@
 
 import { Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -15,6 +15,9 @@ import { formatDate } from '@/lib/utils/date';
  * InlineEditableField in read mode, but two dates need an explicit Save
  * rather than commit-on-blur -- tabbing from one date to the other would
  * otherwise submit a half-edited period.
+ *
+ * Displays the dates the server sent (no private copy -- the Overview and
+ * Contract tabs both render this at once, and the action revalidates the page).
  */
 export function ContractPeriodField({
   contractId,
@@ -22,22 +25,24 @@ export function ContractPeriodField({
   startDate,
   endDate,
   locale,
+  hint,
 }: {
   contractId: string;
   roomId: string;
   startDate: string;
   endDate: string;
   locale: Locale;
+  /** Read-mode note under the value, e.g. days remaining. */
+  hint?: ReactNode;
 }) {
   const t = useTranslations();
-  const [period, setPeriod] = useState({ start: startDate, end: endDate });
-  const [draft, setDraft] = useState(period);
+  const [draft, setDraft] = useState({ start: startDate, end: endDate });
   const [editing, setEditing] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ message: string; field?: string } | null>(null);
 
   function startEditing() {
-    setDraft(period);
+    setDraft({ start: startDate, end: endDate });
     setError(null);
     setEditing(true);
   }
@@ -56,7 +61,6 @@ export function ContractPeriodField({
       setError({ message: result.error, field: result.field });
       return;
     }
-    setPeriod(draft);
     setEditing(false);
   }
 
@@ -76,7 +80,7 @@ export function ContractPeriodField({
           className="group text-ink hover:bg-surface-sunken hover:ring-border -mx-1 mt-0.5 flex cursor-pointer items-center gap-1.5 rounded-md px-1 py-0.5 text-sm font-medium ring-1 ring-transparent"
         >
           <span>
-            {formatDate(period.start, locale)} — {formatDate(period.end, locale)}
+            {formatDate(startDate, locale)} — {formatDate(endDate, locale)}
           </span>
           <Pencil
             size={12}
@@ -84,6 +88,7 @@ export function ContractPeriodField({
             className="text-ink-subtle group-hover:text-brand-blue shrink-0"
           />
         </dd>
+        {hint ? <p className="text-ink-subtle text-caption mt-0.5">{hint}</p> : null}
       </div>
     );
   }

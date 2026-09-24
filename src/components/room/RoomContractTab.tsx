@@ -10,15 +10,21 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { confirmedPaid, outstanding } from '@/lib/billing/calc';
 import { formatTHB } from '@/lib/billing/money';
-import { contractDisplayStatus, type ContractDisplayStatus } from '@/lib/contracts/status';
+import {
+  contractDisplayStatus,
+  pendingDepositSettlement,
+  type ContractDisplayStatus,
+} from '@/lib/contracts/status';
 import { SUBSCRIPTION_FEE_KEYS } from '@/lib/invoices/fees';
 import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { addDays, daysBetween, formatDate } from '@/lib/utils/date';
 
+import { ContractPeriodField } from './ContractPeriodField';
 import { ContractRentField } from './ContractRentField';
 import { ContractSubscriptionsCard } from './ContractSubscriptionsCard';
+import { ContractOccupantsField, TenantContactField } from './EditableTenantFields';
 import { RenewContractForm } from './RenewContractForm';
 import { SettleDepositForm } from './SettleDepositForm';
 import { TenantDocumentsCard, type TenantDocumentView } from './TenantDocumentsCard';
@@ -88,6 +94,14 @@ export async function RoomContractTab({
   );
 
   const daysRemaining = contract ? daysBetween(today, contract.end_date) : null;
+  const daysRemainingHint =
+    daysRemaining === null
+      ? undefined
+      : daysRemaining < 0
+        ? t('dashboard.expired')
+        : daysRemaining === 0
+          ? t('dashboard.expiresToday')
+          : t('dashboard.daysRemaining', { days: daysRemaining });
 
   // Defaults for a 1-year renewal, same as the move-in page's own default term.
   const renewalStartDate = contract ? addDays(contract.end_date, 1) : '';
@@ -103,17 +117,7 @@ export async function RoomContractTab({
   const canManageDocuments = can(profile?.role, 'tenants:write');
   const documents = tenant && canManageDocuments ? await loadTenantDocuments(tenant.id) : null;
 
-  // Only the room's single most recent past contract prompts for settlement --
-  // an older one left unsettled from before this feature existed should not
-  // resurface, and a contract that ended via renewal (status 'expired') was
-  // never actually vacated, so it never needs a refund.
-  const mostRecentPast = contract
-    ? contractHistory.find((row) => row.id !== contract.id)
-    : contractHistory[0];
-  const pendingSettlement =
-    mostRecentPast && mostRecentPast.status === 'terminated' && !mostRecentPast.deposit_settled_at
-      ? mostRecentPast
-      : null;
+  const pendingSettlement = pendingDepositSettlement(contractHistory);
   const settlementTenantName = pendingSettlement
     ? await loadTenantName(pendingSettlement.tenant_id)
     : '';
@@ -168,47 +172,115 @@ export async function RoomContractTab({
           {contract && tenant ? (
             <FieldGrid>
               <Field label={t('tenant.fullName')} value={tenant.full_name} />
-              <Field label={t('room.phone')} value={tenant.phone} />
+              {canManageDocuments ? (
+                <TenantContactField
+                  tenantId={tenant.id}
+                  roomId={detail.room.id}
+                  field="phone"
+                  label={t('room.phone')}
+                  value={tenant.phone}
+                />
+              ) : (
+                <Field label={t('room.phone')} value={tenant.phone} />
+              )}
               <Field
                 label={t('tenant.idCard')}
                 value={tenant.id_card_or_passport ?? t('common.notAvailable')}
               />
-              <Field
-                label={t('tenant.address')}
-                value={
-                  tenant.address ? (
-                    <span className="whitespace-pre-line">{tenant.address}</span>
-                  ) : (
-                    t('common.notAvailable')
-                  )
-                }
-              />
-              <Field
-                label={t('tenant.lineId')}
-                value={tenant.line_id ?? t('common.notAvailable')}
-              />
-              <Field
-                label={t('contract.startDate')}
-                value={formatDate(contract.start_date, locale)}
-              />
-              <Field
-                label={t('contract.endDate')}
-                value={formatDate(contract.end_date, locale)}
-                hint={
-                  daysRemaining === null
-                    ? undefined
-                    : daysRemaining < 0
-                      ? t('dashboard.expired')
-                      : daysRemaining === 0
-                        ? t('dashboard.expiresToday')
-                        : t('dashboard.daysRemaining', { days: daysRemaining })
-                }
-              />
-              <Field
-                label={t('room.occupants')}
-                value={t('room.occupantsValue', { count: contract.occupant_count })}
-                hint={t('room.occupantsHint')}
-              />
+              {canManageDocuments ? (
+                <TenantContactField
+                  tenantId={tenant.id}
+                  roomId={detail.room.id}
+                  field="address"
+                  label={t('tenant.address')}
+                  value={tenant.address}
+                />
+              ) : (
+                <Field
+                  label={t('tenant.address')}
+                  value={
+                    tenant.address ? (
+                      <span className="whitespace-pre-line">{tenant.address}</span>
+                    ) : (
+                      t('common.notAvailable')
+                    )
+                  }
+                />
+              )}
+              {canManageDocuments ? (
+                <>
+                  <TenantContactField
+                    tenantId={tenant.id}
+                    roomId={detail.room.id}
+                    field="line_id"
+                    label={t('tenant.lineId')}
+                    value={tenant.line_id}
+                  />
+                  <TenantContactField
+                    tenantId={tenant.id}
+                    roomId={detail.room.id}
+                    field="emergency_contact"
+                    label={t('tenant.emergencyContact')}
+                    value={tenant.emergency_contact}
+                  />
+                  <TenantContactField
+                    tenantId={tenant.id}
+                    roomId={detail.room.id}
+                    field="emergency_phone"
+                    label={t('tenant.emergencyPhone')}
+                    value={tenant.emergency_phone}
+                  />
+                </>
+              ) : (
+                <>
+                  <Field
+                    label={t('tenant.lineId')}
+                    value={tenant.line_id ?? t('common.notAvailable')}
+                  />
+                  <Field
+                    label={t('tenant.emergencyContact')}
+                    value={tenant.emergency_contact ?? t('common.notAvailable')}
+                  />
+                  <Field
+                    label={t('tenant.emergencyPhone')}
+                    value={tenant.emergency_phone ?? t('common.notAvailable')}
+                  />
+                </>
+              )}
+              {canEditContract ? (
+                <>
+                  <ContractPeriodField
+                    contractId={contract.id}
+                    roomId={detail.room.id}
+                    startDate={contract.start_date}
+                    endDate={contract.end_date}
+                    locale={locale}
+                    hint={daysRemainingHint}
+                  />
+                  <ContractOccupantsField
+                    contractId={contract.id}
+                    roomId={detail.room.id}
+                    count={contract.occupant_count}
+                  />
+                </>
+              ) : (
+                <>
+                  <Field
+                    label={t('contract.startDate')}
+                    value={formatDate(contract.start_date, locale)}
+                  />
+                  <Field
+                    label={t('contract.endDate')}
+                    value={formatDate(contract.end_date, locale)}
+                    hint={daysRemainingHint}
+                  />
+                  <Field
+                    label={t('room.occupants')}
+                    value={t('room.occupantsValue', { count: contract.occupant_count })}
+                    hint={t('room.occupantsHint')}
+                  />
+                </>
+              )}
               {canEditContract ? (
                 <ContractRentField
                   contractId={contract.id}

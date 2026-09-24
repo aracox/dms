@@ -27,6 +27,7 @@
     "meters": "จดมิเตอร์",
     "billing": "ใบแจ้งหนี้",
     "payments": "การชำระเงิน",
+    "deposits": "เงินประกันรอคืน",
     "maintenance": "งานซ่อมบำรุง",
     "expenses": "ค่าใช้จ่ายส่วนกลาง",
     "reports": "รายงาน",
@@ -396,6 +397,17 @@
     "plannedMoveOutDate": "วันที่คาดว่าจะย้ายออก",
     "noticeGiven": "แจ้งย้ายออกแล้ว — ออกวันที่ {date}",
     "cancelNotice": "ยกเลิกการแจ้งย้ายออก"
+  },
+  "deposits": {
+    "title": "เงินประกันรอคืน",
+    "subtitle": "{count} รายการ รวม {amount}",
+    "empty": "ไม่มีเงินประกันที่รอคืน",
+    "previousTenant": "ผู้เช่าเดิม",
+    "movedOutOn": "วันที่ย้ายออก",
+    "outstanding": "ค้างชำระ",
+    "markRefunded": "คืนเงินแล้ว",
+    "confirmRefunded": "ยืนยันคืนเงินแล้ว",
+    "refundPreview": "ยอดคืน: {amount}"
   },
   "reservation": {
     "title": "การจอง",

@@ -93,14 +93,15 @@ export const tenantSchema = z.object({
 export type TenantInput = z.infer<typeof tenantSchema>;
 
 /**
- * The subset of tenant fields editable after move-in: contact details, not
- * identity. full_name / id_card_or_passport / nationality stay fixed once the
- * tenant is registered.
+ * The subset of tenant fields editable after move-in: contact details and the
+ * address, not identity. full_name / id_card_or_passport / nationality stay
+ * fixed once the tenant is registered.
  */
 export const tenantContactSchema = z.object({
   tenant_id: uuid,
   phone: z.string().trim().regex(THAI_PHONE, 'validation.phone.format'),
   line_id: z.string().trim().max(100).nullable().optional(),
+  address: z.string().trim().max(500).nullable().optional(),
   emergency_contact: z.string().trim().max(200).nullable().optional(),
   emergency_phone: z
     .union([z.literal(''), z.string().trim().regex(THAI_PHONE, 'validation.phone.format')])

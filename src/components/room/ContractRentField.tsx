@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 
 import { InlineEditableField } from '@/components/ui/InlineEditableField';
 import type { Locale } from '@/i18n/routing';
@@ -21,7 +20,6 @@ export function ContractRentField({
   locale: Locale;
 }) {
   const t = useTranslations();
-  const [rent, setRent] = useState(monthlyRent);
 
   async function commit(value: string): Promise<string | null> {
     const formData = new FormData();
@@ -29,18 +27,17 @@ export function ContractRentField({
     formData.set('room_id', roomId);
     formData.set('monthly_rent', value);
 
+    // No local copy of the rent: the action revalidates the room page, which
+    // re-renders this with the saved value on whichever tab is showing it.
     const result = await updateContractRentAction({ error: null }, formData);
-    if (result.error) return result.error;
-
-    setRent(Number(value));
-    return null;
+    return result.error;
   }
 
   return (
     <InlineEditableField
       label={t('room.monthlyRent')}
-      value={String(rent)}
-      displayValue={formatTHB(rent, locale)}
+      value={String(monthlyRent)}
+      displayValue={formatTHB(monthlyRent, locale)}
       emptyLabel={t('common.notAvailable')}
       onCommit={commit}
     />

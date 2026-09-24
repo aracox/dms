@@ -7,18 +7,13 @@ import { useState, type ReactNode } from 'react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
-import { InlineEditableField } from '@/components/ui/InlineEditableField';
 import type { Locale } from '@/i18n/routing';
-import { updateContractOccupantsAction } from '@/lib/contracts/actions';
-import {
-  generateLineLinkCodeAction,
-  unlinkLineAction,
-  updateTenantContactAction,
-} from '@/lib/tenants/actions';
+import { generateLineLinkCodeAction, unlinkLineAction } from '@/lib/tenants/actions';
 import { formatDate } from '@/lib/utils/date';
 import type { ContractRow, TenantRow } from '@/types/database';
 
 import { ContractPeriodField } from './ContractPeriodField';
+import { ContractOccupantsField, occupantsHint, TenantContactField } from './EditableTenantFields';
 
 /**
  * LINE link status: linked badge (with unlink, for a changed or wrong
@@ -198,51 +193,6 @@ export function TenantContactCard({
   canEditContract: boolean;
 }) {
   const t = useTranslations();
-  const [contact, setContact] = useState({
-    phone: tenant.phone,
-    line_id: tenant.line_id ?? '',
-    emergency_contact: tenant.emergency_contact ?? '',
-    emergency_phone: tenant.emergency_phone ?? '',
-  });
-
-  async function commitField(field: keyof typeof contact, value: string): Promise<string | null> {
-    const next = { ...contact, [field]: value };
-
-    const formData = new FormData();
-    formData.set('tenant_id', tenant.id);
-    formData.set('room_id', roomId);
-    formData.set('phone', next.phone);
-    formData.set('line_id', next.line_id);
-    formData.set('emergency_contact', next.emergency_contact);
-    formData.set('emergency_phone', next.emergency_phone);
-
-    const result = await updateTenantContactAction({ error: null }, formData);
-    if (result.error) return result.error;
-
-    setContact(next);
-    return null;
-  }
-
-  const [occupants, setOccupants] = useState(contract.occupant_count);
-
-  async function commitOccupants(value: string): Promise<string | null> {
-    const formData = new FormData();
-    formData.set('contract_id', contract.id);
-    formData.set('room_id', roomId);
-    formData.set('occupant_count', value);
-
-    const result = await updateContractOccupantsAction({ error: null }, formData);
-    if (result.error) return result.error;
-
-    setOccupants(Number(value));
-    return null;
-  }
-
-  const occupantsHint =
-    occupants > 1
-      ? t('room.additionalOccupants', { count: occupants - 1 })
-      : t('room.occupantsHint');
-
   return (
     <Card>
       <CardHeader title={t('room.mainTenant')} description={t('tenant.singleTenantNotice')} />
@@ -251,11 +201,12 @@ export function TenantContactCard({
           <ReadOnlyField label={t('tenant.fullName')} value={tenant.full_name} />
 
           {canEdit ? (
-            <InlineEditableField
+            <TenantContactField
+              tenantId={tenant.id}
+              roomId={roomId}
+              field="phone"
               label={t('room.phone')}
-              value={contact.phone}
-              emptyLabel={t('common.notAvailable')}
-              onCommit={(value) => commitField('phone', value)}
+              value={tenant.phone}
             />
           ) : (
             <ReadOnlyField
@@ -269,11 +220,12 @@ export function TenantContactCard({
           )}
 
           {canEdit ? (
-            <InlineEditableField
+            <TenantContactField
+              tenantId={tenant.id}
+              roomId={roomId}
+              field="line_id"
               label={t('tenant.lineId')}
-              value={contact.line_id}
-              emptyLabel={t('common.notAvailable')}
-              onCommit={(value) => commitField('line_id', value)}
+              value={tenant.line_id}
             />
           ) : (
             <ReadOnlyField
@@ -283,20 +235,16 @@ export function TenantContactCard({
           )}
 
           {canEditContract ? (
-            <InlineEditableField
-              label={t('room.occupants')}
-              value={String(occupants)}
-              displayValue={t('room.occupantsValue', { count: occupants })}
-              emptyLabel={t('common.notAvailable')}
-              hint={occupantsHint}
-              inputType="number"
-              onCommit={commitOccupants}
+            <ContractOccupantsField
+              contractId={contract.id}
+              roomId={roomId}
+              count={contract.occupant_count}
             />
           ) : (
             <ReadOnlyField
               label={t('room.occupants')}
-              value={t('room.occupantsValue', { count: occupants })}
-              hint={occupantsHint}
+              value={t('room.occupantsValue', { count: contract.occupant_count })}
+              hint={occupantsHint(t, contract.occupant_count)}
             />
           )}
           {canEditContract ? (
@@ -316,11 +264,12 @@ export function TenantContactCard({
           <ReadOnlyField label={t('room.paymentDueDay')} value={contract.payment_due_day} />
 
           {canEdit ? (
-            <InlineEditableField
+            <TenantContactField
+              tenantId={tenant.id}
+              roomId={roomId}
+              field="emergency_contact"
               label={t('tenant.emergencyContact')}
-              value={contact.emergency_contact}
-              emptyLabel={t('common.notAvailable')}
-              onCommit={(value) => commitField('emergency_contact', value)}
+              value={tenant.emergency_contact}
             />
           ) : (
             <ReadOnlyField
@@ -330,11 +279,12 @@ export function TenantContactCard({
           )}
 
           {canEdit ? (
-            <InlineEditableField
+            <TenantContactField
+              tenantId={tenant.id}
+              roomId={roomId}
+              field="emergency_phone"
               label={t('tenant.emergencyPhone')}
-              value={contact.emergency_phone}
-              emptyLabel={t('common.notAvailable')}
-              onCommit={(value) => commitField('emergency_phone', value)}
+              value={tenant.emergency_phone}
             />
           ) : (
             <ReadOnlyField

@@ -14,6 +14,7 @@ import {
   ScrollText,
   Settings,
   Users,
+  Wallet,
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
@@ -41,6 +42,7 @@ const ICONS: Record<string, LucideIcon> = {
   FlaskConical,
   ScrollText,
   Users,
+  Wallet,
 };
 
 export function Sidebar({ role, onNavigate }: { role: AppRole | null; onNavigate?: () => void }) {

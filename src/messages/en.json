@@ -27,6 +27,7 @@
     "meters": "Meter Readings",
     "billing": "Billing",
     "payments": "Payments",
+    "deposits": "Deposits to refund",
     "maintenance": "Maintenance",
     "expenses": "Common Expenses",
     "reports": "Reports",
@@ -396,6 +397,17 @@
     "plannedMoveOutDate": "Planned move-out date",
     "noticeGiven": "Notice given — leaving {date}",
     "cancelNotice": "Cancel notice"
+  },
+  "deposits": {
+    "title": "Deposits to refund",
+    "subtitle": "{count, plural, one {# deposit} other {# deposits}}, {amount} in total",
+    "empty": "No deposits are waiting to be refunded",
+    "previousTenant": "Previous tenant",
+    "movedOutOn": "Moved out",
+    "outstanding": "Outstanding",
+    "markRefunded": "Mark refunded",
+    "confirmRefunded": "Confirm refunded",
+    "refundPreview": "Refund: {amount}"
   },
   "reservation": {
     "title": "Reservation",
