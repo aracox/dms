@@ -42,15 +42,30 @@ export function MeterReadingForm({
 }) {
   const t = useTranslations();
   const [saveState, saveAction, isSaving] = useActionState(
-    recordMeterReadingAction,
+    async (previous: RecordMeterReadingState, formData: FormData) => {
+      const result = await recordMeterReadingAction(previous, formData);
+      // Close on success so the other meter's card comes back for its reading.
+      if (!result.error) onClose();
+      return result;
+    },
     SAVE_INITIAL_STATE,
   );
 
   if (!open) {
     return (
-      <Button type="button" variant="secondary" size="md" onClick={onOpen}>
-        + {t('meters.recordReading')}
-      </Button>
+      <div className="space-y-2">
+        <Button type="button" variant="secondary" size="md" onClick={onOpen}>
+          + {t('meters.recordReading')}
+        </Button>
+        {saveState.notice ? (
+          <p
+            role="status"
+            className="border-brand-yellow bg-brand-yellow-soft text-ink text-caption rounded-md border px-3 py-2"
+          >
+            {t(saveState.notice)}
+          </p>
+        ) : null}
+      </div>
     );
   }
 

@@ -18,7 +18,8 @@ import { MeterReadingForm } from './MeterReadingForm';
 const DELETE_INITIAL_STATE: DeleteMeterReadingState = { error: null };
 const METER_TYPES = ['electricity', 'water'] as const;
 
-type FormState = { open: boolean; month: string };
+/** The one meter being recorded or corrected, if any. */
+type Editing = { meterType: MeterType; month: string } | null;
 
 function DeleteReadingButton({ roomId, readingId }: { roomId: string; readingId: string }) {
   const t = useTranslations();
@@ -63,20 +64,21 @@ export function MetersSection({
 }) {
   const t = useTranslations();
   const defaultMonth = currentBillingMonth().slice(0, 7);
-  const [forms, setForms] = useState<Record<MeterType, FormState>>({
-    electricity: { open: false, month: defaultMonth },
-    water: { open: false, month: defaultMonth },
-  });
+  const [editing, setEditing] = useState<Editing>(null);
+
+  // Only one meter is edited at a time; while it is, the other card is hidden
+  // so the open form gets the full width.
+  const visibleTypes = editing ? [editing.meterType] : METER_TYPES;
 
   const editReading = (meterType: MeterType, billingMonth: string) => {
-    setForms((prev) => ({ ...prev, [meterType]: { open: true, month: billingMonth.slice(0, 7) } }));
+    setEditing({ meterType, month: billingMonth.slice(0, 7) });
   };
 
   return (
     <div className="space-y-4">
       {canRecord ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {METER_TYPES.map((meterType) => (
+        <div className={editing ? undefined : 'grid gap-4 md:grid-cols-2'}>
+          {visibleTypes.map((meterType) => (
             <Card key={meterType}>
               <CardHeader title={t(`meterType.${meterType}`)} />
               <CardBody>
@@ -87,23 +89,11 @@ export function MetersSection({
                   defaultRate={rates[meterType]}
                   canRecord={canRecord}
                   canCorrect={canCorrect}
-                  open={forms[meterType].open}
-                  month={forms[meterType].month}
-                  onOpen={() =>
-                    setForms((prev) => ({
-                      ...prev,
-                      [meterType]: { ...prev[meterType], open: true },
-                    }))
-                  }
-                  onClose={() =>
-                    setForms((prev) => ({
-                      ...prev,
-                      [meterType]: { ...prev[meterType], open: false },
-                    }))
-                  }
-                  onMonthChange={(month) =>
-                    setForms((prev) => ({ ...prev, [meterType]: { open: true, month } }))
-                  }
+                  open={editing?.meterType === meterType}
+                  month={editing?.meterType === meterType ? editing.month : defaultMonth}
+                  onOpen={() => setEditing({ meterType, month: defaultMonth })}
+                  onClose={() => setEditing(null)}
+                  onMonthChange={(month) => setEditing({ meterType, month })}
                 />
               </CardBody>
             </Card>
@@ -124,7 +114,7 @@ export function MetersSection({
             head={
               <tr>
                 <TH>{t('meters.billingMonth')}</TH>
-                <TH>{t('common.status')}</TH>
+                <TH>{t('meters.type')}</TH>
                 <TH numeric>{t('meters.previousReading')}</TH>
                 <TH numeric>{t('meters.currentReading')}</TH>
                 <TH numeric>{t('meters.usage')}</TH>

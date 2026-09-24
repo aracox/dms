@@ -445,6 +445,8 @@
     "incomplete": "Incomplete",
     "missing": "Missing",
     "openMeters": "Open meters",
+    "type": "Type",
+    "invoiceNotUpdatedPaid": "Reading saved, but this month's invoice already has a payment, so its amount was not changed automatically.",
     "previousReading": "Previous reading",
     "currentReading": "Current reading",
     "usage": "Usage",

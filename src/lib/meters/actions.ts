@@ -8,6 +8,8 @@ import { meterReadingSchema } from '@/lib/validation/schemas';
 
 export interface RecordMeterReadingState {
   error: string | null;
+  /** Saved fine, but something the user should know -- e.g. the bill wasn't adjusted. */
+  notice?: string | null;
 }
 
 /**
@@ -65,7 +67,21 @@ export async function recordMeterReadingAction(
   if (error) return { error: 'errors.generic' };
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
-  return { error: null };
+  revalidatePath('/billing');
+
+  // The DB trigger (0036) carries the reading onto this month's invoice only
+  // while it is unpaid. If it has been (partly) paid, say so rather than let
+  // staff assume the bill changed.
+  const { data: invoice } = await supabase
+    .from('invoices')
+    .select('status')
+    .eq('room_id', parsed.data.room_id)
+    .eq('billing_month', parsed.data.billing_month)
+    .neq('status', 'cancelled')
+    .maybeSingle();
+
+  const paid = invoice?.status === 'paid' || invoice?.status === 'partially_paid';
+  return { error: null, notice: paid ? 'meters.invoiceNotUpdatedPaid' : null };
 }
 
 export interface DeleteMeterReadingState {
