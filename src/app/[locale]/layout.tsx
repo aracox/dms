@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Google_Sans, Google_Sans_Code, Noto_Sans_Thai } from 'next/font/google';
+import { Google_Sans_Code, Kanit, Noto_Sans_Thai } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
@@ -10,18 +10,19 @@ import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 /**
- * Google Sans, headings and body both.
+ * Kanit, headings and body both.
  *
- * It carries the `thai` subset, so one typeface sets both scripts and Thai no
- * longer renders in a visibly different face from Latin. `weight` is omitted
- * deliberately: this is a variable font with a wght axis spanning 400-700, so
- * every step the type ramp asks for (400, 500, 600, 700) is a real
- * interpolation rather than a synthesised or coerced weight.
+ * It carries the `thai` subset, so one typeface sets both scripts and Thai
+ * renders in the same face as Latin. Kanit is NOT a variable font -- each
+ * weight is a separate file -- so `weight` must list every step the type ramp
+ * and the font-* utilities use (400, 500, 600, 700). A weight left out here
+ * gets faux-bolded or snapped to the nearest loaded one by the browser.
  */
-const googleSans = Google_Sans({
+const kanit = Kanit({
   subsets: ['thai', 'latin'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font-google-sans',
+  variable: '--font-kanit',
 });
 
 /**
@@ -37,7 +38,7 @@ const googleSansCode = Google_Sans_Code({
 });
 
 /**
- * Fallback only, second in every stack (see globals.css). Google Sans covers
+ * Fallback only, second in every stack (see globals.css). Kanit covers
  * Thai, so this exists purely as insurance against a face failing to load.
  * `preload: false` on purpose: preloading it would ship a font the browser is
  * never expected to need.
@@ -91,7 +92,7 @@ export default async function LocaleLayout({
     // own attributes, not for the tree inside them.
     <html
       lang={locale}
-      className={`${googleSans.variable} ${googleSansCode.variable} ${notoSansThai.variable}`}
+      className={`${kanit.variable} ${googleSansCode.variable} ${notoSansThai.variable}`}
       suppressHydrationWarning
     >
       <body className="font-sans antialiased" suppressHydrationWarning>

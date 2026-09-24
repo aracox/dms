@@ -35,19 +35,18 @@
 
   /*
    * Must reference the next/font variable, not the family name: naming
-   * 'Google Sans' as a string only picks it up if the user happens to have it
+   * 'Kanit' as a string only picks it up if the user happens to have it
    * installed locally, silently bypassing the self-hosted, subsetted font. The
    * variables are set on <html> in [locale]/layout.tsx.
    *
-   * Noto Sans Thai still sits second in every stack. Google Sans ships the thai
+   * Noto Sans Thai still sits second in every stack. Kanit ships the thai
    * subset, so Noto is no longer the face carrying Thai -- it is insurance if a
    * face fails to load, and is not preloaded. Browsers resolve font-family per
    * glyph, so keeping it costs nothing.
    */
   --font-display:
-    var(--font-google-sans), var(--font-noto-sans-thai), ui-sans-serif, system-ui, sans-serif;
-  --font-sans:
-    var(--font-google-sans), var(--font-noto-sans-thai), ui-sans-serif, system-ui, sans-serif;
+    var(--font-kanit), var(--font-noto-sans-thai), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-kanit), var(--font-noto-sans-thai), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-google-sans-code), ui-monospace, 'Cascadia Code', monospace;
 }
 
