@@ -175,7 +175,13 @@ export async function RoomContractTab({
               />
               <Field
                 label={t('tenant.address')}
-                value={tenant.address ?? t('common.notAvailable')}
+                value={
+                  tenant.address ? (
+                    <span className="whitespace-pre-line">{tenant.address}</span>
+                  ) : (
+                    t('common.notAvailable')
+                  )
+                }
               />
               <Field
                 label={t('tenant.lineId')}

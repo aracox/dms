@@ -16,6 +16,13 @@ import {
 
 export interface MoveInState {
   error: string | null;
+  /** Per-input error keys, by form field name, so the form can mark the right input. */
+  fieldErrors?: Record<string, string>;
+  /**
+   * What was submitted, echoed back on failure. React resets a form after its
+   * action runs, so without this every typed-in field would be wiped.
+   */
+  values?: Record<string, string>;
 }
 
 export interface MoveOutState {
@@ -134,6 +141,12 @@ export async function moveInAction(
 
   const roomId = String(formData.get('room_id') ?? '');
 
+  // Text fields only -- a file input can't be refilled by the browser.
+  const values: Record<string, string> = {};
+  for (const [key, value] of formData.entries()) {
+    if (typeof value === 'string') values[key] = value;
+  }
+
   const parsed = moveInSchema.safeParse({
     room_id: roomId,
     tenant: {
@@ -157,7 +170,14 @@ export async function moveInAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+    // Each issue's last path segment is the form field's name
+    // (['tenant', 'phone'] -> 'phone', ['end_date'] -> 'end_date').
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const field = String(issue.path.at(-1) ?? '');
+      if (field && !fieldErrors[field]) fieldErrors[field] = issue.message;
+    }
+    return { error: null, fieldErrors, values };
   }
 
   const { tenant, room_id, ...contractFields } = parsed.data;
@@ -184,7 +204,10 @@ export async function moveInAction(
   });
 
   if (error) {
-    return { error: error.code === '23505' ? 'contract.roomAlreadyOccupied' : 'errors.generic' };
+    return {
+      error: error.code === '23505' ? 'contract.roomAlreadyOccupied' : 'errors.generic',
+      values,
+    };
   }
 
   const tenantId = data?.[0]?.tenant_id;

@@ -711,6 +711,7 @@
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
+    "fixHighlighted": "Please fix the fields outlined in red.",
     "notFound": "Not found",
     "roomNotFound": "Room not found",
     "permissionDenied": "You do not have permission to do this"

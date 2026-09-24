@@ -5,7 +5,7 @@ import { useActionState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { Input, Textarea } from '@/components/ui/Input';
 import { RequiredMark } from '@/components/ui/RequiredMark';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
@@ -24,6 +24,9 @@ function TextField({
   required,
   step,
   min,
+  multiline,
+  className,
+  state,
 }: {
   name: string;
   label: string;
@@ -32,23 +35,42 @@ function TextField({
   required?: boolean;
   step?: string;
   min?: number;
+  multiline?: boolean;
+  className?: string;
+  state: MoveInState;
 }) {
+  const t = useTranslations();
+  const error = state.fieldErrors?.[name];
+  const errorId = `${name}-error`;
+
+  const controlProps = {
+    id: name,
+    name,
+    // After a failed submit, refill with what was typed (React resets the
+    // form once the action returns, back to these defaults).
+    defaultValue: state.values?.[name] ?? defaultValue,
+    required,
+    invalid: Boolean(error),
+    'aria-describedby': error ? errorId : undefined,
+    className: 'mt-1',
+  };
+
   return (
-    <div>
+    <div className={className}>
       <label htmlFor={name} className={LABEL_CLASS}>
         {label}
         {required ? <RequiredMark /> : null}
       </label>
-      <Input
-        id={name}
-        name={name}
-        type={type}
-        defaultValue={defaultValue}
-        required={required}
-        step={step}
-        min={min}
-        className="mt-1"
-      />
+      {multiline ? (
+        <Textarea {...controlProps} rows={3} />
+      ) : (
+        <Input {...controlProps} type={type} step={step} min={min} />
+      )}
+      {error ? (
+        <p id={errorId} className="text-brand-red-deep text-caption mt-1">
+          {t(error)}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -94,24 +116,36 @@ export function MoveInForm({
         <CardBody>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <TextField
+              state={state}
               name="full_name"
               label={t('tenant.fullName')}
               defaultValue={reservation?.prospect_name}
               required
             />
             <TextField
+              state={state}
               name="phone"
               label={t('room.phone')}
               defaultValue={reservation?.prospect_phone ?? undefined}
               required
             />
-            <TextField name="email" label={t('room.email')} type="email" />
-            <TextField name="id_card_or_passport" label={t('tenant.idCard')} />
-            <TextField name="nationality" label={t('tenant.nationality')} />
-            <TextField name="address" label={t('tenant.address')} />
-            <TextField name="emergency_contact" label={t('tenant.emergencyContact')} />
-            <TextField name="emergency_phone" label={t('tenant.emergencyPhone')} />
-            <TextField name="line_id" label={t('tenant.lineId')} />
+            <TextField state={state} name="email" label={t('room.email')} type="email" />
+            <TextField state={state} name="id_card_or_passport" label={t('tenant.idCard')} />
+            <TextField state={state} name="nationality" label={t('tenant.nationality')} />
+            <TextField
+              state={state}
+              name="emergency_contact"
+              label={t('tenant.emergencyContact')}
+            />
+            <TextField state={state} name="emergency_phone" label={t('tenant.emergencyPhone')} />
+            <TextField state={state} name="line_id" label={t('tenant.lineId')} />
+            <TextField
+              state={state}
+              name="address"
+              label={t('tenant.address')}
+              multiline
+              className="sm:col-span-2 lg:col-span-3"
+            />
           </div>
 
           <div className="mt-4">
@@ -136,6 +170,7 @@ export function MoveInForm({
         <CardBody>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <TextField
+              state={state}
               name="start_date"
               label={t('contract.startDate')}
               type="date"
@@ -143,6 +178,7 @@ export function MoveInForm({
               required
             />
             <TextField
+              state={state}
               name="end_date"
               label={t('contract.endDate')}
               type="date"
@@ -150,6 +186,7 @@ export function MoveInForm({
               required
             />
             <TextField
+              state={state}
               name="occupant_count"
               label={t('room.occupants')}
               type="number"
@@ -158,6 +195,7 @@ export function MoveInForm({
               required
             />
             <TextField
+              state={state}
               name="monthly_rent"
               label={t('room.monthlyRent')}
               type="number"
@@ -167,6 +205,7 @@ export function MoveInForm({
               required
             />
             <TextField
+              state={state}
               name="deposit"
               label={t('room.deposit')}
               type="number"
@@ -176,6 +215,7 @@ export function MoveInForm({
               required
             />
             <TextField
+              state={state}
               name="payment_due_day"
               label={t('room.paymentDueDay')}
               type="number"
@@ -189,7 +229,7 @@ export function MoveInForm({
             <input
               type="checkbox"
               name="activate_cards"
-              defaultChecked
+              defaultChecked={state.values ? state.values.activate_cards === 'on' : true}
               className="accent-brand-blue size-5 rounded-sm"
             />
             {t('contract.activateCards')}
@@ -197,12 +237,12 @@ export function MoveInForm({
         </CardBody>
       </Card>
 
-      {state.error ? (
+      {state.error || state.fieldErrors ? (
         <p
           role="alert"
           className="border-brand-red bg-brand-red-soft text-brand-red-deep text-caption rounded-md border px-3 py-2"
         >
-          {t(state.error)}
+          {t(state.error ?? 'errors.fixHighlighted')}
         </p>
       ) : null}
 
