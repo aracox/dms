@@ -23,10 +23,13 @@ export function RoomDetail({
   detail,
   locale,
   today,
+  initialTab,
 }: {
   detail: RoomDetailData;
   locale: Locale;
   today: string;
+  /** From `?tab=` -- which tab to open on load. Unknown values fall back to overview. */
+  initialTab?: string;
 }) {
   const t = useTranslations();
 
@@ -75,5 +78,5 @@ export function RoomDetail({
     },
   ];
 
-  return <Tabs tabs={tabs} />;
+  return <Tabs tabs={tabs} initialTabId={initialTab} urlParam="tab" />;
 }

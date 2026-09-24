@@ -20,8 +20,15 @@ import { bangkokToday } from '@/lib/utils/date';
  * no mock implementation of a room anywhere in the codebase -- if this page ever
  * needs different behaviour, parameterise RoomDetail instead of forking it.
  */
-export default async function TestModePage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function TestModePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ tab?: string | string[] }>;
+}) {
   const { locale } = await params;
+  const { tab } = await searchParams;
   setRequestLocale(locale);
 
   const t = await getTranslations();
@@ -78,7 +85,12 @@ export default async function TestModePage({ params }: { params: Promise<{ local
       </section>
 
       {detail ? (
-        <RoomDetail detail={detail} locale={locale as Locale} today={today} />
+        <RoomDetail
+          detail={detail}
+          locale={locale as Locale}
+          today={today}
+          initialTab={typeof tab === 'string' ? tab : undefined}
+        />
       ) : (
         <EmptyState
           message={`${t('errors.roomNotFound')} (${T01_ROOM_NUMBER}) — npm run seed -- --reset`}

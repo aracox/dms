@@ -13,10 +13,13 @@ import { bangkokToday } from '@/lib/utils/date';
 
 export default async function RoomDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; roomId: string }>;
+  searchParams: Promise<{ tab?: string | string[] }>;
 }) {
   const { locale, roomId } = await params;
+  const { tab } = await searchParams;
   setRequestLocale(locale);
 
   const t = await getTranslations();
@@ -51,7 +54,12 @@ export default async function RoomDetailPage({
         }
       />
 
-      <RoomDetail detail={detail} locale={locale as Locale} today={bangkokToday()} />
+      <RoomDetail
+        detail={detail}
+        locale={locale as Locale}
+        today={bangkokToday()}
+        initialTab={typeof tab === 'string' ? tab : undefined}
+      />
     </>
   );
 }

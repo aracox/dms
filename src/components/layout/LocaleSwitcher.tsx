@@ -11,6 +11,11 @@ import { cn } from '@/lib/utils/cn';
 /**
  * Switches language only. Business data is language-neutral in the database, so
  * nothing stored changes -- the same rows are simply relabelled.
+ *
+ * Keeps the query string (a room's `?tab=`, a `?segment=` filter) so the user
+ * stays exactly where they were. Read from window.location at click time rather
+ * than useSearchParams: it also picks up params written by history.replaceState,
+ * and avoids needing a Suspense boundary on every page that renders the header.
  */
 export function LocaleSwitcher() {
   const t = useTranslations('common');
@@ -34,7 +39,7 @@ export function LocaleSwitcher() {
             disabled={isPending}
             onClick={() => {
               startTransition(() => {
-                router.replace(pathname, { locale: candidate });
+                router.replace(`${pathname}${window.location.search}`, { locale: candidate });
               });
             }}
             className={cn(

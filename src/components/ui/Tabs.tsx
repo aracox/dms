@@ -16,18 +16,36 @@ export interface TabDefinition {
  * Tab strip with roving focus and arrow-key navigation, per the WAI-ARIA tabs
  * pattern. All panels are rendered and the inactive ones hidden, so the browser
  * can still find text on them.
+ *
+ * With `urlParam`, the active tab is mirrored into the query string (e.g.
+ * `?tab=meters`) via history.replaceState -- no navigation, no refetch -- so a
+ * reload, a shared link or a language switch lands back on the same tab. The
+ * page reads the param server-side and passes it as `initialTabId`.
  */
 export function Tabs({
   tabs,
   initialTabId,
+  urlParam,
   className,
 }: {
   tabs: TabDefinition[];
   initialTabId?: string;
+  urlParam?: string;
   className?: string;
 }) {
   const baseId = useId();
-  const [activeId, setActiveId] = useState(initialTabId ?? tabs[0]?.id ?? '');
+  const [activeId, setActiveIdState] = useState(
+    tabs.some((tab) => tab.id === initialTabId) ? initialTabId! : (tabs[0]?.id ?? ''),
+  );
+
+  function setActiveId(id: string) {
+    setActiveIdState(id);
+    if (!urlParam) return;
+    const url = new URL(window.location.href);
+    if (id === tabs[0]?.id) url.searchParams.delete(urlParam);
+    else url.searchParams.set(urlParam, id);
+    window.history.replaceState(window.history.state, '', url);
+  }
 
   const activeIndex = Math.max(
     0,
