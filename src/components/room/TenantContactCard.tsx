@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { InlineEditableField } from '@/components/ui/InlineEditableField';
 import type { Locale } from '@/i18n/routing';
+import { updateContractOccupantsAction } from '@/lib/contracts/actions';
 import { generateLineLinkCodeAction, updateTenantContactAction } from '@/lib/tenants/actions';
 import { formatDate } from '@/lib/utils/date';
 import type { ContractRow, TenantRow } from '@/types/database';
@@ -59,13 +60,27 @@ function LineLinkSection({
         ) : code ? (
           <div>
             <p className="text-ink font-mono text-lg font-semibold tracking-widest">{code}</p>
-            <p className="text-ink-subtle text-caption mt-0.5">{t('tenant.lineLinkInstructions')}</p>
-            <Button type="button" variant="ghost" size="sm" onClick={handleGenerate} disabled={pending}>
+            <p className="text-ink-subtle text-caption mt-0.5">
+              {t('tenant.lineLinkInstructions')}
+            </p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleGenerate}
+              disabled={pending}
+            >
               {t('tenant.regenerateLineLinkCode')}
             </Button>
           </div>
         ) : (
-          <Button type="button" variant="secondary" size="sm" onClick={handleGenerate} disabled={pending}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleGenerate}
+            disabled={pending}
+          >
             {t('tenant.generateLineLinkCode')}
           </Button>
         )}
@@ -98,9 +113,9 @@ function ReadOnlyField({
 }
 
 /**
- * The main-tenant card. Phone, LINE ID and emergency contact/phone edit in
- * place (click the value); everything else on the tenant record is fixed at
- * move-in and shown read-only with a lock icon.
+ * The main-tenant card. Phone, LINE ID, emergency contact/phone and the
+ * contract's occupant count edit in place (click the value); everything else
+ * is fixed at move-in and shown read-only with a lock icon.
  */
 export function TenantContactCard({
   roomId,
@@ -108,12 +123,14 @@ export function TenantContactCard({
   contract,
   locale,
   canEdit,
+  canEditContract,
 }: {
   roomId: string;
   tenant: TenantRow;
   contract: ContractRow;
   locale: Locale;
   canEdit: boolean;
+  canEditContract: boolean;
 }) {
   const t = useTranslations();
   const [contact, setContact] = useState({
@@ -140,6 +157,26 @@ export function TenantContactCard({
     setContact(next);
     return null;
   }
+
+  const [occupants, setOccupants] = useState(contract.occupant_count);
+
+  async function commitOccupants(value: string): Promise<string | null> {
+    const formData = new FormData();
+    formData.set('contract_id', contract.id);
+    formData.set('room_id', roomId);
+    formData.set('occupant_count', value);
+
+    const result = await updateContractOccupantsAction({ error: null }, formData);
+    if (result.error) return result.error;
+
+    setOccupants(Number(value));
+    return null;
+  }
+
+  const occupantsHint =
+    occupants > 1
+      ? t('room.additionalOccupants', { count: occupants - 1 })
+      : t('room.occupantsHint');
 
   return (
     <Card>
@@ -180,15 +217,23 @@ export function TenantContactCard({
             />
           )}
 
-          <ReadOnlyField
-            label={t('room.occupants')}
-            value={t('room.occupantsValue', { count: contract.occupant_count })}
-            hint={
-              contract.occupant_count > 1
-                ? t('room.additionalOccupants', { count: contract.occupant_count - 1 })
-                : t('room.occupantsHint')
-            }
-          />
+          {canEditContract ? (
+            <InlineEditableField
+              label={t('room.occupants')}
+              value={String(occupants)}
+              displayValue={t('room.occupantsValue', { count: occupants })}
+              emptyLabel={t('common.notAvailable')}
+              hint={occupantsHint}
+              inputType="number"
+              onCommit={commitOccupants}
+            />
+          ) : (
+            <ReadOnlyField
+              label={t('room.occupants')}
+              value={t('room.occupantsValue', { count: occupants })}
+              hint={occupantsHint}
+            />
+          )}
           <ReadOnlyField
             label={t('room.contractPeriod')}
             value={`${formatDate(contract.start_date, locale)} — ${formatDate(contract.end_date, locale)}`}

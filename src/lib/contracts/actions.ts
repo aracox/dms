@@ -8,6 +8,7 @@ import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { bangkokToday } from '@/lib/utils/date';
 import {
+  contractOccupantsSchema,
   contractRentSchema,
   giveMoveOutNoticeSchema,
   renewContractSchema,
@@ -50,6 +51,47 @@ export async function updateContractRentAction(
   if (error) return { error: 'errors.generic' };
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
+  return { error: null };
+}
+
+export interface UpdateContractOccupantsState {
+  error: string | null;
+}
+
+/**
+ * Corrects the active contract's headcount. Still just a number -- no personal
+ * data is stored for the occupants beyond the main tenant.
+ */
+export async function updateContractOccupantsAction(
+  _previous: UpdateContractOccupantsState,
+  formData: FormData,
+): Promise<UpdateContractOccupantsState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'contracts:write');
+
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const parsed = contractOccupantsSchema.safeParse({
+    contract_id: String(formData.get('contract_id') ?? ''),
+    occupant_count: Number(formData.get('occupant_count')),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('contracts')
+    .update({ occupant_count: parsed.data.occupant_count })
+    .eq('id', parsed.data.contract_id);
+
+  if (error) return { error: 'errors.generic' };
+
+  // The headcount also shows on the room list and floor plan.
+  if (roomId) revalidatePath(`/rooms/${roomId}`);
+  revalidatePath('/rooms');
+  revalidatePath('/floor-plan');
   return { error: null };
 }
 

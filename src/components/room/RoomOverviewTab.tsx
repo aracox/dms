@@ -122,6 +122,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
           contract={contract}
           locale={locale}
           canEdit={canEditTenant}
+          canEditContract={canEditContract}
         />
       ) : (
         <Card>

@@ -688,6 +688,7 @@
     "contract": {
       "dueDayRange": "Payment due day must be between 1 and 28",
       "occupantsMin": "There must be at least 1 occupant",
+      "occupantsRange": "Occupants must be between 1 and 20",
       "endBeforeStart": "The end date must be after the start date"
     },
     "settings": {

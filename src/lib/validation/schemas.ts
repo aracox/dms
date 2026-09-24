@@ -125,7 +125,10 @@ export const contractSchema = z
       .min(1, 'validation.contract.dueDayRange')
       .max(28, 'validation.contract.dueDayRange'),
     /** Total occupants INCLUDING the main tenant. */
-    occupant_count: z.int().min(1, 'validation.contract.occupantsMin').max(20),
+    occupant_count: z
+      .int('validation.contract.occupantsRange')
+      .min(1, 'validation.contract.occupantsMin')
+      .max(20, 'validation.contract.occupantsRange'),
     status: z.enum(['draft', 'active', 'expired', 'terminated']),
     notes: z.string().trim().max(1000).nullable().optional(),
   })
@@ -144,6 +147,15 @@ export const contractRentSchema = z.object({
 
 export type ContractRentInput = z.infer<typeof contractRentSchema>;
 
+/** Corrects the active contract's headcount (includes the main tenant). */
+export const contractOccupantsSchema = z.object({
+  contract_id: uuid,
+  occupant_count: z
+    .int('validation.contract.occupantsRange')
+    .min(1, 'validation.contract.occupantsMin')
+    .max(20, 'validation.contract.occupantsRange'),
+});
+
 /** Ends the named contract and opens a new term for the same tenant and room. */
 export const renewContractSchema = z
   .object({
@@ -156,7 +168,10 @@ export const renewContractSchema = z
       .int()
       .min(1, 'validation.contract.dueDayRange')
       .max(28, 'validation.contract.dueDayRange'),
-    occupant_count: z.int().min(1, 'validation.contract.occupantsMin').max(20),
+    occupant_count: z
+      .int('validation.contract.occupantsRange')
+      .min(1, 'validation.contract.occupantsMin')
+      .max(20, 'validation.contract.occupantsRange'),
   })
   .refine((value) => value.end_date > value.start_date, {
     error: 'validation.contract.endBeforeStart',
@@ -395,7 +410,10 @@ export const moveInSchema = z
       .int()
       .min(1, 'validation.contract.dueDayRange')
       .max(28, 'validation.contract.dueDayRange'),
-    occupant_count: z.int().min(1, 'validation.contract.occupantsMin').max(20),
+    occupant_count: z
+      .int('validation.contract.occupantsRange')
+      .min(1, 'validation.contract.occupantsMin')
+      .max(20, 'validation.contract.occupantsRange'),
     activate_cards: z.boolean().default(true),
   })
   .refine((value) => value.end_date > value.start_date, {
