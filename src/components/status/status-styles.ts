@@ -12,6 +12,7 @@ export type RoomDisplayStatus =
   | 'vacant'
   | 'reserved'
   | 'maintenance'
+  | 'occupied'
   | 'occupied_no_bill'
   | 'occupied_paid'
   | 'occupied_notice'
@@ -24,6 +25,7 @@ export type StatusIconName =
   | 'CalendarClock'
   | 'Wrench'
   | 'User'
+  | 'KeyRound'
   | 'CircleCheck'
   | 'Clock'
   | 'TriangleAlert'
@@ -75,6 +77,17 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     text: 'fill-status-maintenance-ink',
     swatch: 'bg-status-maintenance border-status-maintenance-edge',
     hatched: true,
+  },
+  // Moved in this month: same colour as "not yet invoiced", since both mean
+  // "occupied, nothing to collect right now" -- only the label is calmer.
+  occupied: {
+    labelKey: 'occupied',
+    icon: 'KeyRound',
+    badge: 'bg-status-occupied text-status-occupied-ink border-status-occupied-edge',
+    fill: 'fill-status-occupied',
+    stroke: 'stroke-status-occupied-edge',
+    text: 'fill-status-occupied-ink',
+    swatch: 'bg-status-occupied border-status-occupied-edge',
   },
   occupied_no_bill: {
     labelKey: 'occupiedNoBill',
@@ -130,7 +143,7 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
  * maintenance reads as maintenance even if an old invoice is outstanding.
  *
  * `hasNotice` (an occupied room whose tenant has given move-out notice) only
- * wins over 'paid' or 'none' -- unpaid rent stays visible as due/overdue even
+ * wins over 'paid', 'none' or 'first_month' -- unpaid rent stays visible as due/overdue even
  * for a tenant who is already leaving, since that is still the more urgent
  * thing for the owner to see.
  */
@@ -152,6 +165,8 @@ export function toDisplayStatus(
       return hasNotice ? 'occupied_notice' : 'occupied_paid';
     case 'none':
       return hasNotice ? 'occupied_notice' : 'occupied_no_bill';
+    case 'first_month':
+      return hasNotice ? 'occupied_notice' : 'occupied';
   }
 }
 
@@ -162,6 +177,7 @@ export const LEGEND_ORDER: RoomDisplayStatus[] = [
   'occupied_notice',
   'occupied_paid',
   'occupied_no_bill',
+  'occupied',
   'reserved',
   'maintenance',
   'vacant',

@@ -10,7 +10,7 @@
  */
 
 import type { FinancialStatus, InvoiceItemType, InvoiceStatus } from '@/types/database';
-import { bangkokToday, isPastDue, type IsoDate } from '@/lib/utils/date';
+import { bangkokToday, billingMonthOf, isPastDue, type IsoDate } from '@/lib/utils/date';
 
 import { multiplyMoney, round2, subtractMoney, sumMoney } from './money';
 
@@ -122,11 +122,16 @@ export function deriveFinancialStatus(input: {
   today?: IsoDate;
   /** Days past due_date before the invoice counts as overdue. Mirrors payment_grace_days(). */
   graceDays?: number;
+  /** The active contract's start_date; a contract started this month is 'first_month'. */
+  contractStartDate?: IsoDate | null;
 }): FinancialStatus {
-  const { invoiceStatus, dueDate, graceDays = 0 } = input;
+  const { invoiceStatus, dueDate, graceDays = 0, contractStartDate } = input;
   const today = input.today ?? bangkokToday();
 
-  if (!invoiceStatus || !dueDate) return 'none';
+  if (!invoiceStatus) {
+    return contractStartDate && contractStartDate >= billingMonthOf(today) ? 'first_month' : 'none';
+  }
+  if (!dueDate) return 'none';
   if (invoiceStatus === 'paid') return 'paid';
   if (invoiceStatus === 'cancelled' || invoiceStatus === 'draft') return 'none';
   return isPastDue(dueDate, today, graceDays) ? 'overdue' : 'payment_due';

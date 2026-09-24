@@ -64,7 +64,8 @@ export type CommonExpenseCategory =
   | 'other';
 
 /** Derived on the server in v_room_board, not stored. */
-export type FinancialStatus = 'none' | 'paid' | 'payment_due' | 'overdue';
+/** 'first_month': moved in this month, no bill yet -- the first one is due on the 1st. */
+export type FinancialStatus = 'none' | 'first_month' | 'paid' | 'payment_due' | 'overdue';
 
 // --- Row shapes ------------------------------------------------------------
 

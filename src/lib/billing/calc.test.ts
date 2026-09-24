@@ -194,6 +194,36 @@ describe('floor plan financial status', () => {
     expect(deriveFinancialStatus({ invoiceStatus: null, dueDate: null, today })).toBe('none');
   });
 
+  it('reports first_month for a tenant who moved in this month and has no bill yet', () => {
+    expect(
+      deriveFinancialStatus({
+        invoiceStatus: null,
+        dueDate: null,
+        today,
+        contractStartDate: '2026-08-24',
+      }),
+    ).toBe('first_month');
+    expect(
+      deriveFinancialStatus({
+        invoiceStatus: null,
+        dueDate: null,
+        today,
+        contractStartDate: '2026-08-01',
+      }),
+    ).toBe('first_month');
+  });
+
+  it('falls back to none from the 1st of the next month', () => {
+    expect(
+      deriveFinancialStatus({
+        invoiceStatus: null,
+        dueDate: null,
+        today,
+        contractStartDate: '2026-07-24',
+      }),
+    ).toBe('none');
+  });
+
   it('reports paid', () => {
     expect(deriveFinancialStatus({ invoiceStatus: 'paid', dueDate: '2026-08-05', today })).toBe(
       'paid',

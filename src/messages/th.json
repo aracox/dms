@@ -111,12 +111,14 @@
   },
   "financialStatus": {
     "none": "ไม่มีบิล",
+    "first_month": "เดือนแรก ยังไม่ถึงรอบบิล",
     "paid": "ชำระแล้ว",
     "payment_due": "รอชำระ",
     "overdue": "เกินกำหนด"
   },
   "combinedStatus": {
     "vacant": "ห้องว่าง",
+    "occupied": "มีผู้เช่า",
     "occupiedPaid": "มีผู้เช่า • ชำระแล้ว",
     "occupiedDue": "มีผู้เช่า • รอชำระ",
     "occupiedOverdue": "มีผู้เช่า • เกินกำหนด",

@@ -43,7 +43,10 @@ export default async function BillingPage({
     .sort(compareBillingRooms);
   const totalOutstanding = activeRooms.reduce((sum, room) => sum + room.outstanding, 0);
   const overdueRooms = activeRooms.filter((room) => room.financial_status === 'overdue').length;
-  const roomsWithoutInvoice = activeRooms.filter((room) => room.invoice_id === null).length;
+  // A tenant who moved in this month is not behind yet -- their first bill is next month's.
+  const roomsWithoutInvoice = activeRooms.filter(
+    (room) => room.invoice_id === null && room.financial_status !== 'first_month',
+  ).length;
 
   return (
     <>

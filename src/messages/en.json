@@ -111,12 +111,14 @@
   },
   "financialStatus": {
     "none": "No invoice",
+    "first_month": "First month, not billed yet",
     "paid": "Paid",
     "payment_due": "Payment due",
     "overdue": "Overdue"
   },
   "combinedStatus": {
     "vacant": "Vacant",
+    "occupied": "Occupied",
     "occupiedPaid": "Occupied • Paid",
     "occupiedDue": "Occupied • Payment due",
     "occupiedOverdue": "Occupied • Overdue",

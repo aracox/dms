@@ -15,6 +15,7 @@ describe('toDisplayStatus', () => {
     expect(toDisplayStatus('occupied', 'payment_due')).toBe('occupied_due');
     expect(toDisplayStatus('occupied', 'overdue')).toBe('occupied_overdue');
     expect(toDisplayStatus('occupied', 'none')).toBe('occupied_no_bill');
+    expect(toDisplayStatus('occupied', 'first_month')).toBe('occupied');
   });
 
   it('shows a move-out notice once nothing more urgent is going on', () => {

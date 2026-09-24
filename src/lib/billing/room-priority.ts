@@ -4,6 +4,7 @@ const BILLING_PRIORITY: Record<FinancialStatus, number> = {
   overdue: 0,
   payment_due: 1,
   none: 2,
+  first_month: 3,
   paid: 3,
 };
 
