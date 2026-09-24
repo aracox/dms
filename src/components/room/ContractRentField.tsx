@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 import { InlineEditableField } from '@/components/ui/InlineEditableField';
 import type { Locale } from '@/i18n/routing';
-import { formatAmount } from '@/lib/billing/money';
+import { formatTHB } from '@/lib/billing/money';
 import { updateContractRentAction } from '@/lib/contracts/actions';
 
 /** Corrects the active contract's monthly rent. Only future invoices are affected. */
@@ -40,7 +40,7 @@ export function ContractRentField({
     <InlineEditableField
       label={t('room.monthlyRent')}
       value={String(rent)}
-      displayValue={formatAmount(rent, locale)}
+      displayValue={formatTHB(rent, locale)}
       emptyLabel={t('common.notAvailable')}
       onCommit={commit}
     />

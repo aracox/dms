@@ -85,7 +85,7 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
           ) : null}
 
           {contract && contract.status === 'active' && canEditContract ? (
-            <div className="border-border mt-3 space-y-3 border-t pt-3">
+            <div className="border-border mt-3 flex flex-wrap items-start gap-2 border-t pt-3">
               <MoveOutNoticeForm
                 contractId={contract.id}
                 roomId={room.id}

@@ -56,7 +56,7 @@ export function MoveOutNoticeForm({
 
   if (noticeGivenAt && plannedMoveOutDate) {
     return (
-      <div className="space-y-2">
+      <div className="w-full space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone="yellow">
             {t('contract.noticeGiven', { date: formatDate(plannedMoveOutDate, locale) })}
@@ -86,7 +86,7 @@ export function MoveOutNoticeForm({
   }
 
   return (
-    <form action={giveAction} className="space-y-2 text-left">
+    <form action={giveAction} className="w-full space-y-2 text-left">
       <input type="hidden" name="contract_id" value={contractId} />
       <input type="hidden" name="room_id" value={roomId} />
 

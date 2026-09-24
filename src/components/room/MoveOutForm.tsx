@@ -32,7 +32,7 @@ export function MoveOutForm({
   }
 
   return (
-    <form action={formAction} className="space-y-2 text-left">
+    <form action={formAction} className="w-full space-y-2 text-left">
       <input type="hidden" name="contract_id" value={contractId} />
       <input type="hidden" name="room_id" value={roomId} />
 
