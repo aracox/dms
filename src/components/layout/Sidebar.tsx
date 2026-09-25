@@ -58,7 +58,11 @@ export function Sidebar({ role, onNavigate }: { role: AppRole | null; onNavigate
         if (visible.length === 0) return null;
 
         return (
-          <div key={section.labelKey ?? `section-${sectionIndex}`}>
+          // A rule above each labelled section, so its heading reads as a divider.
+          <div
+            key={section.labelKey ?? `section-${sectionIndex}`}
+            className={section.labelKey ? 'border-border border-t pt-4' : undefined}
+          >
             {section.labelKey ? (
               <h2 className="text-ink-subtle font-display text-caption px-3 pb-1 font-semibold tracking-wide uppercase">
                 {t(section.labelKey)}

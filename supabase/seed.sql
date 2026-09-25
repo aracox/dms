@@ -76,7 +76,7 @@ insert into settings (key, value, description) values
 -- describe the property itself and must not be split.
 insert into settings (key, value, description, is_segment_scoped) values
   ('currency',                '"THB"'::jsonb, 'Display currency', false),
-  ('dormitory', '{"name_th":"หอพักตัวอย่าง","name_en":"Sample Dormitory","floors":3,"real_rooms":24}'::jsonb,
+  ('dormitory', '{"name_th":"บ้านชมเพลิน","name_en":"Baan Chomplern","floors":3,"real_rooms":24}'::jsonb,
     'Property identity shown in headers and on invoices', false);
 
 -- ===========================================================================

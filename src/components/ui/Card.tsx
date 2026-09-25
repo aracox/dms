@@ -50,15 +50,18 @@ export function CardHeader({
   return (
     <header
       className={cn(
-        'border-border flex items-start justify-between gap-4 border-b px-6 py-4',
+        'border-brand-blue-deep bg-brand-blue flex items-start justify-between gap-4 border-b px-6 py-4',
         className,
       )}
     >
       <div className="min-w-0">
-        <h2 className="text-ink font-display text-h4 font-semibold">{title}</h2>
-        {description ? <p className="text-ink-muted text-caption mt-1">{description}</p> : null}
+        <h2 className="font-display text-h4 font-semibold text-white">{title}</h2>
+        {description ? <p className="text-caption mt-1 text-white/85">{description}</p> : null}
       </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
+      {/* Header controls sit on the brand-blue band, so give them a white face. */}
+      {action ? (
+        <div className="[&_a]:bg-surface [&_button]:bg-surface shrink-0">{action}</div>
+      ) : null}
     </header>
   );
 }

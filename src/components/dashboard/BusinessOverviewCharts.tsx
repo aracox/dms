@@ -44,7 +44,7 @@ type ChartLabels = {
  * deeper one.
  */
 const STACK_FILL: Record<'billed' | 'collected', Record<PropertySegment, string>> = {
-  billed: { dorm: 'bg-brand-blue', house: 'bg-brand-blue-deep' },
+  billed: { dorm: 'bg-brand-brown', house: 'bg-brand-brown-deep' },
   collected: { dorm: 'bg-brand-green', house: 'bg-brand-green-deep' },
 };
 

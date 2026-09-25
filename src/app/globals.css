@@ -4,34 +4,50 @@
  * Palette. Defined once here; components use the semantic tokens
  * (bg-status-paid, text-brand-blue) rather than raw hex, so a re-theme is a
  * change to this file alone.
+ *
+ * Earth tones from the owner's reference ("Mona Lisa": olive #727F4B, sage
+ * #A9A569, mustard #E9C468, brown #92692E, dark brown #764B1C, near-black
+ * #352524). The token names are roles, not hues, and predate this palette:
+ *   brand-blue   = primary (olive); its -soft/-deep are the dark-brown family
+ *                  used for info chips, table headers and links, so they never
+ *                  blur into paid's olive
+ *   brand-green  = success / paid (leaf olive)
+ *   brand-yellow = warning / due (mustard) brand-red    = danger / overdue (brick)
+ *   brand-brown  = occupied, secondary chart series
+ * Red is not in the reference; overdue keeps a warm brick red on purpose so an
+ * unpaid bill still reads as a warning. Primary is a shade darker than the
+ * reference olive so white text on it passes 4.5:1.
  */
 @theme {
-  --color-brand-blue: rgb(48 111 199);
-  --color-brand-yellow: rgb(246 194 74);
-  --color-brand-green: rgb(67 147 143);
-  --color-brand-red: rgb(218 56 50);
+  --color-brand-blue: rgb(103 115 63);
+  --color-brand-yellow: rgb(233 196 104);
+  --color-brand-green: rgb(107 128 67);
+  --color-brand-red: rgb(181 69 47);
+  --color-brand-brown: rgb(146 105 46);
 
   /* Tints, for fills behind dark text. */
-  --color-brand-blue-soft: rgb(233 240 250);
-  --color-brand-yellow-soft: rgb(254 246 228);
-  --color-brand-green-soft: rgb(232 243 242);
-  --color-brand-red-soft: rgb(252 234 233);
+  --color-brand-blue-soft: rgb(238 232 229);
+  --color-brand-yellow-soft: rgb(251 243 220);
+  --color-brand-green-soft: rgb(236 241 226);
+  --color-brand-red-soft: rgb(247 227 221);
+  --color-brand-brown-soft: rgb(243 234 219);
 
   /* Shades, for text and borders that must pass contrast on a tint. */
-  --color-brand-blue-deep: rgb(28 72 133);
-  --color-brand-yellow-deep: rgb(140 100 12);
-  --color-brand-green-deep: rgb(38 92 89);
-  --color-brand-red-deep: rgb(150 30 26);
+  --color-brand-blue-deep: rgb(74 50 46);
+  --color-brand-yellow-deep: rgb(122 92 18);
+  --color-brand-green-deep: rgb(67 85 42);
+  --color-brand-red-deep: rgb(138 46 29);
+  --color-brand-brown-deep: rgb(118 75 28);
 
-  /* White work surfaces and quiet cool-grey separators. */
-  --color-surface: rgb(255 255 255);
-  --color-surface-muted: rgb(247 247 250);
-  --color-surface-sunken: rgb(239 237 246);
-  --color-border: rgb(233 232 239);
-  --color-border-strong: rgb(202 198 216);
-  --color-ink: rgb(24 30 40);
-  --color-ink-muted: rgb(96 106 122);
-  --color-ink-subtle: rgb(138 147 161);
+  /* Warm cream work surfaces, sand separators, dark-brown ink. */
+  --color-surface: rgb(255 253 248);
+  --color-surface-muted: rgb(248 244 235);
+  --color-surface-sunken: rgb(240 234 221);
+  --color-border: rgb(230 223 209);
+  --color-border-strong: rgb(207 196 175);
+  --color-ink: rgb(53 37 36);
+  --color-ink-muted: rgb(110 95 85);
+  --color-ink-subtle: rgb(151 138 126);
 
   /*
    * Must reference the next/font variable, not the family name: naming
@@ -148,7 +164,7 @@
      * inherit custom properties from its originating element before Chrome
      * 122, so the @theme tokens can resolve to nothing in this one place.
      */
-    background-color: color-mix(in srgb, var(--color-ink, rgb(24 30 40)) 35%, transparent);
+    background-color: color-mix(in srgb, var(--color-ink, rgb(53 37 36)) 35%, transparent);
     backdrop-filter: blur(var(--blur-glass, 12px));
   }
 }
@@ -243,29 +259,29 @@
  * these with an icon and a text label (see components/status/status-styles.ts).
  */
 @theme {
-  --color-status-vacant: rgb(241 243 246);
-  --color-status-vacant-ink: rgb(96 106 122);
-  --color-status-vacant-edge: rgb(199 205 214);
+  --color-status-vacant: rgb(242 239 234);
+  --color-status-vacant-ink: rgb(110 99 88);
+  --color-status-vacant-edge: rgb(210 203 192);
 
-  --color-status-paid: rgb(232 243 242);
-  --color-status-paid-ink: rgb(38 92 89);
-  --color-status-paid-edge: rgb(67 147 143);
+  --color-status-paid: rgb(236 241 226);
+  --color-status-paid-ink: rgb(67 85 42);
+  --color-status-paid-edge: rgb(114 127 75);
 
-  --color-status-due: rgb(254 246 228);
-  --color-status-due-ink: rgb(140 100 12);
-  --color-status-due-edge: rgb(246 194 74);
+  --color-status-due: rgb(251 243 220);
+  --color-status-due-ink: rgb(122 92 18);
+  --color-status-due-edge: rgb(233 196 104);
 
-  --color-status-overdue: rgb(252 234 233);
-  --color-status-overdue-ink: rgb(150 30 26);
-  --color-status-overdue-edge: rgb(218 56 50);
+  --color-status-overdue: rgb(247 227 221);
+  --color-status-overdue-ink: rgb(138 46 29);
+  --color-status-overdue-edge: rgb(181 69 47);
 
-  --color-status-occupied: rgb(233 240 250);
-  --color-status-occupied-ink: rgb(28 72 133);
-  --color-status-occupied-edge: rgb(48 111 199);
+  --color-status-occupied: rgb(243 234 219);
+  --color-status-occupied-ink: rgb(118 75 28);
+  --color-status-occupied-edge: rgb(146 105 46);
 
-  --color-status-maintenance: rgb(237 239 243);
-  --color-status-maintenance-ink: rgb(70 78 92);
-  --color-status-maintenance-edge: rgb(138 147 161);
+  --color-status-maintenance: rgb(236 232 226);
+  --color-status-maintenance-ink: rgb(79 70 62);
+  --color-status-maintenance-edge: rgb(156 145 133);
 }
 
 html {
@@ -275,9 +291,9 @@ html {
 body {
   background-color: var(--color-surface-muted);
   background-image:
-    radial-gradient(ellipse at 100% 0%, rgb(70 155 177 / 0.85), transparent 60%),
-    radial-gradient(ellipse at 0% 60%, rgb(211 126 126 / 0.9), transparent 65%),
-    linear-gradient(165deg, #594497 5%, #785b9b 35%, #c59a89 72%, #dedde9);
+    radial-gradient(ellipse at 100% 0%, rgb(169 165 105 / 0.55), transparent 60%),
+    radial-gradient(ellipse at 0% 60%, rgb(146 105 46 / 0.6), transparent 65%),
+    linear-gradient(165deg, #352524 5%, #5a3a22 35%, #764b1c 72%, #92692e);
   background-attachment: fixed;
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
@@ -319,11 +335,42 @@ body {
     overflow-y: auto;
   }
 
+  /* Section headings: small but bold mustard, so they read as headings, not faded text. */
   .app-sidebar .sidebar-navigation h2 {
-    color: rgb(255 255 255 / 0.75);
-    font-weight: 400;
-    letter-spacing: 0;
+    color: var(--color-brand-yellow);
+    font-weight: 600;
+    letter-spacing: 0.02em;
     text-transform: none;
+  }
+
+  .app-sidebar .sidebar-navigation > div {
+    border-color: rgb(255 255 255 / 0.18);
+  }
+
+  /*
+   * Compact spacing so the whole menu fits a laptop screen without scrolling.
+   * Desktop only -- the mobile drawer keeps the roomier, touch-sized rows.
+   * Unlayered, so these beat the space-y/py utilities on the same elements.
+   */
+  .app-sidebar .sidebar-navigation > div:not(:last-child) {
+    margin-block-end: 0.5rem;
+  }
+
+  .app-sidebar .sidebar-navigation > div[class*='border-t'] {
+    padding-top: 0.5rem;
+  }
+
+  .app-sidebar .sidebar-navigation h2 {
+    padding-bottom: 0.125rem;
+  }
+
+  .app-sidebar .sidebar-navigation ul > li + li {
+    margin-top: 0;
+  }
+
+  .app-sidebar .sidebar-navigation a {
+    padding-top: 0.3125rem;
+    padding-bottom: 0.3125rem;
   }
 
   .app-sidebar .sidebar-navigation a {
@@ -345,6 +392,24 @@ body {
   .app-workspace {
     grid-column: 2;
     grid-row: 2;
+  }
+}
+
+/*
+ * Route-change overlay (RouteChangeIndicator). Transparent at first so a fast
+ * navigation never flashes; fades in only if the page is still loading.
+ */
+.route-overlay {
+  background-color: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  animation: route-overlay-in 150ms ease-out 250ms both;
+}
+
+@keyframes route-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

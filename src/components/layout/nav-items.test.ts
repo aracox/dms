@@ -11,7 +11,7 @@ describe('main navigation', () => {
       })),
     ).toEqual([
       { section: null, routes: ['/dashboard', '/floor-plan', '/rooms'] },
-      { section: 'monthlyWorkflow', routes: ['/meters', '/billing', '/payments', '/deposits'] },
+      { section: 'monthlyWorkflow', routes: ['/meters', '/billing', '/payments', '/refunds'] },
       { section: 'operations', routes: ['/access-cards', '/maintenance'] },
       { section: 'financeInsights', routes: ['/expenses', '/reports'] },
       { section: 'system', routes: ['/settings', '/test', '/audit', '/staff'] },

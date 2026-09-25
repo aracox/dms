@@ -446,10 +446,11 @@ export const moveOutSchema = z.object({
 export type MoveOutInput = z.infer<typeof moveOutSchema>;
 
 /** Deducts from a terminated contract's deposit; the rest is the refund. */
+/** The amount actually handed back; the deduction is derived server-side. */
 export const settleDepositSchema = z.object({
   contract_id: uuid,
-  deduction: money,
-  note: z.string().trim().max(1000).nullable().optional(),
+  refund: money,
+  reason: z.string().trim().max(1000).nullable().optional(),
 });
 
 export type SettleDepositInput = z.infer<typeof settleDepositSchema>;

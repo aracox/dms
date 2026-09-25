@@ -62,11 +62,11 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
   reserved: {
     labelKey: 'reserved',
     icon: 'CalendarClock',
-    badge: 'bg-brand-blue-soft text-brand-blue-deep border-brand-blue',
+    badge: 'bg-brand-blue-soft text-brand-blue-deep border-brand-blue-deep',
     fill: 'fill-brand-blue-soft',
-    stroke: 'stroke-brand-blue',
+    stroke: 'stroke-brand-blue-deep',
     text: 'fill-brand-blue-deep',
-    swatch: 'bg-brand-blue-soft border-brand-blue',
+    swatch: 'bg-brand-blue-soft border-brand-blue-deep',
   },
   maintenance: {
     labelKey: 'maintenance',
@@ -110,11 +110,11 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
   occupied_notice: {
     labelKey: 'occupiedNotice',
     icon: 'LogOut',
-    badge: 'bg-brand-blue-soft text-brand-blue-deep border-brand-blue',
+    badge: 'bg-brand-blue-soft text-brand-blue-deep border-brand-blue-deep',
     fill: 'fill-brand-blue-soft',
-    stroke: 'stroke-brand-blue',
+    stroke: 'stroke-brand-blue-deep',
     text: 'fill-brand-blue-deep',
-    swatch: 'bg-brand-blue-soft border-brand-blue',
+    swatch: 'bg-brand-blue-soft border-brand-blue-deep',
   },
   occupied_due: {
     labelKey: 'occupiedDue',

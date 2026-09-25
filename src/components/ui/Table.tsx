@@ -15,7 +15,7 @@ export function Table({
   return (
     <div className="overflow-x-auto">
       <table className={cn('text-body-sm w-full min-w-[32rem] border-collapse', className)}>
-        <thead className="border-border bg-surface-muted/50 text-ink-muted font-display text-caption border-b text-left">
+        <thead className="border-brand-blue/30 bg-brand-blue-soft text-brand-blue-deep font-display text-caption border-b text-left">
           {head}
         </thead>
         <tbody className="divide-border [&>tr:hover]:bg-surface-muted divide-y [&>tr]:transition-colors">
@@ -36,7 +36,7 @@ export function TH({
   className?: string;
 }) {
   return (
-    <th scope="col" className={cn('px-4 py-3 font-normal', numeric && 'text-right', className)}>
+    <th scope="col" className={cn('px-4 py-3 font-medium', numeric && 'text-right', className)}>
       {children}
     </th>
   );

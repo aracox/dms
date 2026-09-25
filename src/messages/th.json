@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "ระบบจัดการหอพัก",
-    "shortName": "หอพัก",
+    "name": "บ้านชมเพลิน",
+    "shortName": "บ้านชมเพลิน",
     "tagline": "จัดการห้องพัก สัญญา บิล และงานซ่อมในที่เดียว"
   },
   "appearance": {
@@ -27,7 +27,7 @@
     "meters": "จดมิเตอร์",
     "billing": "ใบแจ้งหนี้",
     "payments": "การชำระเงิน",
-    "deposits": "เงินประกันรอคืน",
+    "deposits": "คืนเงินประกัน",
     "maintenance": "งานซ่อมบำรุง",
     "expenses": "ค่าใช้จ่ายส่วนกลาง",
     "reports": "รายงาน",
@@ -388,7 +388,13 @@
     "noSubscriptions": "ไม่มีบริการเสริม",
     "settleDeposit": "คืนเงินประกัน",
     "settleDepositHint": "{tenant} ย้ายออกเมื่อ {date} เงินประกันที่วางไว้: {deposit}",
-    "deduction": "หักเงินประกัน (ค่าเสียหาย/ค้างชำระ)",
+    "actualRefund": "ยอดคืนจริง",
+    "fullRefundHint": "คืนเต็มจำนวน {deposit} หากไม่มีการหัก",
+    "deductedPreview": "จากเงินประกัน {deposit} หัก {amount}",
+    "deductionReason": "เหตุผลที่หัก / หมายเหตุ",
+    "deductionReasonHint": "เช่น ค่าซ่อมผนัง ค่าทำความสะอาด ค่าไฟค้างชำระ",
+    "refundExceedsDeposit": "ยอดคืนต้องไม่เกินเงินประกันที่วางไว้",
+    "deductionReasonRequired": "กรุณาระบุเหตุผลที่หักเงินประกัน",
     "refundAmount": "ยอดคืน",
     "outstandingHint": "ผู้เช่ารายนี้ยังค้างชำระ {amount} จากใบแจ้งหนี้",
     "depositSettledOn": "คืนเงินประกันเมื่อ {date}",
@@ -401,15 +407,22 @@
     "cancelNotice": "ยกเลิกการแจ้งย้ายออก"
   },
   "deposits": {
-    "title": "เงินประกันรอคืน",
-    "subtitle": "{count} รายการ รวม {amount}",
-    "empty": "ไม่มีเงินประกันที่รอคืน",
+    "title": "คืนเงินประกัน",
+    "subtitle": "รอคืน {count} รายการ รวม {amount}",
+    "empty": "ไม่พบรายการ",
     "previousTenant": "ผู้เช่าเดิม",
     "movedOutOn": "วันที่ย้ายออก",
-    "outstanding": "ค้างชำระ",
-    "markRefunded": "คืนเงินแล้ว",
+    "recordRefund": "บันทึกการคืนเงิน",
+    "deductedShort": "หัก {amount}",
     "confirmRefunded": "ยืนยันคืนเงินแล้ว",
-    "refundPreview": "ยอดคืน: {amount}"
+    "nonePending": "ไม่มีเงินประกันที่รอคืน",
+    "searchPlaceholder": "ค้นหาชื่อผู้เช่า เบอร์โทร หรือเลขห้อง",
+    "resultCount": "พบ {count} รายการ",
+    "status": {
+      "all": "ทุกสถานะ",
+      "pending": "รอคืน",
+      "refunded": "คืนแล้ว"
+    }
   },
   "reservation": {
     "title": "การจอง",

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { round2 } from '@/lib/billing/money';
+import { subtractMoney } from '@/lib/billing/money';
 import { SUBSCRIPTION_FEE_KEYS, type SubscriptionFeeKey } from '@/lib/invoices/fees';
 import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
@@ -198,13 +198,17 @@ export async function renewContractAction(
 
 export interface SettleDepositState {
   error: string | null;
+  /** Which input the error belongs to, so the form can mark it. */
+  field?: 'refund' | 'reason';
 }
 
 /**
- * Records how much of a terminated contract's deposit was withheld; the
- * rest is the refund. A separate step from move-out itself, since the
- * final figure often is not known (a damage check, the last utility bill)
- * until after the tenant has already left.
+ * Records how much of a terminated contract's deposit was actually handed
+ * back. Staff enter the refund; the deduction is deposit - refund, derived
+ * here rather than trusted from the browser. Any deduction needs a reason
+ * -- it is what the tenant will ask about. A separate step from move-out
+ * itself, since the final figure often is not known (a damage check, the
+ * last utility bill) until after the tenant has already left.
  */
 export async function settleDepositAction(
   _previous: SettleDepositState,
@@ -217,12 +221,16 @@ export async function settleDepositAction(
 
   const parsed = settleDepositSchema.safeParse({
     contract_id: String(formData.get('contract_id') ?? ''),
-    deduction: Number(formData.get('deduction')),
-    note: String(formData.get('note') ?? '').trim() || null,
+    refund: Number(formData.get('refund')),
+    reason: String(formData.get('reason') ?? '').trim() || null,
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+    const issue = parsed.error.issues[0];
+    return {
+      error: issue?.message ?? 'errors.generic',
+      field: issue?.path[0] === 'reason' ? 'reason' : 'refund',
+    };
   }
 
   const supabase = await createClient();
@@ -234,23 +242,29 @@ export async function settleDepositAction(
 
   if (!contract) return { error: 'errors.generic' };
   if (contract.status !== 'terminated') return { error: 'contract.notTerminated' };
+  if (parsed.data.refund > contract.deposit) {
+    return { error: 'contract.refundExceedsDeposit', field: 'refund' };
+  }
 
-  const refund = Math.max(0, round2(contract.deposit - parsed.data.deduction));
+  const deduction = subtractMoney(contract.deposit, parsed.data.refund);
+  if (deduction > 0 && !parsed.data.reason) {
+    return { error: 'contract.deductionReasonRequired', field: 'reason' };
+  }
 
   const { error } = await supabase
     .from('contracts')
     .update({
-      deposit_deduction: parsed.data.deduction,
-      deposit_refund: refund,
+      deposit_deduction: deduction,
+      deposit_refund: parsed.data.refund,
       deposit_settled_at: bangkokToday(),
-      deposit_settlement_note: parsed.data.note,
+      deposit_settlement_note: parsed.data.reason,
     })
     .eq('id', parsed.data.contract_id);
 
   if (error) return { error: 'errors.generic' };
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
-  revalidatePath('/deposits');
+  revalidatePath('/refunds');
   return { error: null };
 }
 

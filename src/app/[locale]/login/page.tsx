@@ -1,9 +1,9 @@
-import { Building2 } from 'lucide-react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
 
 import { LoginForm } from './LoginForm';
+import { AppLogo } from '@/components/layout/AppLogo';
 
 export default async function LoginPage({
   params,
@@ -21,9 +21,7 @@ export default async function LoginPage({
     <main className="flex min-h-dvh items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <span className="bg-brand-blue mx-auto flex size-11 items-center justify-center rounded-lg text-white">
-            <Building2 size={22} aria-hidden="true" />
-          </span>
+          <AppLogo size={56} className="mx-auto rounded-lg" />
           <h1 className="text-ink font-display text-h3 mt-3">{t('app.name')}</h1>
           <p className="text-ink-muted text-body-sm mt-0.5">{t('auth.signInSubtitle')}</p>
         </div>

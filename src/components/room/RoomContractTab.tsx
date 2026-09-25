@@ -377,13 +377,22 @@ export async function RoomContractTab({
                     </Badge>
                   </TD>
                   <TD>
-                    {row.deposit_refund !== null
-                      ? t('contract.depositRefunded', {
+                    {row.deposit_refund !== null ? (
+                      <>
+                        {t('contract.depositRefunded', {
                           amount: formatTHB(row.deposit_refund, locale),
-                        })
-                      : row.status === 'terminated'
-                        ? '-'
-                        : ''}
+                        })}
+                        {row.deposit_settlement_note ? (
+                          <p className="text-ink-subtle text-caption whitespace-pre-line">
+                            {row.deposit_settlement_note}
+                          </p>
+                        ) : null}
+                      </>
+                    ) : row.status === 'terminated' ? (
+                      '-'
+                    ) : (
+                      ''
+                    )}
                   </TD>
                 </tr>
               );

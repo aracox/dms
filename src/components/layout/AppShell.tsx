@@ -1,4 +1,3 @@
-import { Building2 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { Suspense } from 'react';
@@ -7,6 +6,7 @@ import { Link } from '@/i18n/navigation';
 import type { AppRole } from '@/types/database';
 
 import { AppFrame } from './AppFrame';
+import { AppLogo } from './AppLogo';
 import { DesktopSidebar } from './DesktopSidebar';
 import { GlassSettings } from './GlassSettings';
 import { LocaleSwitcher } from './LocaleSwitcher';
@@ -31,9 +31,6 @@ export async function AppShell({
 
   return (
     <SidebarProvider>
-      <Suspense fallback={null}>
-        <RouteChangeIndicator />
-      </Suspense>
       <AppFrame>
         <header className="app-toolbar border-border bg-surface sticky top-0 z-10 border-b">
           <div className="flex items-center justify-between gap-4 px-4 py-2.5">
@@ -44,9 +41,7 @@ export async function AppShell({
                 aria-label={t('app.name')}
                 className="text-ink flex min-w-0 items-center gap-2"
               >
-                <span className="bg-brand-blue border-brand-blue-deep flex size-7 shrink-0 items-center justify-center rounded-md border text-white">
-                  <Building2 size={16} aria-hidden="true" />
-                </span>
+                <AppLogo size={28} />
                 <span className="font-display text-h4 hidden truncate font-semibold sm:inline">
                   {t('app.name')}
                 </span>
@@ -64,7 +59,11 @@ export async function AppShell({
         <div className="app-body flex flex-col lg:flex-row">
           <DesktopSidebar role={profile.role} />
 
-          <main className="app-workspace bg-surface min-w-0 flex-1 px-4 py-6 lg:px-8 lg:py-8">
+          <main className="app-workspace bg-surface relative min-w-0 flex-1 px-4 py-6 lg:px-8 lg:py-8">
+            {/* Covers the content only; the sidebar and toolbar never reload. */}
+            <Suspense fallback={null}>
+              <RouteChangeIndicator />
+            </Suspense>
             {children}
           </main>
         </div>

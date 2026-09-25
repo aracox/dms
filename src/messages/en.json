@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "Dormitory Management",
-    "shortName": "Dormitory",
+    "name": "Baan Chomplern",
+    "shortName": "Baan Chomplern",
     "tagline": "Rooms, contracts, billing and maintenance in one place"
   },
   "appearance": {
@@ -27,7 +27,7 @@
     "meters": "Meter Readings",
     "billing": "Billing",
     "payments": "Payments",
-    "deposits": "Deposits to refund",
+    "deposits": "Deposit refunds",
     "maintenance": "Maintenance",
     "expenses": "Common Expenses",
     "reports": "Reports",
@@ -388,7 +388,13 @@
     "noSubscriptions": "No recurring extras",
     "settleDeposit": "Settle deposit",
     "settleDepositHint": "{tenant} moved out on {date}. Deposit paid: {deposit}.",
-    "deduction": "Deduction (damages, unpaid dues)",
+    "actualRefund": "Actual refund",
+    "fullRefundHint": "Full refund of {deposit} if nothing is deducted",
+    "deductedPreview": "{amount} deducted from the {deposit} deposit",
+    "deductionReason": "Deduction reason / note",
+    "deductionReasonHint": "e.g. wall repair, cleaning, unpaid electricity",
+    "refundExceedsDeposit": "The refund cannot be more than the deposit",
+    "deductionReasonRequired": "Enter why part of the deposit was kept",
     "refundAmount": "Refund",
     "outstandingHint": "This tenant still has {amount} outstanding across their invoices.",
     "depositSettledOn": "Deposit settled on {date}",
@@ -401,15 +407,22 @@
     "cancelNotice": "Cancel notice"
   },
   "deposits": {
-    "title": "Deposits to refund",
-    "subtitle": "{count, plural, one {# deposit} other {# deposits}}, {amount} in total",
-    "empty": "No deposits are waiting to be refunded",
+    "title": "Deposit refunds",
+    "subtitle": "{count, plural, one {# waiting} other {# waiting}}, {amount} in total",
+    "empty": "No matching records",
     "previousTenant": "Previous tenant",
     "movedOutOn": "Moved out",
-    "outstanding": "Outstanding",
-    "markRefunded": "Mark refunded",
+    "recordRefund": "Record refund",
+    "deductedShort": "{amount} deducted",
     "confirmRefunded": "Confirm refunded",
-    "refundPreview": "Refund: {amount}"
+    "nonePending": "No deposits waiting to be refunded",
+    "searchPlaceholder": "Search tenant name, phone or room",
+    "resultCount": "{count, plural, one {# record} other {# records}}",
+    "status": {
+      "all": "All statuses",
+      "pending": "Waiting",
+      "refunded": "Refunded"
+    }
   },
   "reservation": {
     "title": "Reservation",

@@ -274,8 +274,9 @@ tokens in `src/app/globals.css`.
 
 Two deliberate deviations from that document, both load-bearing:
 
-1. **Palette.** The doc specifies gold / deep red / royal purple on dark brown. The app keeps the
-   brand hues below instead. Do not introduce the doc's hex values.
+1. **Palette.** The doc specifies gold / deep red / royal purple on dark brown. The app uses the
+   owner's earth-tone reference instead (olive, sage, mustard, browns — see Brand colors). Do not
+   introduce the doc's hex values.
 2. **Fonts.** The doc specifies Cinzel + Spectral. The app uses **Kanit** for headings and body,
    and **Google Sans Code** for `--font-mono`, both via `next/font/google`. Kanit (owner's choice,
    replacing Google Sans) ships the `thai` subset — Thai is the default locale — so one typeface
@@ -321,12 +322,18 @@ Status colors are defined once as CSS variables in `src/app/globals.css`, which 
 source of truth for palette values. Use the semantic tokens, never raw hex, so a re-theme stays a
 change to that one file.
 
-| Token            | Use                  |
-| ---------------- | -------------------- |
-| `--brand-blue`   | primary, occupied    |
-| `--brand-yellow` | warning, payment due |
-| `--brand-green`  | success, paid        |
-| `--brand-red`    | danger, overdue      |
+The palette follows the owner's "Mona Lisa" reference (#727F4B olive, #A9A569 sage, #E9C468
+mustard, #92692E brown, #764B1C dark brown, #352524 near-black). **Token names are roles, not
+hues** — they predate this palette, so `brand-blue` is olive. Do not rename them to match.
+
+| Token              | Use                                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------------------- |
+| `--brand-blue`     | primary (olive): buttons, card title bands, focus                                                   |
+| `-blue-soft/-deep` | info chips, table headers, links — dark-brown family, kept apart from paid                          |
+| `--brand-yellow`   | warning, payment due (mustard)                                                                      |
+| `--brand-green`    | success, paid (leaf olive)                                                                          |
+| `--brand-red`      | danger, overdue — brick red, deliberately outside the reference so overdue still reads as a warning |
+| `--brand-brown`    | occupied, the billed series in charts                                                               |
 
 ## Floor plan geometry
 

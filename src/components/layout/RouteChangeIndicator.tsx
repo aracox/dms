@@ -5,17 +5,22 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 /**
- * Blocks the whole page with a centered spinner the instant an in-app link is
- * clicked, until the URL actually changes.
+ * Blocks the content area with a centered spinner the instant an in-app link
+ * is clicked, until the URL actually changes. Rendered inside <main>, so the
+ * sidebar and toolbar -- which a navigation never re-renders -- stay crisp and
+ * the click does not read as a full page reload.
  *
  * `loading.tsx` alone only fires while a page segment is still fetching --
  * Next's Link prefetching means most in-app navigations (e.g. a room list row
  * to that room's own page) already have their data by the time you click, so
  * Suspense never suspends and no loading state appears at all. This listens
  * for the click itself instead, so every navigation gets immediate feedback
- * regardless of how fast the target page turns out to be, and the full-screen
- * overlay stops a second click (e.g. double-clicking a "save" button) from
- * firing again mid-navigation.
+ * regardless of how fast the target page turns out to be, and the overlay
+ * stops a second click (e.g. double-clicking a "save" button) from firing
+ * again mid-navigation.
+ *
+ * The overlay blocks clicks immediately but only becomes visible after a short
+ * delay (route-overlay-in in globals.css), so a fast navigation shows no flash.
  */
 export function RouteChangeIndicator() {
   const pathname = usePathname();
@@ -72,12 +77,11 @@ export function RouteChangeIndicator() {
   if (!isNavigating) return null;
 
   return (
-    <div
-      className="glass fixed inset-0 z-[100] flex items-center justify-center"
-      role="status"
-      aria-live="polite"
-    >
-      <Loader2 className="text-brand-blue size-10 animate-spin" aria-label="Loading" />
+    <div className="route-overlay absolute inset-0 z-20" role="status" aria-live="polite">
+      {/* Sticky, so the spinner stays in view on a long, scrolled page. */}
+      <div className="sticky top-[40vh] flex justify-center">
+        <Loader2 className="text-brand-blue size-10 animate-spin" aria-label="Loading" />
+      </div>
     </div>
   );
 }

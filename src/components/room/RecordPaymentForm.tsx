@@ -54,7 +54,11 @@ export function RecordPaymentForm({
           />
         </FormField>
 
-        <FormField label={t('common.amount')} htmlFor="amount" hint={t('payments.maxAllowed', { amount: formatTHB(outstanding, locale) })}>
+        <FormField
+          label={t('common.amount')}
+          htmlFor="amount"
+          hint={t('payments.maxAllowed', { amount: formatTHB(outstanding, locale) })}
+        >
           <Input
             id="amount"
             name="amount"
