@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
-import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { Card, CardBody } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
 import type { Locale } from '@/i18n/routing';
@@ -14,6 +14,7 @@ import { getCurrentProfile } from '@/lib/supabase/server';
 import { formatBillingMonth, formatDate } from '@/lib/utils/date';
 import type { InvoiceStatus } from '@/types/database';
 
+import { CollapsibleInvoiceCard } from './CollapsibleInvoiceCard';
 import { GenerateInvoiceForm } from './GenerateInvoiceForm';
 import { InvoiceActions } from './InvoiceActions';
 import { RecordPaymentForm } from './RecordPaymentForm';
@@ -57,6 +58,8 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
               fees={fees}
               liveInvoiceMonths={liveInvoiceMonths}
               subscribedKeys={detail.contractSubscriptions}
+              monthlyRent={detail.contract?.monthly_rent ?? 0}
+              meterReadings={detail.meterReadings}
               locale={locale}
             />
           </CardBody>
@@ -65,31 +68,43 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
 
       {detail.invoices.length === 0 ? <EmptyState message={t('room.noInvoice')} /> : null}
 
-      {detail.invoices.map((invoice) => {
+      {detail.invoices.map((invoice, index) => {
         const paid = confirmedPaid(invoice.payments);
         const hasPayments = invoice.payments.length > 0;
         const invoiceOutstanding = outstanding(invoice.total, paid);
+        // Open what still needs attention (a live bill with money owing) and
+        // the newest bill; paid and cancelled history starts folded.
+        const needsAttention = invoice.status !== 'cancelled' && invoiceOutstanding > 0;
 
         return (
-          <Card key={invoice.id}>
-            <CardHeader
-              title={`${invoice.invoice_number} · ${formatBillingMonth(invoice.billing_month, locale)}`}
-              description={`${t('billing.dueDate')} ${formatDate(invoice.due_date, locale)}`}
-              action={
-                <div className="flex items-center gap-3">
-                  <Badge tone={INVOICE_TONE[invoice.status]}>
-                    {t(`invoiceStatus.${invoice.status}`)}
-                  </Badge>
-                  <InvoiceActions
-                    roomId={detail.room.id}
-                    invoiceId={invoice.id}
-                    canCancel={canCancel && invoice.status !== 'cancelled'}
-                    canDelete={canDeleteInvoices && !hasPayments}
-                  />
-                </div>
-              }
-            />
-
+          <CollapsibleInvoiceCard
+            key={invoice.id}
+            defaultOpen={index === 0 || needsAttention}
+            title={`${invoice.invoice_number} · ${formatBillingMonth(invoice.billing_month, locale)}`}
+            description={[
+              `${t('billing.dueDate')} ${formatDate(invoice.due_date, locale)}`,
+              `${t('billing.total')} ${formatTHB(invoice.total, locale)}`,
+              // A cancelled bill is not owed, so no outstanding figure for it.
+              invoice.status === 'cancelled'
+                ? null
+                : `${t('billing.outstanding')} ${formatTHB(invoiceOutstanding, locale)}`,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+            action={
+              <div className="flex items-center gap-3">
+                <Badge tone={INVOICE_TONE[invoice.status]}>
+                  {t(`invoiceStatus.${invoice.status}`)}
+                </Badge>
+                <InvoiceActions
+                  roomId={detail.room.id}
+                  invoiceId={invoice.id}
+                  canCancel={canCancel && invoice.status !== 'cancelled'}
+                  canDelete={canDeleteInvoices && !hasPayments}
+                />
+              </div>
+            }
+          >
             <Table
               head={
                 <tr>
@@ -153,7 +168,7 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
                 />
               ) : null}
             </CardBody>
-          </Card>
+          </CollapsibleInvoiceCard>
         );
       })}
     </div>

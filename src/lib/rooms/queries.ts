@@ -138,6 +138,8 @@ export async function getRoomDetail(roomId: string): Promise<RoomDetail | null> 
         .select('*')
         .eq('room_id', roomId)
         .order('billing_month', { ascending: false })
+        // A month can hold a cancelled bill and its reissue; newest on top.
+        .order('created_at', { ascending: false })
         .limit(12),
       supabase
         .from('maintenance_tickets')
