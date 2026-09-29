@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
 import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
+import { OutstandingPaymentRow } from '@/components/payments/OutstandingPaymentRow';
 import { PageHeader } from '@/components/layout/AppShell';
 import { INVOICE_TONE } from '@/components/room/RoomBillingTab';
 import { Badge } from '@/components/ui/Badge';
@@ -12,8 +13,10 @@ import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
+import { can } from '@/lib/permissions';
 import { getOutstandingInvoices, getPaymentCollection } from '@/lib/reporting/queries';
 import { filterByView, parseSegmentView } from '@/lib/reporting/segments';
+import { getCurrentProfile } from '@/lib/supabase/server';
 import { formatBillingMonth, formatDate } from '@/lib/utils/date';
 
 export default async function PaymentsPage({
@@ -29,10 +32,12 @@ export default async function PaymentsPage({
   const t = await getTranslations();
   const typedLocale = locale as Locale;
   const view = parseSegmentView((await searchParams).segment);
-  const [allOutstanding, collection] = await Promise.all([
+  const [allOutstanding, collection, profile] = await Promise.all([
     getOutstandingInvoices(),
     getPaymentCollection(12),
+    getCurrentProfile(),
   ]);
+  const canRecord = can(profile?.role, 'payments:record');
 
   // report_outstanding carries property_segment, so the invoice list filters.
   // report_payment_collection aggregates payments by month and method with no
@@ -72,11 +77,24 @@ export default async function PaymentsPage({
                   <TH numeric>{t('billing.total')}</TH>
                   <TH numeric>{t('billing.paid')}</TH>
                   <TH numeric>{t('billing.outstanding')}</TH>
+                  <TH>
+                    <span className="sr-only">{t('payments.recordPayment')}</span>
+                  </TH>
                 </tr>
               }
             >
               {outstanding.map((invoice) => (
-                <tr key={invoice.invoice_id}>
+                // Keyed on the balance too, so a partial payment re-renders the
+                // row closed with the new outstanding as the form's default.
+                <OutstandingPaymentRow
+                  key={`${invoice.invoice_id}-${invoice.outstanding}`}
+                  columns={10}
+                  canRecord={canRecord}
+                  roomId={invoice.room_id}
+                  invoiceId={invoice.invoice_id}
+                  outstanding={invoice.outstanding}
+                  locale={typedLocale}
+                >
                   <TD className="text-caption font-mono">{invoice.invoice_number}</TD>
                   <TD>
                     <Link
@@ -108,7 +126,7 @@ export default async function PaymentsPage({
                   <TD numeric className="font-medium">
                     {formatTHB(invoice.outstanding, typedLocale)}
                   </TD>
-                </tr>
+                </OutstandingPaymentRow>
               ))}
             </Table>
           )}

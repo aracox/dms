@@ -14,20 +14,28 @@ import type { PaymentMethod } from '@/types/database';
 const INITIAL_STATE: RecordPaymentState = { error: null };
 const PAYMENT_METHODS: PaymentMethod[] = ['cash', 'bank_transfer', 'promptpay'];
 
-/** Collapsed by default: a "+ Record payment" button reveals the form. */
+/**
+ * Collapsed by default: a "+ Record payment" button reveals the form.
+ * `defaultOpen` + `onClose` let a parent own the toggle instead (the payments
+ * page opens it in a row of its own).
+ */
 export function RecordPaymentForm({
   roomId,
   invoiceId,
   outstanding,
   locale,
+  defaultOpen = false,
+  onClose,
 }: {
   roomId: string;
   invoiceId: string;
   outstanding: number;
   locale: Locale;
+  defaultOpen?: boolean;
+  onClose?: () => void;
 }) {
   const t = useTranslations();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [state, formAction, isPending] = useActionState(recordPaymentAction, INITIAL_STATE);
 
   if (!open) {
@@ -111,7 +119,12 @@ export function RecordPaymentForm({
         <Button variant="primary" size="sm" type="submit" disabled={isPending}>
           {isPending ? t('common.loading') : t('common.save')}
         </Button>
-        <Button type="button" variant="link" size="sm" onClick={() => setOpen(false)}>
+        <Button
+          type="button"
+          variant="link"
+          size="sm"
+          onClick={() => (onClose ? onClose() : setOpen(false))}
+        >
           {t('common.close')}
         </Button>
       </div>

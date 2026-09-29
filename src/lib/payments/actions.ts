@@ -72,6 +72,7 @@ export async function recordPaymentAction(
   }
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
+  revalidatePath('/payments');
   return { error: null };
 }
 
@@ -122,6 +123,7 @@ async function setPaymentStatus(
   if (!data || data.length === 0) return { error: 'payments.alreadyProcessed' };
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
+  revalidatePath('/payments');
   return { error: null };
 }
 

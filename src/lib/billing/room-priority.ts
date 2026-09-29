@@ -4,7 +4,8 @@ const BILLING_PRIORITY: Record<FinancialStatus, number> = {
   overdue: 0,
   payment_due: 1,
   none: 2,
-  first_month: 3,
+  // Also unbilled -- sits with 'none' so unbilled rooms list in room order.
+  first_month: 2,
   paid: 3,
 };
 
