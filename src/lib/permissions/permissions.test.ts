@@ -38,6 +38,12 @@ describe('permissions', () => {
     expect(can(undefined, 'reports:read')).toBe(false);
   });
 
+  it('sends a signed-out caller to the login page instead of denying access', () => {
+    // next/navigation's redirect() works by throwing NEXT_REDIRECT.
+    expect(() => assertCan(null, 'rooms:read')).toThrow('NEXT_REDIRECT');
+    expect(() => assertCan(undefined, 'rooms:read')).not.toThrow(PermissionError);
+  });
+
   it('throws PermissionError from assertCan', () => {
     expect(() => assertCan('staff', 'payments:delete')).toThrow(PermissionError);
     expect(() => assertCan('owner', 'payments:delete')).not.toThrow();

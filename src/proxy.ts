@@ -53,6 +53,14 @@ export async function proxy(request: NextRequest) {
   );
 
   if (!user && !isPublic) {
+    // A Server Action (a save button) posts to the page URL. Redirecting that
+    // POST here makes the browser fetch the login page's HTML as the action's
+    // result, which the client can only report as a generic error. Let it
+    // through instead: every action calls assertCan, which redirects to the
+    // login page in a way the client follows -- and RLS still refuses the
+    // anonymous request either way.
+    if (request.headers.has('next-action')) return response;
+
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}/login`;
     url.search = '';

@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+
 import type { AppRole } from '@/types/database';
 
 /**
@@ -119,7 +121,16 @@ export class PermissionError extends Error {
   }
 }
 
-/** Throws unless the role holds the permission. Use at the top of a Server Action. */
+/**
+ * Throws unless the role holds the permission. Use at the top of a Server Action.
+ *
+ * No role at all means nobody is signed in -- in practice an expired session
+ * on a page left open. That is not an access problem, so send them to the
+ * login page instead of throwing: Next turns a redirect() inside a Server
+ * Action into a client-side navigation. `/login` without a locale is fine;
+ * the proxy's locale middleware prefixes it from the NEXT_LOCALE cookie.
+ */
 export function assertCan(role: AppRole | null | undefined, permission: Permission): void {
+  if (!role) redirect('/login');
   if (!can(role, permission)) throw new PermissionError(permission);
 }
