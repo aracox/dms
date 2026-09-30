@@ -132,7 +132,9 @@ export async function getRoomDetail(roomId: string): Promise<RoomDetail | null> 
         .select('*')
         .eq('room_id', roomId)
         .order('billing_month', { ascending: false })
-        .limit(24),
+        // ~10 years of monthly electricity + water: the meter history pages by
+        // year on the client, so it needs past years, not just the last 12 months.
+        .limit(240),
       supabase
         .from('invoices')
         .select('*')

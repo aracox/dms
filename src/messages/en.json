@@ -485,7 +485,8 @@
     "waterRate": "Water rate (THB per unit)",
     "usageUnits": "{units} units",
     "recordReading": "Record reading",
-    "correctPermissionRequired": "Only an admin can edit a month that already has a reading."
+    "correctPermissionRequired": "Only an admin can edit a month that already has a reading.",
+    "changeVsLastMonth": "Units used compared with the previous month"
   },
   "billing": {
     "title": "Billing",

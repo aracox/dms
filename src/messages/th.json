@@ -485,7 +485,8 @@
     "waterRate": "อัตราค่าน้ำ (บาท/หน่วย)",
     "usageUnits": "{units} หน่วย",
     "recordReading": "จดมิเตอร์",
-    "correctPermissionRequired": "เฉพาะแอดมินเท่านั้นที่แก้ไขเดือนที่มีการจดมิเตอร์แล้วได้"
+    "correctPermissionRequired": "เฉพาะแอดมินเท่านั้นที่แก้ไขเดือนที่มีการจดมิเตอร์แล้วได้",
+    "changeVsLastMonth": "เทียบหน่วยที่ใช้กับเดือนก่อน"
   },
   "billing": {
     "title": "ใบแจ้งหนี้",
