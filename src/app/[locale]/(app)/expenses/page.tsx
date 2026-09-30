@@ -1,7 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-import { AdHocExpensesSection } from '@/components/expenses/AdHocExpensesSection';
-import { MonthlyExpensesSection } from '@/components/expenses/MonthlyExpensesSection';
+import { ExpensesSection } from '@/components/expenses/ExpensesSection';
 import { PageHeader } from '@/components/layout/AppShell';
 import type { Locale } from '@/i18n/routing';
 import { getCommonExpenses } from '@/lib/common-expenses/queries';
@@ -23,16 +22,7 @@ export default async function ExpensesPage({ params }: { params: Promise<{ local
     <>
       <PageHeader title={t('expenses.title')} description={t('expenses.subtitle')} />
 
-      <h2 className="text-ink mb-3 text-sm font-semibold">{t('expenses.monthlyTitle')}</h2>
-      <MonthlyExpensesSection
-        expenses={expenses}
-        canWrite={canWrite}
-        canDelete={canDelete}
-        locale={typedLocale}
-      />
-
-      <h2 className="text-ink mt-8 mb-3 text-sm font-semibold">{t('expenses.adHocTitle')}</h2>
-      <AdHocExpensesSection
+      <ExpensesSection
         expenses={expenses}
         canWrite={canWrite}
         canDelete={canDelete}

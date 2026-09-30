@@ -475,6 +475,14 @@ export type BusinessOverviewBySegmentRow = {
   collection_rate: number;
 };
 
+/** report_expense_months: real shared expenses per month and category, zero-filled. */
+export type ExpenseMonthRow = {
+  billing_month: string;
+  category: CommonExpenseCategory;
+  amount: number;
+  entry_count: number;
+};
+
 export type ContractExpiringRow = {
   contract_id: string;
   room_id: string;
@@ -792,6 +800,7 @@ export type Database = {
       report_finance_summary_by_segment: ViewDef<FinanceSummaryBySegmentRow>;
       report_business_overview: ViewDef<BusinessOverviewRow>;
       report_business_overview_by_segment: ViewDef<BusinessOverviewBySegmentRow>;
+      report_expense_months: ViewDef<ExpenseMonthRow>;
       report_contracts_expiring: ViewDef<ContractExpiringRow>;
       report_move_out_notices: ViewDef<MoveOutNoticeRow>;
       report_outstanding: ViewDef<OutstandingRow>;

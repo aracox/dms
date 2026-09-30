@@ -39,6 +39,31 @@
   --color-brand-red-deep: rgb(138 46 29);
   --color-brand-brown-deep: rgb(118 75 28);
 
+  /*
+   * Two-series chart pair for the expenses report (recurring vs non-recurring).
+   * Earth tones stepped until they pass the dataviz palette validator against
+   * the cream surface: CVD ΔE 11.2, normal-vision ΔE 20.9. The ochre is under
+   * 3:1 on cream, so charts using it must also show a legend and a table view.
+   */
+  --color-chart-recurring: rgb(79 122 42);
+  --color-chart-adhoc: rgb(208 140 28);
+
+  /*
+   * Seven-slot categorical set for the expense-category donut, one fixed
+   * color per category. Validated as a ring (slot 7 wraps to slot 1) against
+   * the cream surface: CVD ΔE >= 11.3, normal-vision ΔE >= 18.5. The ring
+   * order IS the safety mechanism -- draw slices in slot order, never sorted
+   * by size. Slot 3 is the ochre above, so non-recurring matches the bar chart.
+   * Ochre and khaki are under 3:1, so the donut always carries a value legend.
+   */
+  --color-chart-cat-1: rgb(79 122 42); /* common_electricity -- olive */
+  --color-chart-cat-2: rgb(59 111 192); /* common_water -- blue */
+  --color-chart-cat-3: rgb(208 140 28); /* other (non-recurring) -- ochre */
+  --color-chart-cat-4: rgb(0 137 123); /* housekeeping -- teal */
+  --color-chart-cat-5: rgb(192 80 42); /* gardening -- terracotta */
+  --color-chart-cat-6: rgb(123 74 160); /* internet -- plum */
+  --color-chart-cat-7: rgb(184 154 16); /* transformer_fee -- khaki */
+
   /* Warm cream work surfaces, sand separators, dark-brown ink. */
   --color-surface: rgb(255 253 248);
   --color-surface-muted: rgb(248 244 235);

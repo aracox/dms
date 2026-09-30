@@ -1,3 +1,12 @@
+import {
+  Ban,
+  CircleCheck,
+  CircleDashed,
+  Clock,
+  FilePen,
+  TriangleAlert,
+  type LucideIcon,
+} from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
@@ -26,6 +35,16 @@ export const INVOICE_TONE: Record<InvoiceStatus, BadgeTone> = {
   paid: 'green',
   overdue: 'red',
   cancelled: 'neutral',
+};
+
+/** One icon per status, so the pill reads as a status (and never by color alone). */
+const INVOICE_ICON: Record<InvoiceStatus, LucideIcon> = {
+  draft: FilePen,
+  issued: Clock,
+  partially_paid: CircleDashed,
+  paid: CircleCheck,
+  overdue: TriangleAlert,
+  cancelled: Ban,
 };
 
 export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; locale: Locale }) {
@@ -75,12 +94,23 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
         // Open what still needs attention (a live bill with money owing) and
         // the newest bill; paid and cancelled history starts folded.
         const needsAttention = invoice.status !== 'cancelled' && invoiceOutstanding > 0;
+        const StatusIcon = INVOICE_ICON[invoice.status];
 
         return (
           <CollapsibleInvoiceCard
             key={invoice.id}
             defaultOpen={index === 0 || needsAttention}
             title={`${invoice.invoice_number} · ${formatBillingMonth(invoice.billing_month, locale)}`}
+            status={
+              // Rounded pill + icon: shaped unlike the square buttons on the right.
+              <Badge
+                tone={INVOICE_TONE[invoice.status]}
+                icon={<StatusIcon size={12} aria-hidden="true" />}
+                className="rounded-full font-medium"
+              >
+                {t(`invoiceStatus.${invoice.status}`)}
+              </Badge>
+            }
             description={[
               `${t('billing.dueDate')} ${formatDate(invoice.due_date, locale)}`,
               `${t('billing.total')} ${formatTHB(invoice.total, locale)}`,
@@ -92,17 +122,12 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
               .filter(Boolean)
               .join(' · ')}
             action={
-              <div className="flex items-center gap-3">
-                <Badge tone={INVOICE_TONE[invoice.status]}>
-                  {t(`invoiceStatus.${invoice.status}`)}
-                </Badge>
-                <InvoiceActions
-                  roomId={detail.room.id}
-                  invoiceId={invoice.id}
-                  canCancel={canCancel && invoice.status !== 'cancelled'}
-                  canDelete={canDeleteInvoices && !hasPayments}
-                />
-              </div>
+              <InvoiceActions
+                roomId={detail.room.id}
+                invoiceId={invoice.id}
+                canCancel={canCancel && invoice.status !== 'cancelled'}
+                canDelete={canDeleteInvoices && !hasPayments}
+              />
             }
           >
             <Table

@@ -19,6 +19,7 @@ import type {
   AccessCardReportRow,
   BusinessOverviewBySegmentRow,
   BusinessOverviewRow,
+  ExpenseMonthRow,
   ContractExpiringRow,
   FinanceSummaryRow,
   MaintenanceReportRow,
@@ -27,7 +28,6 @@ import type {
   OutstandingRow,
   PaymentCollectionRow,
   PropertySegment,
-  ReportRoomRow,
   RoomSummaryRow,
   TenantSummaryRow,
 } from '@/types/database';
@@ -90,6 +90,15 @@ export async function getFinanceSummaryBySegment(): Promise<
   return bySegment(data ?? [], () => EMPTY_FINANCE_SUMMARY);
 }
 
+/** Shared expenses per month and category (zero-filled), oldest month first. */
+export async function getExpenseMonths(): Promise<ExpenseMonthRow[]> {
+  const supabase = await createClient();
+  const data = await read('report_expense_months', () =>
+    supabase.from('report_expense_months').select('*').order('billing_month'),
+  );
+  return (data ?? []).map((row) => ({ ...row, amount: Number(row.amount) }));
+}
+
 /** Monthly occupancy, billing, collections, and common expenses. */
 export async function getBusinessOverview(): Promise<BusinessOverviewRow[]> {
   const supabase = await createClient();
@@ -131,15 +140,6 @@ export async function getTenantSummaryBySegment(): Promise<
     supabase.from('report_tenant_summary_by_segment').select('*'),
   );
   return bySegment(data ?? [], () => EMPTY_TENANT_SUMMARY);
-}
-
-/** All 24 real rooms with contract, tenant and financial state. */
-export async function getReportRooms(): Promise<ReportRoomRow[]> {
-  const supabase = await createClient();
-  const data = await read('report_rooms', () =>
-    supabase.from('report_rooms').select('*').order('room_number'),
-  );
-  return data ?? [];
 }
 
 /** Active contracts ending within `withinDays`. */

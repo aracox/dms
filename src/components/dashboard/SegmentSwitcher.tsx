@@ -13,9 +13,18 @@ import { SEGMENT_VIEWS, type SegmentView } from '@/lib/reporting/segments';
  * ships no JavaScript.
  *
  * `pathname` is the page the links point back at, so the same control serves
- * the dashboard and the rooms list without either one owning it.
+ * the dashboard and the rooms list without either one owning it. `query`
+ * carries the page's other filters through, so switching segment keeps them.
  */
-export function SegmentSwitcher({ current, pathname }: { current: SegmentView; pathname: string }) {
+export function SegmentSwitcher({
+  current,
+  pathname,
+  query = {},
+}: {
+  current: SegmentView;
+  pathname: string;
+  query?: Record<string, string>;
+}) {
   const t = useTranslations();
 
   return (
@@ -30,7 +39,7 @@ export function SegmentSwitcher({ current, pathname }: { current: SegmentView; p
         return (
           <Link
             key={view}
-            href={view === 'all' ? pathname : { pathname, query: { segment: view } }}
+            href={{ pathname, query: view === 'all' ? query : { ...query, segment: view } }}
             aria-current={active ? 'true' : undefined}
             className={buttonClasses(active ? 'primary' : 'ghost', 'sm')}
           >

@@ -231,6 +231,10 @@ describe('the SQL enforces exclusion, not just the TypeScript', () => {
   const views = readRepoFile('../../../supabase/migrations/0006_views.sql');
   const businessOverview = readRepoFile('../../../supabase/migrations/0023_business_overview.sql');
   const segments = readRepoFile('../../../supabase/migrations/0024_property_segments.sql');
+  const overviewRange = readRepoFile(
+    '../../../supabase/migrations/0039_business_overview_month_range.sql',
+  );
+  const expenseMonths = readRepoFile('../../../supabase/migrations/0040_report_expense_months.sql');
   const tables = readRepoFile('../../../supabase/migrations/0002_core_tables.sql');
   const triggers = readRepoFile('../../../supabase/migrations/0005_functions_and_triggers.sql');
 
@@ -254,6 +258,20 @@ describe('the SQL enforces exclusion, not just the TypeScript', () => {
 
   it('filters is_test in every report_ view definition', () => {
     assertReportViewsFilterTestData(views, 9);
+  });
+
+  it('keeps is_test = false on every source in the widened overview views (0039)', () => {
+    // Each view: invoices + expenses in the bounds, plus its own data joins.
+    expect(overviewRange).toContain('create or replace view report_business_overview with');
+    expect(overviewRange).toContain('create or replace view report_business_overview_by_segment');
+    expect(overviewRange.match(/is_test = false/g)!.length).toBeGreaterThanOrEqual(14);
+  });
+
+  it('filters is_test on every expense read in report_expense_months (0040)', () => {
+    // Two in the month bounds, one on the joined rows.
+    expect(expenseMonths).toContain('create view report_expense_months');
+    const sql = expenseMonths.replace(/--.*$/gm, '');
+    expect(sql.match(/is_test = false/g)).toHaveLength(3);
   });
 
   it('filters is_test in every per-segment report_ view', () => {

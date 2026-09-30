@@ -8,7 +8,9 @@ import { useEffect, useState } from 'react';
  * Blocks the content area with a centered spinner the instant an in-app link
  * is clicked, until the URL actually changes. Rendered inside <main>, so the
  * sidebar and toolbar -- which a navigation never re-renders -- stay crisp and
- * the click does not read as a full page reload.
+ * the click does not read as a full page reload. Links that stay on the same
+ * page and only change the query (year steppers, filters) get no overlay at
+ * all: the current content stays until the new data swaps in.
  *
  * `loading.tsx` alone only fires while a page segment is still fetching --
  * Next's Link prefetching means most in-app navigations (e.g. a room list row
@@ -65,7 +67,10 @@ export function RouteChangeIndicator() {
       }
       const current = new URL(window.location.href);
       if (target.origin !== current.origin) return;
-      if (target.pathname === current.pathname && target.search === current.search) return;
+      // Same page, only the query differs (a year stepper, a status or segment
+      // filter): the soft navigation swaps the data in place, so a veil over
+      // the content would only make it look like a full reload.
+      if (target.pathname === current.pathname) return;
 
       setIsNavigating(true);
     }

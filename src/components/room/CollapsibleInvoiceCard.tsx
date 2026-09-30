@@ -11,15 +11,21 @@ import { Card, CardHeader } from '@/components/ui/Card';
  * the total and outstanding, so a folded bill still says what matters. Only
  * the title toggles -- the actions sit outside the button so clicking them
  * never folds the card.
+ *
+ * The status pill sits beside the title, not among the actions: next to the
+ * buttons, a boxed status read as one more thing to click.
  */
 export function CollapsibleInvoiceCard({
   title,
+  status,
   description,
   action,
   defaultOpen,
   children,
 }: {
   title: string;
+  /** Status pill shown right after the title. */
+  status: ReactNode;
   description: string;
   action: ReactNode;
   defaultOpen: boolean;
@@ -33,16 +39,19 @@ export function CollapsibleInvoiceCard({
     <Card>
       <CardHeader
         title={
-          <button
-            type="button"
-            onClick={() => setOpen(!open)}
-            aria-expanded={open}
-            aria-controls={bodyId}
-            className="flex items-center gap-1.5 text-left"
-          >
-            <Chevron size={18} aria-hidden="true" className="shrink-0" />
-            {title}
-          </button>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <button
+              type="button"
+              onClick={() => setOpen(!open)}
+              aria-expanded={open}
+              aria-controls={bodyId}
+              className="flex items-center gap-1.5 text-left"
+            >
+              <Chevron size={18} aria-hidden="true" className="shrink-0" />
+              {title}
+            </button>
+            {status}
+          </span>
         }
         description={description}
         action={action}
