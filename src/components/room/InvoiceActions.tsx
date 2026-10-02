@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import {
@@ -36,34 +36,58 @@ export function InvoiceActions({
     DELETE_INITIAL_STATE,
   );
 
+  // Both actions are one-way, so each asks once before it submits.
+  const [confirming, setConfirming] = useState<'cancel' | 'delete' | null>(null);
+
   if (!canCancel && !canDelete) return null;
+
+  if (confirming) {
+    const isCancel = confirming === 'cancel';
+    const isPending = isCancel ? isCancelling : isDeleting;
+    return (
+      <form
+        action={isCancel ? cancelAction : deleteAction}
+        className="flex flex-wrap items-center gap-3"
+      >
+        <input type="hidden" name="invoice_id" value={invoiceId} />
+        <input type="hidden" name="room_id" value={roomId} />
+        <span className="text-caption font-medium text-white">
+          {t(isCancel ? 'billing.confirmCancelInvoice' : 'billing.confirmDeleteInvoice')}
+        </span>
+        <Button
+          type="submit"
+          variant="link"
+          size="sm"
+          disabled={isPending}
+          className="text-brand-red-deep hover:text-brand-red-deep"
+        >
+          {isPending ? t('common.loading') : t('common.yes')}
+        </Button>
+        <Button type="button" variant="link" size="sm" onClick={() => setConfirming(null)}>
+          {t('common.no')}
+        </Button>
+      </form>
+    );
+  }
 
   return (
     <div className="flex items-center gap-3">
       {canCancel ? (
-        <form action={cancelAction}>
-          <input type="hidden" name="invoice_id" value={invoiceId} />
-          <input type="hidden" name="room_id" value={roomId} />
-          <Button type="submit" variant="link" size="sm" disabled={isCancelling}>
-            {isCancelling ? t('common.loading') : t('billing.cancelInvoice')}
-          </Button>
-        </form>
+        <Button type="button" variant="link" size="sm" onClick={() => setConfirming('cancel')}>
+          {t('billing.cancelInvoice')}
+        </Button>
       ) : null}
 
       {canDelete ? (
-        <form action={deleteAction}>
-          <input type="hidden" name="invoice_id" value={invoiceId} />
-          <input type="hidden" name="room_id" value={roomId} />
-          <Button
-            type="submit"
-            variant="link"
-            size="sm"
-            disabled={isDeleting}
-            className="text-brand-red-deep hover:text-brand-red-deep"
-          >
-            {isDeleting ? t('common.loading') : t('common.delete')}
-          </Button>
-        </form>
+        <Button
+          type="button"
+          variant="link"
+          size="sm"
+          onClick={() => setConfirming('delete')}
+          className="text-brand-red-deep hover:text-brand-red-deep"
+        >
+          {t('common.delete')}
+        </Button>
       ) : null}
 
       {cancelState.error ? (

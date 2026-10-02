@@ -15,7 +15,7 @@ import type { PaymentStatus } from '@/types/database';
 
 import { ConfirmRejectPaymentButtons } from './ConfirmRejectPaymentButtons';
 
-const PAYMENT_TONE: Record<PaymentStatus, BadgeTone> = {
+export const PAYMENT_TONE: Record<PaymentStatus, BadgeTone> = {
   pending: 'yellow',
   confirmed: 'green',
   cancelled: 'neutral',

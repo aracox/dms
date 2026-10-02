@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { meterChainError } from '@/lib/meters/chain';
 import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { meterReadingSchema } from '@/lib/validation/schemas';
@@ -48,6 +49,32 @@ export async function recordMeterReadingAction(
     .maybeSingle();
 
   assertCan(profile?.role, existing ? 'meters:correct' : 'meters:record');
+
+  // The same meter's nearest readings either side, so an edit cannot
+  // overlap a neighbouring month and bill the shared units twice.
+  const [{ data: earlier }, { data: later }] = await Promise.all([
+    supabase
+      .from('meter_readings')
+      .select('previous_reading, current_reading')
+      .eq('room_id', parsed.data.room_id)
+      .eq('meter_type', parsed.data.meter_type)
+      .lt('billing_month', parsed.data.billing_month)
+      .order('billing_month', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('meter_readings')
+      .select('previous_reading, current_reading')
+      .eq('room_id', parsed.data.room_id)
+      .eq('meter_type', parsed.data.meter_type)
+      .gt('billing_month', parsed.data.billing_month)
+      .order('billing_month', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  const chainError = meterChainError(parsed.data, earlier, later);
+  if (chainError) return { error: chainError };
 
   const payload = {
     room_id: parsed.data.room_id,

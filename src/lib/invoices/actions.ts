@@ -153,6 +153,17 @@ export async function cancelInvoiceAction(
   const roomId = String(formData.get('room_id') ?? '');
 
   const supabase = await createClient();
+
+  // Voiding a bill with confirmed money on it orphans that payment, and the
+  // reissued bill would charge the tenant a second time.
+  const { count } = await supabase
+    .from('payments')
+    .select('id', { count: 'exact', head: true })
+    .eq('invoice_id', invoiceId)
+    .eq('status', 'confirmed');
+
+  if (count) return { error: 'billing.cancelHasPayments' };
+
   const { error } = await supabase
     .from('invoices')
     .update({ status: 'cancelled' })

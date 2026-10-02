@@ -13,6 +13,7 @@ import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Card, CardBody } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
+import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { confirmedPaid, outstanding } from '@/lib/billing/calc';
 import { formatAmount, formatTHB } from '@/lib/billing/money';
@@ -27,6 +28,7 @@ import { CollapsibleInvoiceCard } from './CollapsibleInvoiceCard';
 import { GenerateInvoiceForm } from './GenerateInvoiceForm';
 import { InvoiceActions } from './InvoiceActions';
 import { RecordPaymentForm } from './RecordPaymentForm';
+import { PAYMENT_TONE } from './RoomPaymentsTab';
 
 export const INVOICE_TONE: Record<InvoiceStatus, BadgeTone> = {
   draft: 'neutral',
@@ -51,7 +53,11 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
   const t = await getTranslations();
   const profile = await getCurrentProfile();
 
-  const canGenerate = can(profile?.role, 'invoices:write') && Boolean(detail.contract);
+  // After a move-out the room has no active contract, but the tenant still
+  // owes the month they left in -- generateInvoiceForRoom checks the month.
+  const billableContract =
+    detail.contract ?? detail.contractHistory.find((contract) => contract.status !== 'draft');
+  const canGenerate = can(profile?.role, 'invoices:write') && Boolean(billableContract);
   const canCancel = can(profile?.role, 'invoices:write');
   const canDeleteInvoices = can(profile?.role, 'invoices:delete');
   const canRecordPayment = can(profile?.role, 'payments:record');
@@ -77,7 +83,7 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
               fees={fees}
               liveInvoiceMonths={liveInvoiceMonths}
               subscribedKeys={detail.contractSubscriptions}
-              monthlyRent={detail.contract?.monthly_rent ?? 0}
+              monthlyRent={billableContract?.monthly_rent ?? 0}
               meterReadings={detail.meterReadings}
               locale={locale}
             />
@@ -125,7 +131,9 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
               <InvoiceActions
                 roomId={detail.room.id}
                 invoiceId={invoice.id}
-                canCancel={canCancel && invoice.status !== 'cancelled'}
+                // A paid bill cannot be voided: the payment would stay on it, and
+                // a reissued bill would charge the tenant twice.
+                canCancel={canCancel && invoice.status !== 'cancelled' && paid === 0}
                 canDelete={canDeleteInvoices && !hasPayments}
               />
             }
@@ -183,6 +191,38 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
                   <dd className="tabular-nums">{formatTHB(invoiceOutstanding, locale)}</dd>
                 </div>
               </dl>
+
+              {hasPayments ? (
+                <div className="mt-4">
+                  <h3 className="text-ink-muted text-caption font-medium">
+                    {t('payments.history')}
+                  </h3>
+                  <ul className="divide-border mt-1 divide-y text-sm">
+                    {invoice.payments.map((payment) => (
+                      <li key={payment.id} className="flex flex-wrap items-center gap-x-3 py-1.5">
+                        <span>{formatDate(payment.payment_date, locale)}</span>
+                        <span className="text-ink-muted">
+                          {t(`paymentMethod.${payment.payment_method}`)}
+                        </span>
+                        <Badge tone={PAYMENT_TONE[payment.status]}>
+                          {t(`paymentStatus.${payment.status}`)}
+                        </Badge>
+                        <span className="ml-auto font-medium tabular-nums">
+                          {formatTHB(payment.amount, locale)}
+                        </span>
+                        {payment.status === 'confirmed' ? (
+                          <Link
+                            href={`/payments/${payment.id}/receipt`}
+                            className="text-brand-blue-deep text-caption underline"
+                          >
+                            {t('payments.receipt')}
+                          </Link>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
 
               {canRecordPayment && invoice.status !== 'cancelled' && invoiceOutstanding > 0 ? (
                 <RecordPaymentForm

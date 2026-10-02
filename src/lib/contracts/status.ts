@@ -35,3 +35,25 @@ export function pendingDepositSettlement<
     ? mostRecentPast
     : null;
 }
+
+/**
+ * The contract a room's invoice for `billingMonth` belongs to, given that
+ * room's contracts newest first. A contract covers the months from its start
+ * through the month it ended -- so a tenant who moved out on the 31st can
+ * still be billed for that last month after the room is vacant. Drafts never
+ * bill. When two contracts touch the same month (a renewal) the newer wins.
+ */
+export function contractForBillingMonth<
+  T extends Pick<ContractRow, 'status' | 'start_date' | 'end_date' | 'terminated_at'>,
+>(roomContractsNewestFirst: readonly T[], billingMonth: string): T | null {
+  const month = billingMonth.slice(0, 7);
+  return (
+    roomContractsNewestFirst.find((contract) => {
+      if (contract.status === 'draft') return false;
+      if (contract.start_date.slice(0, 7) > month) return false;
+      if (contract.status === 'active') return true;
+      const endedOn = contract.status === 'terminated' ? contract.terminated_at : contract.end_date;
+      return endedOn !== null && endedOn.slice(0, 7) >= month;
+    }) ?? null
+  );
+}

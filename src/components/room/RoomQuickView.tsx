@@ -121,10 +121,20 @@ export function RoomQuickView({ room, locale }: { room: RoomBoardRow; locale: Lo
         ) : null}
       </div>
 
-      <Link href={`/rooms/${room.room_id}`} className={buttonClasses('primary', 'md')}>
-        {t('room.openFullPage')}
-        <ArrowRight size={14} aria-hidden="true" />
-      </Link>
+      <div className="flex flex-wrap gap-2">
+        {room.room_status === 'vacant' || room.room_status === 'reserved' ? (
+          <Link
+            href={`/rooms/${room.room_id}/move-in`}
+            className={buttonClasses('secondary', 'md')}
+          >
+            {t('contract.moveIn')}
+          </Link>
+        ) : null}
+        <Link href={`/rooms/${room.room_id}`} className={buttonClasses('primary', 'md')}>
+          {t('room.openFullPage')}
+          <ArrowRight size={14} aria-hidden="true" />
+        </Link>
+      </div>
     </div>
   );
 }

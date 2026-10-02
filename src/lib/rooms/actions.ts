@@ -7,6 +7,7 @@ import { redirect } from '@/i18n/navigation';
 import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { uploadTenantDocuments } from '@/lib/tenant-documents/upload';
+import { bangkokToday } from '@/lib/utils/date';
 import {
   moveInSchema,
   moveOutSchema,
@@ -268,6 +269,12 @@ export async function moveOutAction(
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  // move_out_room vacates the room immediately, whatever the date says. A
+  // future move-out is a notice; the daily sweep (0032) runs it on the day.
+  if (parsed.data.terminated_at > bangkokToday()) {
+    return { error: 'contract.moveOutFutureDate' };
   }
 
   const supabase = await createClient();

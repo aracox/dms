@@ -403,6 +403,7 @@
     "depositSettledOn": "Deposit settled on {date}",
     "depositRefunded": "Refunded {amount}",
     "notTerminated": "This contract has not been terminated yet.",
+    "moveOutFutureDate": "The move-out date cannot be after today. If the tenant is leaving later, use “Give move-out notice” instead.",
     "giveNotice": "Give move-out notice",
     "giveNoticeHint": "Records that the tenant plans to leave. The room stays occupied until that date, then moves out automatically — you can still move out earlier if needed.",
     "plannedMoveOutDate": "Planned move-out date",
@@ -510,7 +511,7 @@
     "openBilling": "Open billing",
     "generateInvoice": "Generate invoice",
     "extras": "Additional charges (optional)",
-    "noActiveContract": "This room has no active contract to bill.",
+    "noActiveContract": "This room had no contract in the selected month to bill.",
     "invoiceAlreadyExists": "An invoice already exists for this room and month.",
     "invoiceAlreadyExistsHint": "An invoice already exists for {month}. Cancel or delete it below to generate a new one.",
     "filterByStatus": "Filter by bill status",
@@ -522,6 +523,9 @@
     "reviewNoReading": "No meter reading for this month ({items}) — this bill will not include it",
     "invoiceHasPayments": "This invoice has a payment recorded against it. Cancel it instead of deleting.",
     "cancelInvoice": "Cancel invoice",
+    "confirmCancelInvoice": "Cancel this invoice?",
+    "confirmDeleteInvoice": "Delete this invoice permanently?",
+    "cancelHasPayments": "This invoice has confirmed payments, so it cannot be cancelled.",
     "print": "Print invoice",
     "bulkGenerateCreated": "Created {count} invoices",
     "bulkGenerateNoneCreated": "No new invoices were created",
@@ -768,7 +772,9 @@
       "slot": "Card number must end in -A or -B"
     },
     "meter": {
-      "reversed": "The current reading cannot be below the previous reading"
+      "reversed": "The current reading cannot be below the previous reading",
+      "overlapsEarlier": "The previous reading cannot be below the earlier month's reading, or the shared units would be billed twice",
+      "overlapsLater": "The current reading cannot be above the next month's previous reading, or the shared units would be billed twice"
     },
     "invoice": {
       "noItems": "An invoice needs at least one item"

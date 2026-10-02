@@ -13,8 +13,6 @@ export interface TestModeState {
   error: string | null;
 }
 
-export const INITIAL_TEST_MODE_STATE: TestModeState = { message: null, error: null };
-
 async function requireTestModeAccess() {
   const profile = await getCurrentProfile();
   // Throws PermissionError, which the error boundary renders.

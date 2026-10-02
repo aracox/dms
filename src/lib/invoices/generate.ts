@@ -3,6 +3,7 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { buildMonthlyInvoiceItems } from '@/lib/billing/calc';
+import { contractForBillingMonth } from '@/lib/contracts/status';
 import { EXTRA_FEE_META, type InvoiceExtraFeeKey } from '@/lib/invoices/fees';
 import { propertySegment } from '@/lib/reporting/segments';
 import { bangkokToday, dueDateFor, type IsoDate } from '@/lib/utils/date';
@@ -13,8 +14,8 @@ export interface GenerateInvoiceResult {
 }
 
 /**
- * Generates a room's invoice for one billing month: rent from the active
- * contract, that month's recorded electricity/water usage (if any -- a room
+ * Generates a room's invoice for one billing month: rent from the contract
+ * covering that month (see contractForBillingMonth), that month's recorded electricity/water usage (if any -- a room
  * with no reading yet simply gets rent and extras, no utility line), and
  * whichever extra fees the caller passed, priced from current settings.
  *
@@ -33,18 +34,20 @@ export async function generateInvoiceForRoom(
     extraKeys,
   }: { roomId: string; billingMonth: IsoDate; extraKeys: readonly InvoiceExtraFeeKey[] },
 ): Promise<GenerateInvoiceResult> {
-  const [{ data: contract }, { data: room }] = await Promise.all([
+  const [{ data: contracts }, { data: room }] = await Promise.all([
+    // Not just the active contract: a tenant who has already moved out still
+    // owes the month they left in.
     supabase
       .from('contracts')
-      .select('id, monthly_rent, payment_due_day')
+      .select('id, monthly_rent, payment_due_day, status, start_date, end_date, terminated_at')
       .eq('room_id', roomId)
-      .eq('status', 'active')
-      .maybeSingle(),
+      .order('start_date', { ascending: false }),
     // The room's type decides which segment's fees apply -- a house is priced
     // from the บ้านพัก column, not the building-wide one that no longer exists.
     supabase.from('rooms').select('room_type').eq('id', roomId).maybeSingle(),
   ]);
 
+  const contract = contractForBillingMonth(contracts ?? [], billingMonth);
   if (!contract) return { error: 'billing.noActiveContract' };
   if (!room) return { error: 'errors.generic' };
 

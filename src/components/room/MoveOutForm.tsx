@@ -40,7 +40,14 @@ export function MoveOutForm({
         <label className="text-ink text-body-sm block font-medium">
           {t('contract.terminatedAt')}
         </label>
-        <Input name="terminated_at" type="date" defaultValue={today} required className="mt-1" />
+        <Input
+          name="terminated_at"
+          type="date"
+          defaultValue={today}
+          max={today}
+          required
+          className="mt-1"
+        />
       </div>
 
       <div>

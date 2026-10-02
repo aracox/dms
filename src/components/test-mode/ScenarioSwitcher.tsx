@@ -9,9 +9,11 @@ import { TEST_SCENARIO_IDS, type TestScenarioId } from '@/config/test-scenarios'
 import {
   applyTestScenarioAction,
   resetTestDataAction,
-  INITIAL_TEST_MODE_STATE,
+  type TestModeState,
 } from '@/lib/test-mode/actions';
 import { cn } from '@/lib/utils/cn';
+
+const INITIAL_TEST_MODE_STATE: TestModeState = { message: null, error: null };
 
 export function ScenarioSwitcher({ currentScenario }: { currentScenario: TestScenarioId | null }) {
   const t = useTranslations();
