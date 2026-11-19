@@ -593,7 +593,12 @@
     "completedAt": "Completed on",
     "commonArea": "Common area",
     "newTicket": "New ticket",
-    "commonAreaExcluded": "Excludes {count} common-area tickets, which belong to neither segment."
+    "commonAreaExcluded": "Excludes {count} common-area tickets, which belong to neither segment.",
+    "filterLabel": "Search maintenance",
+    "openTitle": "Not finished · every month",
+    "closedFor": "Closed · {month}",
+    "closedCost": "Repair cost {amount}",
+    "noClosedInMonth": "No tickets closed in {month}."
   },
   "expenses": {
     "title": "Common Expenses",
@@ -629,7 +634,6 @@
     "outstanding": "Outstanding balance",
     "meterUsage": "Meter usage",
     "contractExpiry": "Contract expiration",
-    "maintenance": "Maintenance",
     "cardStatus": "Access card status",
     "export": "Export CSV",
     "expenseTitle": "Expense report",

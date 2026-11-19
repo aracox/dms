@@ -215,10 +215,11 @@ export async function getOpenMaintenance(limit = 50): Promise<MaintenanceReportR
   return data ?? [];
 }
 
-export async function getMaintenanceReport(limit = 200): Promise<MaintenanceReportRow[]> {
+/** Every finished (completed or cancelled) ticket, uncapped so no month drops off. */
+export async function getClosedMaintenance(): Promise<MaintenanceReportRow[]> {
   const supabase = await createClient();
   const data = await read('report_maintenance', () =>
-    supabase.from('report_maintenance').select('*').limit(limit),
+    supabase.from('report_maintenance').select('*').in('status', ['completed', 'cancelled']),
   );
   return data ?? [];
 }

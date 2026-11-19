@@ -593,7 +593,12 @@
     "completedAt": "วันที่เสร็จ",
     "commonArea": "พื้นที่ส่วนกลาง",
     "newTicket": "แจ้งงานซ่อม",
-    "commonAreaExcluded": "ไม่รวมงานส่วนกลาง {count} รายการ ซึ่งไม่ได้อยู่ในกลุ่มใด"
+    "commonAreaExcluded": "ไม่รวมงานส่วนกลาง {count} รายการ ซึ่งไม่ได้อยู่ในกลุ่มใด",
+    "filterLabel": "ค้นหางานซ่อมบำรุง",
+    "openTitle": "งานที่ยังไม่เสร็จ · ทุกเดือน",
+    "closedFor": "ปิดงานแล้ว · {month}",
+    "closedCost": "ค่าซ่อมรวม {amount}",
+    "noClosedInMonth": "ไม่มีงานที่ปิดใน{month}"
   },
   "expenses": {
     "title": "ค่าใช้จ่ายส่วนกลาง",
@@ -629,7 +634,6 @@
     "outstanding": "รายงานยอดค้างชำระ",
     "meterUsage": "รายงานการใช้น้ำ-ไฟ",
     "contractExpiry": "รายงานสัญญาหมดอายุ",
-    "maintenance": "รายงานงานซ่อม",
     "cardStatus": "รายงานสถานะคีย์การ์ด",
     "export": "ส่งออก CSV",
     "expenseTitle": "รายงานค่าใช้จ่าย",
