@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { FLOOR_LAYOUTS, getFloorLayout, layoutRoomCount, layoutRoomNumbers } from './index';
+import {
+  contentViewBox,
+  FLOOR_LAYOUTS,
+  getFloorLayout,
+  layoutRoomCount,
+  layoutRoomNumbers,
+  type FloorLayout,
+} from './index';
 
 describe('floor layouts', () => {
   it('describe exactly the 24 real rooms', () => {
@@ -72,5 +79,39 @@ describe('floor layouts', () => {
       expect(typeof layout.provisional).toBe('boolean');
       expect(layout.note.length).toBeGreaterThan(20);
     }
+  });
+
+  it('fit a content viewBox around every room with the padding on each side', () => {
+    for (const layout of FLOOR_LAYOUTS) {
+      const [minX, minY, width, height] = contentViewBox(layout, 10).split(' ').map(Number);
+
+      for (const room of layout.rooms) {
+        expect(room.x, `${room.roomNumber} left`).toBeGreaterThanOrEqual(minX! + 10);
+        expect(room.y, `${room.roomNumber} top`).toBeGreaterThanOrEqual(minY! + 10);
+        expect(room.x + room.width).toBeLessThanOrEqual(minX! + width! - 10);
+        expect(room.y + room.height).toBeLessThanOrEqual(minY! + height! - 10);
+      }
+    }
+  });
+});
+
+describe('contentViewBox', () => {
+  it('hugs the drawn geometry rather than the JSON canvas', () => {
+    const layout: FloorLayout = {
+      floor: 9,
+      provisional: true,
+      note: 'synthetic layout for the viewBox test',
+      viewBox: '0 0 1000 1000',
+      outline: [
+        [100, 50],
+        [300, 50],
+        [300, 150],
+        [100, 150],
+      ],
+      decorations: [{ type: 'corridor', x: 100, y: 150, width: 200, height: 20 }],
+      rooms: [{ roomNumber: 'X1', x: 120, y: 200, width: 40, height: 30 }],
+    };
+
+    expect(contentViewBox(layout, 5)).toBe('95 45 210 190');
   });
 });

@@ -4,6 +4,13 @@ import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
 import { RoomQuickView } from '@/components/room/RoomQuickView';
+import { STATUS_ICONS } from '@/components/status/RoomStatusBadge';
+import {
+  LEGEND_ORDER,
+  STATUS_STYLES,
+  toDisplayStatus,
+  type RoomDisplayStatus,
+} from '@/components/status/status-styles';
 import { Drawer } from '@/components/ui/Drawer';
 import { FLOOR_LAYOUTS, type FloorNumber } from '@/config/floor-layout';
 import type { Locale } from '@/i18n/routing';
@@ -12,7 +19,6 @@ import { cn } from '@/lib/utils/cn';
 import type { RoomBoardRow } from '@/types/database';
 
 import { FloorPlanSvg } from './FloorPlanSvg';
-import { StatusLegend } from './StatusLegend';
 
 /**
  * The interactive floor plan.
@@ -86,6 +92,35 @@ export function FloorPlanView({
       ? roomsByNumber.get(selectedRoomNumber)
       : undefined;
 
+  /** Occupied / total per segment for one floor, counting only units the filter shows. */
+  const occupancyOf = (floorLayout: (typeof FLOOR_LAYOUTS)[number]) => {
+    const counts = { dorm: { occupied: 0, total: 0 }, house: { occupied: 0, total: 0 } };
+    for (const roomLayout of floorLayout.rooms) {
+      const room = roomsByNumber.get(roomLayout.roomNumber);
+      if (!room || dimmed.has(room.room_number)) continue;
+      const bucket = counts[propertySegment(room.room_type)];
+      bucket.total += 1;
+      if (room.room_status === 'occupied') bucket.occupied += 1;
+    }
+    return counts;
+  };
+
+  /**
+   * How many units on this floor are in each status, worst first. Doubles as
+   * the legend: only statuses actually on the floor are listed.
+   */
+  const statusCounts = new Map<RoomDisplayStatus, number>();
+  for (const roomLayout of layout?.rooms ?? []) {
+    const room = roomsByNumber.get(roomLayout.roomNumber);
+    if (!room || dimmed.has(room.room_number)) continue;
+    const status = toDisplayStatus(
+      room.room_status,
+      room.financial_status,
+      Boolean(room.notice_given_at),
+    );
+    statusCounts.set(status, (statusCounts.get(status) ?? 0) + 1);
+  }
+
   const floorUnits = layout?.rooms.length ?? 0;
   const shownUnits = layout
     ? layout.rooms.filter((roomLayout) => !dimmed.has(roomLayout.roomNumber)).length
@@ -93,39 +128,77 @@ export function FloorPlanView({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
-      <div role="tablist" aria-label={t('floorPlan.title')} className="flex shrink-0 gap-1">
-        {FLOOR_LAYOUTS.map((candidate) => {
-          const isActive = candidate.floor === activeFloor;
-          // Nothing of the selected segment on this floor, so there is nothing
-          // to switch to. Disabled rather than hidden: the building still has
-          // three floors, and the tabs should not move under you.
-          const isEmpty = !floorsWithUnits.includes(candidate.floor as FloorNumber);
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
+        <div role="tablist" aria-label={t('floorPlan.title')} className="flex flex-wrap gap-2">
+          {FLOOR_LAYOUTS.map((candidate) => {
+            const isActive = candidate.floor === activeFloor;
+            // Nothing of the selected segment on this floor, so there is nothing
+            // to switch to. Disabled rather than hidden: the building still has
+            // three floors, and the tabs should not move under you.
+            const isEmpty = !floorsWithUnits.includes(candidate.floor as FloorNumber);
+            const { dorm, house } = occupancyOf(candidate);
+            const summary = [
+              dorm.total > 0 && t('floorPlan.occupiedOf', dorm),
+              house.total > 0 && t('floorPlan.housesOf', house),
+            ]
+              .filter(Boolean)
+              .join(' · ');
 
-          return (
-            <button
-              key={candidate.floor}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              disabled={isEmpty}
-              title={isEmpty ? t('floorPlan.noUnitsOnFloor') : undefined}
-              onClick={() => setFloor(candidate.floor as FloorNumber)}
-              className={cn(
-                'rounded-md border px-4 py-2 text-sm font-medium',
-                'disabled:cursor-not-allowed disabled:opacity-35',
-                isActive
-                  ? 'border-brand-blue bg-brand-blue text-white'
-                  : 'glass-surface border-border text-ink-muted enabled:hover:text-ink',
-              )}
-            >
-              {t('floorPlan.floor', { floor: candidate.floor })}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={candidate.floor}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                disabled={isEmpty}
+                title={isEmpty ? t('floorPlan.noUnitsOnFloor') : undefined}
+                onClick={() => setFloor(candidate.floor as FloorNumber)}
+                className={cn(
+                  'flex min-h-12 flex-col items-start justify-center rounded-lg border px-4 py-1.5 text-left transition-colors',
+                  'disabled:cursor-not-allowed disabled:opacity-35',
+                  isActive
+                    ? 'border-brand-blue bg-brand-blue text-white'
+                    : 'bg-surface border-border text-ink enabled:hover:bg-surface-sunken',
+                )}
+              >
+                <span className="font-display text-body-sm font-semibold">
+                  {t('floorPlan.floor', { floor: candidate.floor })}
+                </span>
+                {summary ? (
+                  <span
+                    className={cn('text-[11px]', isActive ? 'text-white/80' : 'text-ink-subtle')}
+                  >
+                    {summary}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+
+        <ul aria-label={t('floorPlan.legend')} className="flex flex-wrap gap-1.5">
+          {LEGEND_ORDER.filter((status) => statusCounts.has(status)).map((status) => {
+            const style = STATUS_STYLES[status];
+            const Icon = STATUS_ICONS[style.icon];
+            return (
+              <li
+                key={status}
+                className={cn(
+                  'text-caption flex h-7 items-center gap-1.5 rounded-full border px-2.5',
+                  style.badge,
+                )}
+              >
+                <Icon size={12} aria-hidden="true" />
+                {t(`combinedStatusShort.${style.labelKey}`)}
+                <span className="font-semibold tabular-nums">{statusCounts.get(status)}</span>
+              </li>
+            );
+          })}
+        </ul>
       </div>
 
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
-        <div className="glass border-border flex min-h-0 items-center justify-center rounded-xl border p-3 shadow-sm">
+      <div className="bg-surface border-border flex min-h-0 flex-1 flex-col rounded-xl border p-4 shadow-md">
+        <div className="flex min-h-0 flex-1 items-center justify-center">
           {layout ? (
             <FloorPlanSvg
               layout={layout}
@@ -141,22 +214,17 @@ export function FloorPlanView({
             </p>
           )}
         </div>
-
-        <aside className="glass border-border min-h-0 overflow-y-auto rounded-xl border p-3 shadow-sm">
-          <StatusLegend />
-          {/* Says what the dimming means, and makes the count legible to a
-              screen reader, which the faded units are hidden from. */}
-          {view === 'all' ? null : (
-            <p className="text-ink-muted text-caption mt-4 pt-3" aria-live="polite">
-              {t('floorPlan.segmentShown', {
-                segment: t(`segment.${view}`),
-                shown: shownUnits,
-                total: floorUnits,
-              })}
-            </p>
-          )}
-          <p className="text-ink-subtle text-caption mt-4 pt-3">{t('floorPlan.subtitle')}</p>
-        </aside>
+        {/* Says what the dimming means, and makes the count legible to a
+            screen reader, which the faded units are hidden from. */}
+        {view === 'all' ? null : (
+          <p className="text-ink-muted text-caption mt-3 text-center" aria-live="polite">
+            {t('floorPlan.segmentShown', {
+              segment: t(`segment.${view}`),
+              shown: shownUnits,
+              total: floorUnits,
+            })}
+          </p>
+        )}
       </div>
 
       <Drawer

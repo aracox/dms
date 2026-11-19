@@ -344,6 +344,11 @@ When the real plan arrives: edit only these JSON files, remapping `x/y/width/hei
 room numbers. No component change should be needed. Keep geometry out of the database — it is
 static configuration, not business data.
 
+The plan fits itself: `FloorPlanSvg` frames each floor with `contentViewBox()`, the bounding box of
+the outline, decorations and rooms, so the JSON `viewBox` no longer controls what is shown. Rooms
+are drawn inset from their boxes, so lay them out wall to wall in the JSON; the gap is visual.
+Houses are grouped by their segment (`room_type`), not by position.
+
 ## Out of scope for v1
 
 Accounting/GL, AI chatbot, smart meters, physical access-control hardware, bank APIs, automatic

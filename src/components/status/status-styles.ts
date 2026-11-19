@@ -43,6 +43,8 @@ export interface StatusStyle {
   stroke: string;
   /** Floor-plan label colour. */
   text: string;
+  /** Text colour (`currentColor`), for outline icons drawn inside the plan. */
+  ink: string;
   /** Legend swatch. */
   swatch: string;
   /** Maintenance is additionally hatched so it reads without colour. */
@@ -57,6 +59,7 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     fill: 'fill-status-vacant',
     stroke: 'stroke-status-vacant-edge',
     text: 'fill-status-vacant-ink',
+    ink: 'text-status-vacant-ink',
     swatch: 'bg-status-vacant border-status-vacant-edge',
   },
   reserved: {
@@ -66,6 +69,7 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     fill: 'fill-brand-blue-soft',
     stroke: 'stroke-brand-blue-deep',
     text: 'fill-brand-blue-deep',
+    ink: 'text-brand-blue-deep',
     swatch: 'bg-brand-blue-soft border-brand-blue-deep',
   },
   maintenance: {
@@ -75,6 +79,7 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     fill: 'fill-status-maintenance',
     stroke: 'stroke-status-maintenance-edge',
     text: 'fill-status-maintenance-ink',
+    ink: 'text-status-maintenance-ink',
     swatch: 'bg-status-maintenance border-status-maintenance-edge',
     hatched: true,
   },
@@ -87,6 +92,7 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     fill: 'fill-status-occupied',
     stroke: 'stroke-status-occupied-edge',
     text: 'fill-status-occupied-ink',
+    ink: 'text-status-occupied-ink',
     swatch: 'bg-status-occupied border-status-occupied-edge',
   },
   occupied_no_bill: {
@@ -96,6 +102,7 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     fill: 'fill-status-occupied',
     stroke: 'stroke-status-occupied-edge',
     text: 'fill-status-occupied-ink',
+    ink: 'text-status-occupied-ink',
     swatch: 'bg-status-occupied border-status-occupied-edge',
   },
   occupied_paid: {
@@ -105,6 +112,7 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     fill: 'fill-status-paid',
     stroke: 'stroke-status-paid-edge',
     text: 'fill-status-paid-ink',
+    ink: 'text-status-paid-ink',
     swatch: 'bg-status-paid border-status-paid-edge',
   },
   occupied_notice: {
@@ -114,6 +122,7 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     fill: 'fill-brand-blue-soft',
     stroke: 'stroke-brand-blue-deep',
     text: 'fill-brand-blue-deep',
+    ink: 'text-brand-blue-deep',
     swatch: 'bg-brand-blue-soft border-brand-blue-deep',
   },
   occupied_due: {
@@ -123,6 +132,7 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     fill: 'fill-status-due',
     stroke: 'stroke-status-due-edge',
     text: 'fill-status-due-ink',
+    ink: 'text-status-due-ink',
     swatch: 'bg-status-due border-status-due-edge',
   },
   occupied_overdue: {
@@ -132,6 +142,7 @@ export const STATUS_STYLES: Record<RoomDisplayStatus, StatusStyle> = {
     fill: 'fill-status-overdue',
     stroke: 'stroke-status-overdue-edge',
     text: 'fill-status-overdue-ink',
+    ink: 'text-status-overdue-ink',
     swatch: 'bg-status-overdue border-status-overdue-edge',
   },
 };

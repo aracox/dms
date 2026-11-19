@@ -5,23 +5,72 @@ import type { KeyboardEvent } from 'react';
 
 import { STATUS_ICONS } from '@/components/status/RoomStatusBadge';
 import { STATUS_STYLES, toDisplayStatus } from '@/components/status/status-styles';
-import type { FloorLayout } from '@/config/floor-layout';
+import { contentViewBox, type Decoration, type FloorLayout } from '@/config/floor-layout';
+import type { Locale } from '@/i18n/routing';
 import { formatAmount } from '@/lib/billing/money';
+import { propertySegment } from '@/lib/reporting/segments';
 import { cn } from '@/lib/utils/cn';
+import { truncateVisible } from '@/lib/utils/truncate';
 import type { RoomBoardRow } from '@/types/database';
 
-import type { Locale } from '@/i18n/routing';
+/**
+ * Each room is drawn inset from its layout box by this much on every side.
+ * The JSON packs rooms wall to wall; the inset turns them into separate cards
+ * with a gap between, without touching the geometry.
+ */
+const INSET = 3;
 
-const DECORATION_FILL: Record<string, string> = {
-  corridor: 'fill-surface-sunken',
-  stairs: 'fill-surface-sunken',
-  entrance: 'fill-brand-blue',
-  lift: 'fill-surface-sunken',
-};
+/** Corridor and stairs, drawn light so the rooms carry the plan. */
+function DecorationShape({ decoration, label }: { decoration: Decoration; label: string }) {
+  const { x, y, width, height, type } = decoration;
+  const horizontal = width >= height;
+  const box = {
+    x: x + INSET,
+    y: y + INSET,
+    width: width - INSET * 2,
+    height: height - INSET * 2,
+  };
+  const cx = x + width / 2;
+  const cy = y + height / 2;
 
-/** SVG has no text overflow; trim so long Thai names cannot escape the room. */
-function truncate(value: string, max: number) {
-  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
+  if (type === 'entrance') {
+    return <rect {...box} rx={4} className="fill-brand-blue" />;
+  }
+
+  return (
+    <g>
+      {/* No fill class on the stairs: a CSS fill would override the pattern. */}
+      {type === 'stairs' ? (
+        <rect {...box} rx={6} fill="url(#stairs-stripes)" />
+      ) : (
+        <rect {...box} rx={6} className="fill-surface-sunken" />
+      )}
+      {type === 'corridor' ? (
+        <line
+          x1={horizontal ? box.x + 12 : cx}
+          y1={horizontal ? cy : box.y + 12}
+          x2={horizontal ? box.x + box.width - 12 : cx}
+          y2={horizontal ? cy : box.y + box.height - 12}
+          strokeWidth={1.2}
+          strokeDasharray="5 4"
+          className="stroke-border-strong"
+        />
+      ) : null}
+      {label ? (
+        // A thick stroke in the floor colour, painted under the glyphs, breaks
+        // the dashed centre line behind the label.
+        <text
+          x={cx}
+          y={cy + 3.5}
+          textAnchor="middle"
+          className="fill-ink-subtle stroke-surface-sunken text-[10px] font-medium tracking-wide [paint-order:stroke]"
+          strokeWidth={6}
+        >
+          {label}
+        </text>
+      ) : null}
+    </g>
+  );
 }
 
 export function FloorPlanSvg({
@@ -42,19 +91,15 @@ export function FloorPlanSvg({
 }) {
   const t = useTranslations();
 
-  /*
-   * Rooms share walls: every room's right edge IS the next room's left edge
-   * (the layout JSON has a gap of 0 between all of them). SVG strokes straddle
-   * the path rather than sitting inside it, so whichever room is drawn later
-   * paints its fill over the outer half of its neighbour's stroke.
-   *
-   * At the unselected width of 1.5 that is what you want -- two half strokes
-   * read as one shared wall line. At the selected width of 4 it eats half the
-   * border, so a selected room shows 4 on the side whose neighbour was drawn
-   * first and only 2 on the other, which reads as a missing edge. Drawing the
-   * selected room last puts its whole stroke on top. sort() is stable, so
-   * every other room keeps its original order.
-   */
+  const decorationLabel: Record<string, string> = {
+    corridor: t('floorPlan.corridor'),
+    stairs: t('floorPlan.stairs'),
+    lift: t('floorPlan.lift'),
+    entrance: '',
+  };
+
+  // The selected room is drawn last so its heavier stroke and glow sit above
+  // its neighbours. sort() is stable, so every other room keeps its order.
   const orderedRooms = selectedRoomNumber
     ? [...layout.rooms].sort(
         (a, b) =>
@@ -62,12 +107,29 @@ export function FloorPlanSvg({
       )
     : layout.rooms;
 
+  // Houses have no floor of their own and sit outside the building outline,
+  // so they get their own labelled, dashed group.
+  const houseLayouts = layout.rooms.filter((roomLayout) => {
+    const room = roomsByNumber.get(roomLayout.roomNumber);
+    return room ? propertySegment(room.room_type) === 'house' : false;
+  });
+  const houseBounds =
+    houseLayouts.length > 0
+      ? {
+          x: Math.min(...houseLayouts.map((r) => r.x)) - 4,
+          y: Math.min(...houseLayouts.map((r) => r.y)) - 4,
+          right: Math.max(...houseLayouts.map((r) => r.x + r.width)) + 4,
+          bottom: Math.max(...houseLayouts.map((r) => r.y + r.height)) + 4,
+        }
+      : null;
+  const housesDimmed = houseLayouts.every((r) => dimmed.has(r.roomNumber));
+
   return (
     <svg
-      viewBox={layout.viewBox}
+      viewBox={contentViewBox(layout)}
       role="group"
       aria-label={t('floorPlan.floor', { floor: layout.floor })}
-      className="block h-full max-h-full w-full max-w-full select-none"
+      className="mx-auto block h-full max-h-full w-full max-w-5xl select-none"
     >
       <defs>
         {/* Hatch for maintenance, so the status survives without colour. */}
@@ -87,39 +149,60 @@ export function FloorPlanSvg({
             strokeWidth="2"
           />
         </pattern>
+        {/* Treads for the stairs. */}
+        <pattern id="stairs-stripes" width="7" height="7" patternUnits="userSpaceOnUse">
+          <rect width="7" height="7" className="fill-surface-sunken" />
+          <line x1="0" y1="0" x2="0" y2="7" className="stroke-border" strokeWidth="2.5" />
+        </pattern>
       </defs>
 
-      {/* Building footprint. */}
+      {/* Building footprint: a framed slab the rooms sit on. */}
       <polygon
         points={layout.outline.map(([x, y]) => `${x},${y}`).join(' ')}
-        className="fill-surface"
+        className="fill-surface-muted stroke-border-strong"
+        strokeWidth={2}
+        strokeLinejoin="round"
       />
 
       {layout.decorations.map((decoration, index) => (
-        <g key={`${decoration.type}-${index}`}>
-          <rect
-            x={decoration.x}
-            y={decoration.y}
-            width={decoration.width}
-            height={decoration.height}
-            className={cn(DECORATION_FILL[decoration.type] ?? 'fill-surface-sunken')}
-            rx={decoration.type === 'entrance' ? 3 : 0}
-          />
-          {decoration.type === 'stairs' ? (
-            <text
-              x={decoration.x + decoration.width / 2}
-              y={decoration.y + decoration.height / 2 + 4}
-              textAnchor="middle"
-              className="fill-ink-subtle text-[11px]"
-            >
-              {t('floorPlan.stairs')}
-            </text>
-          ) : null}
-        </g>
+        <DecorationShape
+          key={`${decoration.type}-${index}`}
+          decoration={decoration}
+          label={decorationLabel[decoration.type] ?? ''}
+        />
       ))}
+
+      {houseBounds ? (
+        <g className={cn('transition-opacity', housesDimmed && 'opacity-20')} aria-hidden="true">
+          <rect
+            x={houseBounds.x}
+            y={houseBounds.y}
+            width={houseBounds.right - houseBounds.x}
+            height={houseBounds.bottom - houseBounds.y}
+            rx={10}
+            fill="none"
+            strokeWidth={1.2}
+            strokeDasharray="5 4"
+            className="stroke-border-strong"
+          />
+          <text
+            x={houseBounds.x + 2}
+            y={houseBounds.y - 8}
+            className="fill-ink-muted text-[11px] font-semibold"
+          >
+            {t('segment.house')}
+          </text>
+        </g>
+      ) : null}
 
       {orderedRooms.map((roomLayout) => {
         const room = roomsByNumber.get(roomLayout.roomNumber);
+        const box = {
+          x: roomLayout.x + INSET,
+          y: roomLayout.y + INSET,
+          width: roomLayout.width - INSET * 2,
+          height: roomLayout.height - INSET * 2,
+        };
 
         // A layout entry with no database row means the seed and the layout have
         // drifted. Draw it as an outline rather than silently hiding the room.
@@ -127,17 +210,15 @@ export function FloorPlanSvg({
           return (
             <g key={roomLayout.roomNumber}>
               <rect
-                x={roomLayout.x}
-                y={roomLayout.y}
-                width={roomLayout.width}
-                height={roomLayout.height}
+                {...box}
+                rx={7}
                 className="fill-surface-sunken stroke-border-strong"
                 strokeWidth="1.5"
                 strokeDasharray="4 3"
               />
               <text
-                x={roomLayout.x + roomLayout.width / 2}
-                y={roomLayout.y + roomLayout.height / 2}
+                x={box.x + box.width / 2}
+                y={box.y + box.height / 2}
                 textAnchor="middle"
                 className="fill-ink-subtle text-[13px] font-semibold"
               >
@@ -157,7 +238,6 @@ export function FloorPlanSvg({
         const isSelected = selectedRoomNumber === roomLayout.roomNumber;
 
         const statusLabel = t(`combinedStatus.${style.labelKey}`);
-        const tenantLabel = room.tenant_name ?? t('room.noTenant');
         const ariaLabel = [
           t('room.title', { roomNumber: room.room_number }),
           statusLabel,
@@ -171,13 +251,14 @@ export function FloorPlanSvg({
 
         const centreX = roomLayout.x + roomLayout.width / 2;
         const isDimmed = dimmed.has(roomLayout.roomNumber);
+        const bottom = box.y + box.height;
 
         return (
           <g
             key={roomLayout.roomNumber}
             // A unit the segment filter excludes keeps its place on the plan but
             // stops being a control: not clickable, not focusable, and hidden
-            // from screen readers, which read the sidebar's count instead.
+            // from screen readers, which read the page's count instead.
             {...(isDimmed
               ? { 'aria-hidden': true }
               : {
@@ -204,31 +285,26 @@ export function FloorPlanSvg({
             )}
           >
             <rect
-              x={roomLayout.x}
-              y={roomLayout.y}
-              width={roomLayout.width}
-              height={roomLayout.height}
-              rx="3"
+              {...box}
+              rx={7}
               className={cn(
                 style.fill,
                 style.stroke,
                 'transition-[stroke-width,filter]',
                 // Hover thickens the edge and lifts the shadow. Not a translate:
                 // a CSS transform would replace the group's rotate() attribute.
-                // A selected room keeps its heavier 4px edge.
-                !isDimmed && 'group-hover:drop-shadow-md',
-                !isDimmed && !isSelected && 'group-hover:[stroke-width:3]',
+                // A selected room keeps its heavier edge and glow.
+                isSelected ? 'drop-shadow-lg' : !isDimmed && 'group-hover:drop-shadow-md',
+                !isDimmed && !isSelected && 'group-hover:[stroke-width:2.5]',
               )}
-              strokeWidth={isSelected ? 4 : 1.5}
+              strokeWidth={isSelected ? 3.5 : 1.2}
+              strokeDasharray={displayStatus === 'vacant' ? '5 3' : undefined}
             />
 
             {style.hatched ? (
               <rect
-                x={roomLayout.x}
-                y={roomLayout.y}
-                width={roomLayout.width}
-                height={roomLayout.height}
-                rx="3"
+                {...box}
+                rx={7}
                 fill="url(#hatch-maintenance)"
                 opacity="0.25"
                 pointerEvents="none"
@@ -236,20 +312,17 @@ export function FloorPlanSvg({
             ) : null}
 
             {/*
-              Keyboard focus ring, drawn here rather than left to CSS `outline`.
-              An outline on this <g> is drawn around the group's bounding box --
-              the room rect plus its selected 4px stroke plus every text child --
-              and outline-offset pushes it further out, so it lands outside the
-              room and over the neighbouring one. Inset inside the room instead,
-              so it hugs the geometry and never collides with an adjacent room.
-              globals.css suppresses the CSS outline for these groups.
+              Keyboard focus ring, drawn here rather than left to CSS `outline`,
+              which would wrap the group's whole bounding box and spill over the
+              neighbouring room. Inset so it hugs the card. globals.css
+              suppresses the CSS outline for these groups.
             */}
             <rect
-              x={roomLayout.x + 3}
-              y={roomLayout.y + 3}
-              width={roomLayout.width - 6}
-              height={roomLayout.height - 6}
-              rx="2"
+              x={box.x + 3}
+              y={box.y + 3}
+              width={box.width - 6}
+              height={box.height - 6}
+              rx={5}
               fill="none"
               strokeWidth="2"
               pointerEvents="none"
@@ -257,51 +330,56 @@ export function FloorPlanSvg({
             />
 
             <text
-              x={roomLayout.x + 10}
-              y={roomLayout.y + 26}
-              className={cn(style.text, 'text-[15px] font-bold')}
+              x={box.x + 8}
+              y={box.y + 22}
+              className={cn(style.text, 'text-[16px] font-semibold')}
             >
               {room.room_number}
             </text>
 
-            {/* Nested svg lets the Lucide icon sit inside the room rectangle. */}
+            {/* Outline icon in a light disc, coloured through currentColor. */}
+            <circle
+              cx={box.x + box.width - 16}
+              cy={box.y + 16}
+              r={10}
+              className="fill-surface"
+              opacity={0.85}
+            />
             <Icon
-              x={roomLayout.x + roomLayout.width - 28}
-              y={roomLayout.y + 10}
-              width={16}
-              height={16}
-              className={cn(style.text, 'stroke-current')}
+              x={box.x + box.width - 23}
+              y={box.y + 9}
+              width={14}
+              height={14}
+              strokeWidth={2.2}
+              className={style.ink}
               aria-hidden="true"
             />
 
-            <text
-              x={roomLayout.x + 10}
-              y={roomLayout.y + 46}
-              className={cn(style.text, 'text-[8px] font-medium')}
-            >
-              {truncate(statusLabel, 26)}
+            <text x={box.x + 8} y={box.y + 38} className={cn(style.text, 'text-[9px] font-medium')}>
+              {t(`combinedStatusShort.${style.labelKey}`)}
             </text>
 
-            <text x={roomLayout.x + 10} y={roomLayout.y + 68} className="fill-ink-muted text-[8px]">
-              {truncate(tenantLabel, 22)}
+            <text
+              x={box.x + 8}
+              y={bottom - (room.occupant_count || room.outstanding > 0 ? 22 : 9)}
+              className="fill-ink text-[9.5px] font-medium"
+            >
+              {/* SVG text cannot ellipsis; trim so a long name cannot escape the card. */}
+              {truncateVisible(room.tenant_name ?? t('room.noTenant'), 13)}
             </text>
 
             {room.occupant_count ? (
-              <text
-                x={roomLayout.x + 10}
-                y={roomLayout.y + 84}
-                className="fill-ink-subtle text-[8px]"
-              >
+              <text x={box.x + 8} y={bottom - 8} className="fill-ink-muted text-[8.5px]">
                 {t('room.occupantsValue', { count: room.occupant_count })}
               </text>
             ) : null}
 
             {room.outstanding > 0 ? (
               <text
-                x={roomLayout.x + roomLayout.width - 10}
-                y={roomLayout.y + roomLayout.height - 10}
+                x={box.x + box.width - 8}
+                y={bottom - 8}
                 textAnchor="end"
-                className={cn(style.text, 'text-[9px] font-semibold tabular-nums')}
+                className="fill-brand-red-deep text-[9.5px] font-semibold tabular-nums"
               >
                 {formatAmount(room.outstanding, locale)}
               </text>

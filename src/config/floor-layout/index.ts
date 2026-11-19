@@ -69,3 +69,31 @@ export function layoutRoomCount(): number {
 export function layoutRoomNumbers(): string[] {
   return FLOOR_LAYOUTS.flatMap((layout) => layout.rooms.map((room) => room.roomNumber));
 }
+
+/**
+ * A viewBox hugging everything drawn on a floor -- outline, decorations and
+ * rooms -- plus `padding` on each side, so the plan fills its frame instead of
+ * floating in the JSON's fixed canvas. Derived from the geometry, so a real
+ * plan dropped into the JSON fits itself with no component change. (Rotation
+ * is ignored; the padding absorbs the small overhang of a rotated room.)
+ */
+export function contentViewBox(layout: FloorLayout, padding = 14): string {
+  const xs: number[] = [];
+  const ys: number[] = [];
+
+  for (const [x, y] of layout.outline) {
+    xs.push(x);
+    ys.push(y);
+  }
+  for (const box of [...layout.decorations, ...layout.rooms]) {
+    xs.push(box.x, box.x + box.width);
+    ys.push(box.y, box.y + box.height);
+  }
+
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  const width = Math.max(...xs) - minX;
+  const height = Math.max(...ys) - minY;
+
+  return [minX - padding, minY - padding, width + padding * 2, height + padding * 2].join(' ');
+}

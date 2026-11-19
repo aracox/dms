@@ -133,6 +133,17 @@
     "reserved": "Reserved",
     "maintenance": "Maintenance"
   },
+  "combinedStatusShort": {
+    "vacant": "Vacant",
+    "occupied": "Occupied",
+    "occupiedPaid": "Paid",
+    "occupiedDue": "Due",
+    "occupiedOverdue": "Overdue",
+    "occupiedNoBill": "Not billed",
+    "occupiedNotice": "Moving out",
+    "reserved": "Reserved",
+    "maintenance": "Maintenance"
+  },
   "roomType": {
     "standard": "Standard",
     "air_conditioned": "Air conditioned",
@@ -283,7 +294,9 @@
     "entrance": "Entrance",
     "lift": "Lift",
     "noRooms": "No rooms on this floor",
-    "roomsOnFloor": "{count} rooms"
+    "roomsOnFloor": "{count} rooms",
+    "occupiedOf": "{occupied}/{total} occupied",
+    "housesOf": "Houses {occupied}/{total}"
   },
   "room": {
     "title": "Room {roomNumber}",

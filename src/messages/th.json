@@ -133,6 +133,17 @@
     "reserved": "จองแล้ว",
     "maintenance": "ปิดซ่อม"
   },
+  "combinedStatusShort": {
+    "vacant": "ห้องว่าง",
+    "occupied": "มีผู้เช่า",
+    "occupiedPaid": "ชำระแล้ว",
+    "occupiedDue": "รอชำระ",
+    "occupiedOverdue": "เกินกำหนด",
+    "occupiedNoBill": "ยังไม่ออกบิล",
+    "occupiedNotice": "แจ้งย้ายออก",
+    "reserved": "จองแล้ว",
+    "maintenance": "ปิดซ่อม"
+  },
   "roomType": {
     "standard": "ห้องธรรมดา",
     "air_conditioned": "ห้องแอร์",
@@ -283,7 +294,9 @@
     "entrance": "ทางเข้า",
     "lift": "ลิฟต์",
     "noRooms": "ไม่มีห้องในชั้นนี้",
-    "roomsOnFloor": "{count} ห้อง"
+    "roomsOnFloor": "{count} ห้อง",
+    "occupiedOf": "มีผู้เช่า {occupied}/{total}",
+    "housesOf": "บ้าน {occupied}/{total}"
   },
   "room": {
     "title": "ห้อง {roomNumber}",
