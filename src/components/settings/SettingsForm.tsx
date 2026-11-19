@@ -48,7 +48,7 @@ function SettingTile({
   const showSegmentLabels = visibleSegments.length > 1;
 
   return (
-    <div className="border-border rounded-md border p-3">
+    <div className="border-border bg-surface-muted rounded-md border p-3">
       <span className="text-ink text-body-sm mb-2 block font-medium">
         {label}
         <RequiredMark />

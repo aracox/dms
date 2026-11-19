@@ -69,7 +69,10 @@ export function OwnerNamesForm({
               }
 
               return (
-                <div key={segment} className="border-border space-y-3 rounded-md border p-3">
+                <div
+                  key={segment}
+                  className="border-border bg-surface-muted space-y-3 rounded-md border p-3"
+                >
                   <span className="text-ink-subtle font-display flex items-center gap-1.5 text-[11px] tracking-[1px] uppercase">
                     <span
                       className={cn('size-2.5 rounded-sm', SEGMENT_STYLES[segment].fill)}
