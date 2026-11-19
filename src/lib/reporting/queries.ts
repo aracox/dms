@@ -26,7 +26,7 @@ import type {
   MeterUsageRow,
   MoveOutNoticeRow,
   OutstandingRow,
-  PaymentCollectionRow,
+  PaymentReportRow,
   PropertySegment,
   RoomSummaryRow,
   TenantSummaryRow,
@@ -240,17 +240,26 @@ export async function getAccessCardReport(): Promise<AccessCardReportRow[]> {
   return data ?? [];
 }
 
-/** Payment totals grouped by month and method. */
-export async function getPaymentCollection(limit = 24): Promise<PaymentCollectionRow[]> {
+/** Payments made in one month (by payment date), newest first, cancelled ones left out. */
+export async function getPaymentsForMonth(month: IsoDate): Promise<PaymentReportRow[]> {
   const supabase = await createClient();
-  const data = await read('report_payment_collection', () =>
+  const data = await read('report_payments', () =>
     supabase
-      .from('report_payment_collection')
+      .from('report_payments')
       .select('*')
-      .order('month', { ascending: false })
-      .limit(limit),
+      .eq('payment_month', month)
+      .neq('status', 'cancelled'),
   );
   return data ?? [];
+}
+
+/** The month of the earliest payment, or null before the first one. */
+export async function getFirstPaymentMonth(): Promise<IsoDate | null> {
+  const supabase = await createClient();
+  const data = await read('report_payments', () =>
+    supabase.from('report_payments').select('*').order('payment_date').limit(1),
+  );
+  return data?.[0]?.payment_month ?? null;
 }
 
 /** Meter usage for one billing month, defaulting to the current one. */

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { buttonClasses } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { MonthRoomFilter } from '@/components/ui/MonthRoomFilter';
 import { StatTile } from '@/components/ui/StatTile';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
@@ -15,10 +16,27 @@ import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
 import { can } from '@/lib/permissions';
 import { filterRoomsByView, parseSegmentView, propertySegment } from '@/lib/reporting/segments';
-import { getRoomBoard } from '@/lib/rooms/queries';
+import {
+  getBillsForMonth,
+  getFirstBillMonth,
+  getRoomBoard,
+  type MonthBill,
+} from '@/lib/rooms/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
-import { formatBillingMonth } from '@/lib/utils/date';
-import type { InvoiceStatus } from '@/types/database';
+import {
+  billingMonthOf,
+  currentBillingMonth,
+  formatBillingMonth,
+  type IsoDate,
+} from '@/lib/utils/date';
+import {
+  firstParam,
+  isRoomForMonth,
+  monthRoomQuery,
+  parseMonthParams,
+  type SearchParam,
+} from '@/lib/utils/month-filter';
+import type { FinancialStatus, InvoiceStatus, RoomBoardRow } from '@/types/database';
 
 /** The bill-status chips over the room list; 'none' is a room with no live bill yet. */
 const STATUS_FILTERS = [
@@ -32,9 +50,37 @@ const STATUS_FILTERS = [
 ] as const;
 type StatusFilter = (typeof STATUS_FILTERS)[number];
 
-function parseStatusFilter(value: string | string[] | undefined): StatusFilter {
-  const candidate = Array.isArray(value) ? value[0] : value;
+function parseStatusFilter(value: SearchParam): StatusFilter {
+  const candidate = firstParam(value);
   return STATUS_FILTERS.includes(candidate as StatusFilter) ? (candidate as StatusFilter) : 'all';
+}
+
+/**
+ * Puts the month's bill in place of the room board's latest one. The money
+ * status follows v_room_board's rules, except that overdue comes from the bill
+ * itself (the daily sweep marks it) rather than from the grace-day arithmetic.
+ */
+function withMonthBill(room: RoomBoardRow, bill: MonthBill | undefined, month: IsoDate) {
+  const movedIn = room.start_date !== null && billingMonthOf(room.start_date) === month;
+  const financialStatus: FinancialStatus = !bill
+    ? movedIn
+      ? 'first_month'
+      : 'none'
+    : bill.status === 'paid'
+      ? 'paid'
+      : bill.status === 'overdue'
+        ? 'overdue'
+        : bill.status === 'draft'
+          ? 'none'
+          : 'payment_due';
+  return {
+    ...room,
+    invoice_id: bill?.invoice_id ?? null,
+    billing_month: bill?.billing_month ?? null,
+    invoice_status: bill?.status ?? null,
+    outstanding: bill?.outstanding ?? 0,
+    financial_status: financialStatus,
+  };
 }
 
 export default async function BillingPage({
@@ -42,7 +88,13 @@ export default async function BillingPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ segment?: string | string[]; status?: string | string[] }>;
+  searchParams: Promise<{
+    segment?: SearchParam;
+    status?: SearchParam;
+    year?: SearchParam;
+    month?: SearchParam;
+    room?: SearchParam;
+  }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -54,10 +106,26 @@ export default async function BillingPage({
   const status = parseStatusFilter(query.status);
   const profile = await getCurrentProfile();
   const canGenerate = can(profile?.role, 'invoices:write');
-  const rooms = filterRoomsByView(view, await getRoomBoard({ includeTest: false }));
-  // Every tile below derives from activeRooms, so they follow the filter too.
+  const currentMonth = currentBillingMonth();
+  const month = parseMonthParams(query.year, query.month, currentMonth) ?? currentMonth;
+  const [wholeRooms, monthBills, firstBillMonth] = await Promise.all([
+    getRoomBoard({ includeTest: false }),
+    getBillsForMonth(month),
+    getFirstBillMonth(),
+  ]);
+  const rooms = filterRoomsByView(view, wholeRooms);
+  // A room outside the current segment is ignored rather than showing an empty list.
+  const roomFilter = rooms.find((room) => room.room_number === firstParam(query.room))?.room_number;
+  const searchQuery = monthRoomQuery(month, currentMonth, roomFilter);
+  // Every tile below derives from activeRooms, so they follow the segment and
+  // month; the room search narrows the chips and the table only.
   // Listed in room-number order, as getRoomBoard returns them.
-  const activeRooms = rooms.filter((room) => room.contract_status === 'active');
+  const activeRooms = rooms
+    .filter((room) => isRoomForMonth(room, monthBills.has(room.room_id), month))
+    .map((room) => withMonthBill(room, monthBills.get(room.room_id), month));
+  const searchedRooms = roomFilter
+    ? activeRooms.filter((room) => room.room_number === roomFilter)
+    : activeRooms;
   // The room board never carries a cancelled bill (it skips them), so every
   // status here has a chip.
   const statusOf = (room: (typeof activeRooms)[number]): InvoiceStatus | 'none' =>
@@ -66,12 +134,12 @@ export default async function BillingPage({
     STATUS_FILTERS.map((option) => [
       option,
       option === 'all'
-        ? activeRooms.length
-        : activeRooms.filter((room) => statusOf(room) === option).length,
+        ? searchedRooms.length
+        : searchedRooms.filter((room) => statusOf(room) === option).length,
     ]),
   ) as Record<StatusFilter, number>;
   const listedRooms =
-    status === 'all' ? activeRooms : activeRooms.filter((room) => statusOf(room) === status);
+    status === 'all' ? searchedRooms : searchedRooms.filter((room) => statusOf(room) === status);
   const totalOutstanding = activeRooms.reduce((sum, room) => sum + room.outstanding, 0);
   const overdueRooms = activeRooms.filter((room) => room.financial_status === 'overdue').length;
   // A tenant who moved in this month is not behind yet -- their first bill is next month's.
@@ -88,7 +156,7 @@ export default async function BillingPage({
           <SegmentSwitcher
             current={view}
             pathname="/billing"
-            query={status === 'all' ? {} : { status }}
+            query={{ ...searchQuery, ...(status === 'all' ? {} : { status }) }}
           />
         }
       />
@@ -105,6 +173,17 @@ export default async function BillingPage({
       </div>
 
       <Card>
+        <MonthRoomFilter
+          label={t('billing.filterLabel')}
+          pathname="/billing"
+          month={month}
+          defaultMonth={currentMonth}
+          currentMonth={currentMonth}
+          firstMonth={firstBillMonth ?? currentMonth}
+          rooms={rooms}
+          room={roomFilter}
+          keep={view === 'all' ? {} : { segment: view }}
+        />
         {/* Status chips filter the table only; the tiles above stay whole-list totals. */}
         <div className="border-border flex flex-wrap items-center justify-between gap-3 border-b p-3">
           <div
@@ -121,6 +200,7 @@ export default async function BillingPage({
                   pathname: '/billing',
                   query: {
                     ...(view === 'all' ? {} : { segment: view }),
+                    ...searchQuery,
                     ...(option === 'all' ? {} : { status: option }),
                   },
                 }}
@@ -145,7 +225,9 @@ export default async function BillingPage({
               message={
                 activeRooms.length === 0
                   ? t('billing.noActiveContract')
-                  : t('billing.noRoomsWithStatus')
+                  : searchedRooms.length > 0
+                    ? t('billing.noRoomsWithStatus')
+                    : t('filters.noRoomsMatch', { month: formatBillingMonth(month, typedLocale) })
               }
             />
           </div>

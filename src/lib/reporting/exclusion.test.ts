@@ -235,6 +235,7 @@ describe('the SQL enforces exclusion, not just the TypeScript', () => {
     '../../../supabase/migrations/0039_business_overview_month_range.sql',
   );
   const expenseMonths = readRepoFile('../../../supabase/migrations/0040_report_expense_months.sql');
+  const payments = readRepoFile('../../../supabase/migrations/0043_report_payments.sql');
   const tables = readRepoFile('../../../supabase/migrations/0002_core_tables.sql');
   const triggers = readRepoFile('../../../supabase/migrations/0005_functions_and_triggers.sql');
 
@@ -272,6 +273,10 @@ describe('the SQL enforces exclusion, not just the TypeScript', () => {
     expect(expenseMonths).toContain('create view report_expense_months');
     const sql = expenseMonths.replace(/--.*$/gm, '');
     expect(sql.match(/is_test = false/g)).toHaveLength(3);
+  });
+
+  it('filters is_test in report_payments (0043)', () => {
+    assertReportViewsFilterTestData(payments, 1);
   });
 
   it('filters is_test in every per-segment report_ view', () => {

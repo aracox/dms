@@ -507,15 +507,7 @@
     "recordReading": "จดมิเตอร์",
     "correctPermissionRequired": "เฉพาะแอดมินเท่านั้นที่แก้ไขเดือนที่มีการจดมิเตอร์แล้วได้",
     "changeVsLastMonth": "เทียบหน่วยที่ใช้กับเดือนก่อน",
-    "filterLabel": "ค้นหาการจดมิเตอร์",
-    "filterMonth": "เดือน",
-    "filterYear": "ปี",
-    "previousMonth": "เดือนก่อนหน้า",
-    "nextMonth": "เดือนถัดไป",
-    "filterRoom": "ห้อง",
-    "allRooms": "ทุกห้อง",
-    "clearFilters": "ล้างการค้นหา",
-    "noRoomsMatch": "ไม่พบห้องที่ตรงกับการค้นหาใน{month}"
+    "filterLabel": "ค้นหาการจดมิเตอร์"
   },
   "billing": {
     "title": "ใบแจ้งหนี้",
@@ -558,7 +550,8 @@
     "bulkGenerateCreated": "สร้างใบแจ้งหนี้แล้ว {count} ใบ",
     "bulkGenerateNoneCreated": "ไม่มีใบแจ้งหนี้ใหม่ที่ต้องสร้าง",
     "bulkGenerateSkipped": "มีใบแจ้งหนี้อยู่แล้ว ({count})",
-    "bulkGenerateFailed": "ล้มเหลว ({count})"
+    "bulkGenerateFailed": "ล้มเหลว ({count})",
+    "filterLabel": "ค้นหาใบแจ้งหนี้"
   },
   "payments": {
     "title": "การชำระเงิน",
@@ -572,15 +565,21 @@
     "history": "ประวัติการชำระ",
     "partialPayment": "ชำระบางส่วน",
     "maxAllowed": "ชำระได้ไม่เกิน {amount}",
-    "collectionBuildingWide": "ยอดเก็บเงินตามช่องทางเป็นข้อมูลทั้งอาคาร ยังแยกตามกลุ่มทรัพย์สินไม่ได้",
     "confirm": "ยืนยัน",
     "reject": "ปฏิเสธ",
     "viewSlip": "ดูสลิป",
-    "recordPaymentHint": "บันทึกการชำระหรือแนบสลิปได้จากรายการยอดค้างด้านล่าง หรือจากแท็บ \"บิล\" ของแต่ละห้อง ส่วนใบเสร็จดาวน์โหลดได้จากประวัติการชำระของห้องนั้น",
     "confirmExceedsTotal": "ยอดที่ยืนยันจะเกินยอดใบแจ้งหนี้",
     "alreadyProcessed": "รายการนี้ถูกยืนยันหรือปฏิเสธไปแล้ว",
     "invoiceCancelled": "ใบแจ้งหนี้นี้ถูกยกเลิกแล้ว",
-    "invalidSlipFile": "ไฟล์สลิปต้องเป็น JPG, PNG, WEBP หรือ PDF ขนาดไม่เกิน 5 MB"
+    "invalidSlipFile": "ไฟล์สลิปต้องเป็น JPG, PNG, WEBP หรือ PDF ขนาดไม่เกิน 5 MB",
+    "filterLabel": "ค้นหาการชำระเงิน",
+    "received": "รับเงินแล้ว",
+    "paymentCount": "{count} รายการ",
+    "pendingNotCounted": "รอตรวจสอบ {count} รายการ (ยังไม่นับ)",
+    "historyFor": "การรับชำระ · {month}",
+    "billMonth": "บิลเดือน",
+    "noPayments": "ไม่มีการรับชำระใน{month}",
+    "outstandingAllMonths": "บิลที่ยังค้างชำระทุกเดือน บันทึกการชำระได้จากรายการนี้"
   },
   "maintenance": {
     "title": "งานซ่อมบำรุง",
@@ -625,7 +624,6 @@
     "subtitle": "ทุกรายงานไม่รวมข้อมูลทดสอบ",
     "occupancy": "รายงานการเข้าพัก",
     "monthlyBilling": "รายงานการออกบิลรายเดือน",
-    "collection": "รายงานการเก็บเงิน",
     "outstanding": "รายงานยอดค้างชำระ",
     "meterUsage": "รายงานการใช้น้ำ-ไฟ",
     "contractExpiry": "รายงานสัญญาหมดอายุ",
@@ -820,5 +818,16 @@
     "notFound": "ไม่พบข้อมูลที่ต้องการ",
     "roomNotFound": "ไม่พบห้องพักนี้",
     "permissionDenied": "คุณไม่มีสิทธิ์ทำรายการนี้"
+  },
+  "filters": {
+    "search": "ค้นหา",
+    "month": "เดือน",
+    "year": "ปี",
+    "room": "ห้อง",
+    "allRooms": "ทุกห้อง",
+    "previousMonth": "เดือนก่อนหน้า",
+    "nextMonth": "เดือนถัดไป",
+    "clear": "ล้างการค้นหา",
+    "noRoomsMatch": "ไม่พบห้องที่ตรงกับการค้นหาใน{month}"
   }
 }

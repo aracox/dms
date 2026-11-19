@@ -11,6 +11,7 @@ import 'server-only';
  * Never use this module for a dashboard or report figure. Use lib/reporting.
  */
 
+import { subtractMoney, sumMoney } from '@/lib/billing/money';
 import { propertySegment } from '@/lib/reporting/segments';
 import { createClient } from '@/lib/supabase/server';
 import { currentBillingMonth, type IsoDate } from '@/lib/utils/date';
@@ -20,6 +21,7 @@ import type {
   ContractRow,
   InvoiceItemRow,
   InvoiceRow,
+  InvoiceStatus,
   Json,
   MaintenanceTicketRow,
   MeterReadingRow,
@@ -84,6 +86,83 @@ export async function getRoomBoardByNumber(roomNumber: string): Promise<RoomBoar
     .eq('room_number', roomNumber)
     .maybeSingle();
   return data ?? null;
+}
+
+/** A room's bill for one billing month, with confirmed payments taken off. */
+export type MonthBill = {
+  invoice_id: string;
+  room_id: string;
+  billing_month: string;
+  status: InvoiceStatus;
+  outstanding: number;
+};
+
+/**
+ * Each room's bill for one billing month, keyed by room id. Cancelled bills are
+ * skipped; when a month holds a bill and its reissue, the newest wins -- the
+ * same pick v_room_board makes for the latest bill.
+ */
+export async function getBillsForMonth(
+  month: IsoDate,
+  options: { includeTest?: boolean } = {},
+): Promise<Map<string, MonthBill>> {
+  const supabase = await createClient();
+
+  let query = supabase
+    .from('invoices')
+    .select('*')
+    .eq('billing_month', month)
+    .neq('status', 'cancelled')
+    .order('created_at', { ascending: false });
+  if (!options.includeTest) query = query.eq('is_test', false);
+
+  const { data: invoices, error } = await query;
+  // A failed read must not show every room as "no invoice".
+  if (error) throw new Error(`invoices for ${month}: ${error.message}`, { cause: error });
+
+  const invoiceIds = (invoices ?? []).map((invoice) => invoice.id);
+  const { data: payments, error: paymentError } = invoiceIds.length
+    ? await supabase
+        .from('payments')
+        .select('*')
+        .in('invoice_id', invoiceIds)
+        .eq('status', 'confirmed')
+    : { data: [] as PaymentRow[], error: null };
+  if (paymentError) {
+    throw new Error(`payments for ${month}: ${paymentError.message}`, { cause: paymentError });
+  }
+
+  const paidByInvoice = new Map<string, number[]>();
+  for (const payment of payments ?? []) {
+    paidByInvoice.set(payment.invoice_id, [
+      ...(paidByInvoice.get(payment.invoice_id) ?? []),
+      payment.amount,
+    ]);
+  }
+
+  const bills = new Map<string, MonthBill>();
+  for (const invoice of invoices ?? []) {
+    if (bills.has(invoice.room_id)) continue; // newest first, so the first one wins
+    bills.set(invoice.room_id, {
+      invoice_id: invoice.id,
+      room_id: invoice.room_id,
+      billing_month: invoice.billing_month,
+      status: invoice.status,
+      outstanding: subtractMoney(invoice.total, sumMoney(paidByInvoice.get(invoice.id) ?? [])),
+    });
+  }
+  return bills;
+}
+
+/** The earliest billing month with a bill, or null before the first one. */
+export async function getFirstBillMonth(
+  options: { includeTest?: boolean } = {},
+): Promise<IsoDate | null> {
+  const supabase = await createClient();
+  let query = supabase.from('invoices').select('*').order('billing_month').limit(1);
+  if (!options.includeTest) query = query.eq('is_test', false);
+  const { data } = await query;
+  return data?.[0]?.billing_month ?? null;
 }
 
 export interface InvoiceWithItems extends InvoiceRow {

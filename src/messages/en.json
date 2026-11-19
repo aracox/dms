@@ -507,15 +507,7 @@
     "recordReading": "Record reading",
     "correctPermissionRequired": "Only an admin can edit a month that already has a reading.",
     "changeVsLastMonth": "Units used compared with the previous month",
-    "filterLabel": "Search meter readings",
-    "filterMonth": "Month",
-    "filterYear": "Year",
-    "previousMonth": "Previous month",
-    "nextMonth": "Next month",
-    "filterRoom": "Room",
-    "allRooms": "All rooms",
-    "clearFilters": "Clear",
-    "noRoomsMatch": "No room matches this search for {month}."
+    "filterLabel": "Search meter readings"
   },
   "billing": {
     "title": "Billing",
@@ -558,7 +550,8 @@
     "bulkGenerateCreated": "Created {count} invoices",
     "bulkGenerateNoneCreated": "No new invoices were created",
     "bulkGenerateSkipped": "Already invoiced ({count})",
-    "bulkGenerateFailed": "Failed ({count})"
+    "bulkGenerateFailed": "Failed ({count})",
+    "filterLabel": "Search bills"
   },
   "payments": {
     "title": "Payments",
@@ -572,15 +565,21 @@
     "history": "Payment history",
     "partialPayment": "Partial payment",
     "maxAllowed": "Maximum {amount}",
-    "collectionBuildingWide": "Collection by method is building-wide and is not split by property segment.",
     "confirm": "Confirm",
     "reject": "Reject",
     "viewSlip": "View slip",
-    "recordPaymentHint": "Record a payment or upload a slip from the outstanding list below or a room's billing tab. Receipts are downloadable from that room's payment history.",
     "confirmExceedsTotal": "Confirmed payments would exceed the invoice total.",
     "alreadyProcessed": "This payment has already been confirmed or rejected.",
     "invoiceCancelled": "This invoice has been cancelled.",
-    "invalidSlipFile": "The slip file must be a JPG, PNG, WEBP, or PDF under 5 MB."
+    "invalidSlipFile": "The slip file must be a JPG, PNG, WEBP, or PDF under 5 MB.",
+    "filterLabel": "Search payments",
+    "received": "Received",
+    "paymentCount": "{count} payments",
+    "pendingNotCounted": "{count} pending, not counted",
+    "historyFor": "Payments received · {month}",
+    "billMonth": "Bill month",
+    "noPayments": "No payments received in {month}.",
+    "outstandingAllMonths": "Unpaid bills from every month. Record a payment from here."
   },
   "maintenance": {
     "title": "Maintenance",
@@ -625,7 +624,6 @@
     "subtitle": "Every report excludes test data",
     "occupancy": "Room occupancy",
     "monthlyBilling": "Monthly billing",
-    "collection": "Payment collection",
     "outstanding": "Outstanding balance",
     "meterUsage": "Meter usage",
     "contractExpiry": "Contract expiration",
@@ -820,5 +818,16 @@
     "notFound": "Not found",
     "roomNotFound": "Room not found",
     "permissionDenied": "You do not have permission to do this"
+  },
+  "filters": {
+    "search": "Search",
+    "month": "Month",
+    "year": "Year",
+    "room": "Room",
+    "allRooms": "All rooms",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "clear": "Clear",
+    "noRoomsMatch": "No room matches this search for {month}."
   }
 }

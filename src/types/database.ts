@@ -544,6 +544,25 @@ export type PaymentCollectionRow = {
   total_amount: number;
 };
 
+/** report_payments: one real payment with its bill, room and paying tenant. */
+export type PaymentReportRow = {
+  payment_id: string;
+  payment_date: string;
+  /** First day of the payment_date's month. */
+  payment_month: string;
+  amount: number;
+  payment_method: PaymentMethod;
+  status: PaymentStatus;
+  reference: string | null;
+  invoice_id: string;
+  invoice_number: string;
+  billing_month: string;
+  room_id: string;
+  room_number: string;
+  property_segment: PropertySegment;
+  tenant_name: string | null;
+};
+
 export type MeterUsageRow = {
   billing_month: string;
   meter_type: MeterType;
@@ -812,6 +831,7 @@ export type Database = {
       report_move_out_notices: ViewDef<MoveOutNoticeRow>;
       report_outstanding: ViewDef<OutstandingRow>;
       report_payment_collection: ViewDef<PaymentCollectionRow>;
+      report_payments: ViewDef<PaymentReportRow>;
       report_meter_usage: ViewDef<MeterUsageRow>;
       report_maintenance: ViewDef<MaintenanceReportRow>;
       report_access_cards: ViewDef<AccessCardReportRow>;
