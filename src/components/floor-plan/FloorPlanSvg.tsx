@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import type { KeyboardEvent } from 'react';
 
 import { STATUS_ICONS } from '@/components/status/RoomStatusBadge';
 import { STATUS_STYLES, toDisplayStatus } from '@/components/status/status-styles';
@@ -12,6 +11,8 @@ import { propertySegment } from '@/lib/reporting/segments';
 import { cn } from '@/lib/utils/cn';
 import { truncateVisible } from '@/lib/utils/truncate';
 import type { RoomBoardRow } from '@/types/database';
+
+import { roomControlProps, useRoomLabel } from './room-control';
 
 /**
  * Each room is drawn inset from its layout box by this much on every side.
@@ -39,9 +40,14 @@ function DecorationShape({ decoration, label }: { decoration: Decoration; label:
 
   return (
     <g>
-      {/* No fill class on the stairs: a CSS fill would override the pattern. */}
+      {/* No fill class on the stairs: a CSS fill would override the pattern.
+          Treads run across the flight, so across the block's short side. */}
       {type === 'stairs' ? (
-        <rect {...box} rx={6} fill="url(#stairs-stripes)" />
+        <rect
+          {...box}
+          rx={6}
+          fill={horizontal ? 'url(#stairs-treads-v)' : 'url(#stairs-treads-h)'}
+        />
       ) : (
         <rect {...box} rx={6} className="fill-surface-sunken" />
       )}
@@ -90,6 +96,7 @@ export function FloorPlanSvg({
   locale: Locale;
 }) {
   const t = useTranslations();
+  const roomLabel = useRoomLabel(locale);
 
   const decorationLabel: Record<string, string> = {
     corridor: t('floorPlan.corridor'),
@@ -149,10 +156,14 @@ export function FloorPlanSvg({
             strokeWidth="2"
           />
         </pattern>
-        {/* Treads for the stairs. */}
-        <pattern id="stairs-stripes" width="7" height="7" patternUnits="userSpaceOnUse">
+        {/* Treads for the stairs: vertical lines for a wide flight, horizontal for a tall one. */}
+        <pattern id="stairs-treads-v" width="7" height="7" patternUnits="userSpaceOnUse">
           <rect width="7" height="7" className="fill-surface-sunken" />
           <line x1="0" y1="0" x2="0" y2="7" className="stroke-border" strokeWidth="2.5" />
+        </pattern>
+        <pattern id="stairs-treads-h" width="7" height="7" patternUnits="userSpaceOnUse">
+          <rect width="7" height="7" className="fill-surface-sunken" />
+          <line x1="0" y1="0" x2="7" y2="0" className="stroke-border" strokeWidth="2.5" />
         </pattern>
       </defs>
 
@@ -238,16 +249,6 @@ export function FloorPlanSvg({
         const isSelected = selectedRoomNumber === roomLayout.roomNumber;
 
         const statusLabel = t(`combinedStatus.${style.labelKey}`);
-        const ariaLabel = [
-          t('room.title', { roomNumber: room.room_number }),
-          statusLabel,
-          room.tenant_name ?? '',
-          room.outstanding > 0
-            ? `${t('billing.outstanding')} ${formatAmount(room.outstanding, locale)}`
-            : '',
-        ]
-          .filter(Boolean)
-          .join('. ');
 
         const centreX = roomLayout.x + roomLayout.width / 2;
         const isDimmed = dimmed.has(roomLayout.roomNumber);
@@ -256,24 +257,12 @@ export function FloorPlanSvg({
         return (
           <g
             key={roomLayout.roomNumber}
-            // A unit the segment filter excludes keeps its place on the plan but
-            // stops being a control: not clickable, not focusable, and hidden
-            // from screen readers, which read the page's count instead.
-            {...(isDimmed
-              ? { 'aria-hidden': true }
-              : {
-                  role: 'button',
-                  tabIndex: 0,
-                  'aria-label': ariaLabel,
-                  'aria-pressed': isSelected,
-                  onClick: () => onSelectRoom(roomLayout.roomNumber),
-                  onKeyDown: (event: KeyboardEvent<SVGGElement>) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      onSelectRoom(roomLayout.roomNumber);
-                    }
-                  },
-                })}
+            {...roomControlProps({
+              label: roomLabel(room, statusLabel),
+              selected: isSelected,
+              dimmed: isDimmed,
+              onSelect: () => onSelectRoom(roomLayout.roomNumber),
+            })}
             transform={
               roomLayout.rotation
                 ? `rotate(${roomLayout.rotation} ${centreX} ${roomLayout.y + roomLayout.height / 2})`

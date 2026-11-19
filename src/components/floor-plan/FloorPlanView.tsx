@@ -1,5 +1,6 @@
 'use client';
 
+import { Building2, Map as MapIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
@@ -18,7 +19,10 @@ import { propertySegment, type SegmentView } from '@/lib/reporting/segments';
 import { cn } from '@/lib/utils/cn';
 import type { RoomBoardRow } from '@/types/database';
 
+import { BuildingSvg } from './BuildingSvg';
 import { FloorPlanSvg } from './FloorPlanSvg';
+
+type ViewMode = 'plan' | 'building';
 
 /**
  * The interactive floor plan.
@@ -40,6 +44,7 @@ export function FloorPlanView({
   const t = useTranslations();
   const [floor, setFloor] = useState<FloorNumber>(initialFloor);
   const [selectedRoomNumber, setSelectedRoomNumber] = useState<string | null>(null);
+  const [mode, setMode] = useState<ViewMode>('plan');
 
   const roomsByNumber = useMemo(
     () => new Map(rooms.map((room) => [room.room_number, room])),
@@ -106,11 +111,16 @@ export function FloorPlanView({
   };
 
   /**
-   * How many units on this floor are in each status, worst first. Doubles as
-   * the legend: only statuses actually on the floor are listed.
+   * How many units are in each status, worst first -- on this floor, or across
+   * the whole building in the building view. Doubles as the legend: only
+   * statuses actually shown are listed.
    */
   const statusCounts = new Map<RoomDisplayStatus, number>();
-  for (const roomLayout of layout?.rooms ?? []) {
+  const countedRooms =
+    mode === 'building'
+      ? FLOOR_LAYOUTS.flatMap((candidate) => candidate.rooms)
+      : (layout?.rooms ?? []);
+  for (const roomLayout of countedRooms) {
     const room = roomsByNumber.get(roomLayout.roomNumber);
     if (!room || dimmed.has(room.room_number)) continue;
     const status = toDisplayStatus(
@@ -129,51 +139,87 @@ export function FloorPlanView({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-        <div role="tablist" aria-label={t('floorPlan.title')} className="flex flex-wrap gap-2">
-          {FLOOR_LAYOUTS.map((candidate) => {
-            const isActive = candidate.floor === activeFloor;
-            // Nothing of the selected segment on this floor, so there is nothing
-            // to switch to. Disabled rather than hidden: the building still has
-            // three floors, and the tabs should not move under you.
-            const isEmpty = !floorsWithUnits.includes(candidate.floor as FloorNumber);
-            const { dorm, house } = occupancyOf(candidate);
-            const summary = [
-              dorm.total > 0 && t('floorPlan.occupiedOf', dorm),
-              house.total > 0 && t('floorPlan.housesOf', house),
-            ]
-              .filter(Boolean)
-              .join(' · ');
-
-            return (
+        <div className="flex flex-wrap items-center gap-3">
+          <div
+            role="group"
+            aria-label={t('floorPlan.viewMode')}
+            className="bg-surface-sunken flex gap-0.5 rounded-lg p-0.5"
+          >
+            {(
+              [
+                ['plan', MapIcon, t('floorPlan.viewPlan')],
+                ['building', Building2, t('floorPlan.viewBuilding')],
+              ] as const
+            ).map(([value, Icon, label]) => (
               <button
-                key={candidate.floor}
+                key={value}
                 type="button"
-                role="tab"
-                aria-selected={isActive}
-                disabled={isEmpty}
-                title={isEmpty ? t('floorPlan.noUnitsOnFloor') : undefined}
-                onClick={() => setFloor(candidate.floor as FloorNumber)}
+                aria-pressed={mode === value}
+                onClick={() => setMode(value)}
                 className={cn(
-                  'flex min-h-12 flex-col items-start justify-center rounded-lg border px-4 py-1.5 text-left transition-colors',
-                  'disabled:cursor-not-allowed disabled:opacity-35',
-                  isActive
-                    ? 'border-brand-blue bg-brand-blue text-white'
-                    : 'bg-surface border-border text-ink enabled:hover:bg-surface-sunken',
+                  'text-caption flex h-11 items-center gap-1.5 rounded-md px-3 font-medium transition-colors',
+                  mode === value
+                    ? 'bg-surface text-ink shadow-sm'
+                    : 'text-ink-muted hover:text-ink',
                 )}
               >
-                <span className="font-display text-body-sm font-semibold">
-                  {t('floorPlan.floor', { floor: candidate.floor })}
-                </span>
-                {summary ? (
-                  <span
-                    className={cn('text-[11px]', isActive ? 'text-white/80' : 'text-ink-subtle')}
-                  >
-                    {summary}
-                  </span>
-                ) : null}
+                <Icon size={15} aria-hidden="true" />
+                {label}
               </button>
-            );
-          })}
+            ))}
+          </div>
+
+          {mode === 'plan' ? (
+            <div role="tablist" aria-label={t('floorPlan.title')} className="flex flex-wrap gap-2">
+              {FLOOR_LAYOUTS.map((candidate) => {
+                const isActive = candidate.floor === activeFloor;
+                // Nothing of the selected segment on this floor, so there is nothing
+                // to switch to. Disabled rather than hidden: the building still has
+                // three floors, and the tabs should not move under you.
+                const isEmpty = !floorsWithUnits.includes(candidate.floor as FloorNumber);
+                const { dorm, house } = occupancyOf(candidate);
+                const summary = [
+                  dorm.total > 0 && t('floorPlan.occupiedOf', dorm),
+                  house.total > 0 && t('floorPlan.housesOf', house),
+                ]
+                  .filter(Boolean)
+                  .join(' · ');
+
+                return (
+                  <button
+                    key={candidate.floor}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    disabled={isEmpty}
+                    title={isEmpty ? t('floorPlan.noUnitsOnFloor') : undefined}
+                    onClick={() => setFloor(candidate.floor as FloorNumber)}
+                    className={cn(
+                      'flex min-h-12 flex-col items-start justify-center rounded-lg border px-4 py-1.5 text-left transition-colors',
+                      'disabled:cursor-not-allowed disabled:opacity-35',
+                      isActive
+                        ? 'border-brand-blue bg-brand-blue text-white'
+                        : 'bg-surface border-border text-ink enabled:hover:bg-surface-sunken',
+                    )}
+                  >
+                    <span className="font-display text-body-sm font-semibold">
+                      {t('floorPlan.floor', { floor: candidate.floor })}
+                    </span>
+                    {summary ? (
+                      <span
+                        className={cn(
+                          'text-[11px]',
+                          isActive ? 'text-white/80' : 'text-ink-subtle',
+                        )}
+                      >
+                        {summary}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
 
         <ul aria-label={t('floorPlan.legend')} className="flex flex-wrap gap-1.5">
@@ -199,7 +245,15 @@ export function FloorPlanView({
 
       <div className="bg-surface border-border flex min-h-0 flex-1 flex-col rounded-xl border p-4 shadow-md">
         <div className="flex min-h-0 flex-1 items-center justify-center">
-          {layout ? (
+          {mode === 'building' ? (
+            <BuildingSvg
+              roomsByNumber={roomsByNumber}
+              dimmed={dimmed}
+              selectedRoomNumber={selectedRoomNumber}
+              onSelectRoom={setSelectedRoomNumber}
+              locale={locale}
+            />
+          ) : layout ? (
             <FloorPlanSvg
               layout={layout}
               roomsByNumber={roomsByNumber}
@@ -216,7 +270,7 @@ export function FloorPlanView({
         </div>
         {/* Says what the dimming means, and makes the count legible to a
             screen reader, which the faded units are hidden from. */}
-        {view === 'all' ? null : (
+        {view === 'all' || mode === 'building' ? null : (
           <p className="text-ink-muted text-caption mt-3 text-center" aria-live="polite">
             {t('floorPlan.segmentShown', {
               segment: t(`segment.${view}`),

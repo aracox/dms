@@ -296,7 +296,10 @@
     "noRooms": "ไม่มีห้องในชั้นนี้",
     "roomsOnFloor": "{count} ห้อง",
     "occupiedOf": "มีผู้เช่า {occupied}/{total}",
-    "housesOf": "บ้าน {occupied}/{total}"
+    "housesOf": "บ้าน {occupied}/{total}",
+    "viewMode": "มุมมอง",
+    "viewPlan": "ผังชั้น",
+    "viewBuilding": "อาคาร"
   },
   "room": {
     "title": "ห้อง {roomNumber}",

@@ -296,7 +296,10 @@
     "noRooms": "No rooms on this floor",
     "roomsOnFloor": "{count} rooms",
     "occupiedOf": "{occupied}/{total} occupied",
-    "housesOf": "Houses {occupied}/{total}"
+    "housesOf": "Houses {occupied}/{total}",
+    "viewMode": "View",
+    "viewPlan": "Floor plan",
+    "viewBuilding": "Building"
   },
   "room": {
     "title": "Room {roomNumber}",

@@ -2,16 +2,16 @@
   "floor": 2,
   "provisional": true,
   "note": "Topology confirmed by the owner -- see floor-1.json. Mirrors floor 1's single-row arrangement (201 through 207, stairs past 207); no ground-floor entrance here. Exact wall measurements were not supplied, so sizes are still placeholder.",
-  "viewBox": "0 0 700 280",
+  "viewBox": "0 0 780 280",
   "outline": [
     [50, 30],
-    [650, 30],
-    [650, 260],
+    [730, 30],
+    [730, 260],
     [50, 260]
   ],
   "decorations": [
-    { "type": "corridor", "x": 50, "y": 180, "width": 600, "height": 70 },
-    { "type": "stairs", "x": 560, "y": 180, "width": 85, "height": 70 }
+    { "type": "corridor", "x": 50, "y": 180, "width": 595, "height": 70 },
+    { "type": "stairs", "x": 645, "y": 50, "width": 85, "height": 200 }
   ],
   "rooms": [
     { "roomNumber": "201", "x": 50, "y": 50, "width": 85, "height": 130 },

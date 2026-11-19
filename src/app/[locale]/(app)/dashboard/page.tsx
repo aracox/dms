@@ -330,7 +330,7 @@ export default async function DashboardPage({
 
         <section
           aria-labelledby="collection-heading"
-          className="bg-brand-blue flex flex-col gap-4 rounded-xl p-5 text-white shadow-lg"
+          className="glass-surface flex flex-col gap-4 rounded-xl p-5 text-white shadow-lg [--glass-fill:var(--color-brand-blue)]"
         >
           <h2
             id="collection-heading"

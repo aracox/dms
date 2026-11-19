@@ -13,14 +13,20 @@ const TONE_ACCENT: Record<StatTone, string> = {
   brown: 'text-brand-brown-deep',
 };
 
-/** Soft fill + edge for `tinted` tiles. Neutral stays on the plain surface. */
+/**
+ * Soft fill + edge for `tinted` tiles. Neutral stays on the plain surface.
+ *
+ * Every tone is a `glass-surface` with its colour as the glass fill: that
+ * follows the transparency setting, and it keeps the background-image
+ * backplates (globals.css), which skip glass surfaces, off the tile's labels.
+ */
 const TONE_SURFACE: Record<StatTone, string> = {
   neutral: 'glass-surface border-border',
-  blue: 'bg-brand-blue-soft border-brand-blue/15',
-  green: 'bg-brand-green-soft border-brand-green/20',
-  yellow: 'bg-brand-yellow-soft border-brand-yellow/35',
-  red: 'bg-brand-red-soft border-brand-red/25',
-  brown: 'bg-brand-brown-soft border-brand-brown/20',
+  blue: 'glass-surface [--glass-fill:var(--color-brand-blue-soft)] border-brand-blue/15',
+  green: 'glass-surface [--glass-fill:var(--color-brand-green-soft)] border-brand-green/20',
+  yellow: 'glass-surface [--glass-fill:var(--color-brand-yellow-soft)] border-brand-yellow/35',
+  red: 'glass-surface [--glass-fill:var(--color-brand-red-soft)] border-brand-red/25',
+  brown: 'glass-surface [--glass-fill:var(--color-brand-brown-soft)] border-brand-brown/20',
 };
 
 /**
