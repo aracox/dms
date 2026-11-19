@@ -44,10 +44,22 @@ import type { FinanceSummaryRow } from '@/types/database';
 type AttentionTone = 'red' | 'yellow' | 'neutral';
 
 /** Row fill, edge and icon ink per tone. The row's text always states the issue. */
-const ATTENTION_TONE: Record<AttentionTone, { row: string; icon: string }> = {
-  red: { row: 'bg-brand-red-soft border-brand-red/25', icon: 'text-brand-red-deep' },
-  yellow: { row: 'bg-brand-yellow-soft border-brand-yellow/35', icon: 'text-brand-yellow-deep' },
-  neutral: { row: 'bg-surface-muted border-border', icon: 'text-ink-muted' },
+const ATTENTION_TONE: Record<AttentionTone, { row: string; hover: string; icon: string }> = {
+  red: {
+    row: 'bg-brand-red-soft border-brand-red/25',
+    hover: 'hover:border-brand-red/60',
+    icon: 'text-brand-red-deep',
+  },
+  yellow: {
+    row: 'bg-brand-yellow-soft border-brand-yellow/35',
+    hover: 'hover:border-brand-yellow/80',
+    icon: 'text-brand-yellow-deep',
+  },
+  neutral: {
+    row: 'bg-surface-muted border-border',
+    hover: 'hover:border-border-strong',
+    icon: 'text-ink-muted',
+  },
 };
 
 interface AttentionItem {
@@ -58,6 +70,9 @@ interface AttentionItem {
   title: ReactNode;
   meta: ReactNode;
   amount?: string;
+  /** Where clicking the row itself goes: the room, when the item has one. */
+  detailHref: string;
+  /** The next step, shown as the row's button. */
   href: string;
   action: string;
 }
@@ -145,6 +160,7 @@ export default async function DashboardPage({
         </>
       ),
       amount: money(invoice.outstanding),
+      detailHref: `/rooms/${invoice.room_id}`,
       href: '/payments',
       action: t('payments.recordPayment'),
     })),
@@ -165,6 +181,7 @@ export default async function DashboardPage({
           </Badge>
         </>
       ),
+      detailHref: ticket.room_id ? `/rooms/${ticket.room_id}` : '/maintenance',
       href: '/maintenance',
       action: t('common.viewDetails'),
     })),
@@ -186,6 +203,7 @@ export default async function DashboardPage({
           </Badge>
         </>
       ),
+      detailHref: `/rooms/${contract.room_id}`,
       href: `/rooms/${contract.room_id}`,
       action: t('common.viewDetails'),
     })),
@@ -205,6 +223,7 @@ export default async function DashboardPage({
           </Badge>
         </>
       ),
+      detailHref: `/rooms/${notice.room_id}`,
       href: `/rooms/${notice.room_id}`,
       action: t('common.viewDetails'),
     })),
@@ -215,6 +234,7 @@ export default async function DashboardPage({
       room: card.card_number,
       title: t('dashboard.lostCards'),
       meta: `${t('cards.replacementFee')} ${money(card.replacement_fee)}`,
+      detailHref: `/rooms/${card.room_id}`,
       href: '/access-cards',
       action: t('common.viewDetails'),
     })),
@@ -471,13 +491,27 @@ export default async function DashboardPage({
   );
 }
 
-/** One pending item: what and where on the left, the next step on the right. */
+/**
+ * One pending item: what and where on the left, the next step on the right.
+ *
+ * The whole row is clickable through a stretched link on the title (its
+ * `::after` covers the row), so there is no nested <a>; the action button sits
+ * above that overlay and keeps its own destination.
+ */
 function AttentionRow({ item }: { item: AttentionItem }) {
   const tone = ATTENTION_TONE[item.tone];
   const Icon = item.icon;
 
   return (
-    <li className={cn('flex flex-wrap items-center gap-3 rounded-lg border px-3.5 py-3', tone.row)}>
+    <li
+      className={cn(
+        'relative flex flex-wrap items-center gap-3 rounded-lg border px-3.5 py-3',
+        'transition hover:-translate-y-px hover:shadow-md motion-reduce:transform-none',
+        'has-[a:focus-visible]:shadow-glow',
+        tone.row,
+        tone.hover,
+      )}
+    >
       <span
         className={cn(
           'bg-surface flex size-9 shrink-0 items-center justify-center rounded-md',
@@ -488,8 +522,13 @@ function AttentionRow({ item }: { item: AttentionItem }) {
       </span>
       <div className="min-w-0 flex-[1_1_14rem]">
         <p className="text-body-sm text-ink truncate">
-          <span className="font-display mr-2 font-semibold">{item.room}</span>
-          <span className="font-medium">{item.title}</span>
+          <Link
+            href={item.detailHref}
+            className="after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none"
+          >
+            <span className="font-display mr-2 font-semibold">{item.room}</span>
+            <span className="font-medium">{item.title}</span>
+          </Link>
         </p>
         <p className="text-caption text-ink-muted mt-0.5">{item.meta}</p>
       </div>
@@ -498,7 +537,7 @@ function AttentionRow({ item }: { item: AttentionItem }) {
           {item.amount}
         </span>
       ) : null}
-      <Link href={item.href} className={buttonClasses('secondary', 'sm')}>
+      <Link href={item.href} className={buttonClasses('secondary', 'sm', 'relative z-10')}>
         {item.action}
       </Link>
     </li>

@@ -209,7 +209,16 @@ export function FloorPlanSvg({
               width={roomLayout.width}
               height={roomLayout.height}
               rx="3"
-              className={cn(style.fill, style.stroke, 'transition-[stroke-width]')}
+              className={cn(
+                style.fill,
+                style.stroke,
+                'transition-[stroke-width,filter]',
+                // Hover thickens the edge and lifts the shadow. Not a translate:
+                // a CSS transform would replace the group's rotate() attribute.
+                // A selected room keeps its heavier 4px edge.
+                !isDimmed && 'group-hover:drop-shadow-md',
+                !isDimmed && !isSelected && 'group-hover:[stroke-width:3]',
+              )}
               strokeWidth={isSelected ? 4 : 1.5}
             />
 

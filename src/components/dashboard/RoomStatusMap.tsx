@@ -66,7 +66,8 @@ export function RoomStatusMap({
                     <Link
                       href={`/rooms/${room.room_id}`}
                       className={cn(
-                        'flex min-w-0 flex-col rounded-md border px-2.5 py-1.5 transition-shadow hover:shadow-md',
+                        'flex min-w-0 flex-col rounded-md border px-2.5 py-1.5',
+                        'transition hover:-translate-y-0.5 hover:border-current hover:shadow-md motion-reduce:transform-none',
                         style.badge,
                         style.hatched &&
                           'bg-[repeating-linear-gradient(135deg,transparent_0_6px,rgb(0_0_0/0.05)_6px_8px)]',
