@@ -1,44 +1,48 @@
 @import 'tailwindcss';
 
-/* Compact workspace: neutral surfaces, clear ink, restrained teal accents. */
+/*
+ * Vintage palette from the owner's reference: deep teal-navy #244855,
+ * vermilion #E64833, brown #874F41, sage #90AEAD, cream #FBE9D0. Warning and
+ * paid hues are derived to sit in the same family.
+ */
 @theme {
-  --color-brand-blue: #006b7c;
-  --color-brand-blue-soft: #e1f4f7;
-  --color-brand-blue-deep: #005765;
-  --color-brand-yellow: #fed766;
-  --color-brand-yellow-soft: #fff2c4;
-  --color-brand-yellow-deep: #795100;
-  --color-brand-green: #006b62;
-  --color-brand-green-soft: #e8f6ef;
-  --color-brand-green-deep: #006054;
-  --color-brand-red: #b72a32;
-  --color-brand-red-soft: #fff0f0;
-  --color-brand-red-deep: #a3202a;
-  --color-brand-brown: #5964a0;
-  --color-brand-brown-soft: #eef0fb;
-  --color-brand-brown-deep: #414d87;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f7f8fa;
-  --color-surface-sunken: #eef1f4;
-  --color-border: #e2e6ec;
-  --color-border-strong: #b4becb;
-  --color-ink: #0b132b;
-  --color-ink-muted: #535b70;
-  --color-ink-subtle: #657087;
-  --color-brand-coral: #fe4a49;
-  --color-brand-teal: #009fb7;
-  --color-brand-teal-hover: #20afc1;
+  --color-brand-blue: #244855;
+  --color-brand-blue-soft: #e3ecec;
+  --color-brand-blue-deep: #1b3842;
+  --color-brand-yellow: #e0a43c;
+  --color-brand-yellow-soft: #fbeed4;
+  --color-brand-yellow-deep: #7a5212;
+  --color-brand-green: #4f7a77;
+  --color-brand-green-soft: #e4eeed;
+  --color-brand-green-deep: #355e5b;
+  --color-brand-red: #e64833;
+  --color-brand-red-soft: #fce7e2;
+  --color-brand-red-deep: #b3301d;
+  --color-brand-brown: #874f41;
+  --color-brand-brown-soft: #f3e5df;
+  --color-brand-brown-deep: #6b3b2f;
+  --color-surface: #fffcf7;
+  --color-surface-muted: #faf0e2;
+  --color-surface-sunken: #f2e4d0;
+  --color-border: #ead9c3;
+  --color-border-strong: #c6ad8f;
+  --color-ink: #1d2f36;
+  --color-ink-muted: #4a575c;
+  --color-ink-subtle: #5c686e;
+  --color-brand-coral: #e64833;
+  --color-brand-teal: #90aead;
+  --color-brand-teal-hover: #a3bdbc;
 
   /* Retain distinct series and category colors for report charts. */
-  --color-chart-recurring: #006b7c;
-  --color-chart-adhoc: #bf7200;
-  --color-chart-cat-1: #006b7c;
-  --color-chart-cat-2: #5278c5;
-  --color-chart-cat-3: #bf7200;
-  --color-chart-cat-4: #27865a;
-  --color-chart-cat-5: #c34c57;
-  --color-chart-cat-6: #895ab2;
-  --color-chart-cat-7: #85720b;
+  --color-chart-recurring: #244855;
+  --color-chart-adhoc: #e64833;
+  --color-chart-cat-1: #244855;
+  --color-chart-cat-2: #90aead;
+  --color-chart-cat-3: #e64833;
+  --color-chart-cat-4: #874f41;
+  --color-chart-cat-5: #d49a3a;
+  --color-chart-cat-6: #5f8786;
+  --color-chart-cat-7: #b0847a;
 
   --font-display: var(--font-prompt), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-prompt), ui-sans-serif, system-ui, sans-serif;
@@ -75,31 +79,31 @@
   --radius-md: 6px;
   --radius-lg: 8px;
   --radius-xl: 12px;
-  --shadow-sm: 0 2px 6px rgb(11 19 43 / 0.04);
-  --shadow-md: 0 3px 12px rgb(11 19 43 / 0.06);
-  --shadow-lg: 0 12px 40px rgb(11 19 43 / 0.09);
-  --shadow-xl: 0 20px 64px rgb(11 19 43 / 0.09), 0 3px 12px rgb(11 19 43 / 0.06);
-  --shadow-glow: 0 0 0 3px rgb(0 107 124 / 0.15);
+  --shadow-sm: 0 2px 6px rgb(29 47 54 / 0.05);
+  --shadow-md: 0 3px 12px rgb(29 47 54 / 0.07);
+  --shadow-lg: 0 12px 40px rgb(29 47 54 / 0.1);
+  --shadow-xl: 0 20px 64px rgb(29 47 54 / 0.1), 0 3px 12px rgb(29 47 54 / 0.07);
+  --shadow-glow: 0 0 0 3px rgb(36 72 85 / 0.18);
   --blur-glass: 24px;
 
-  --color-status-vacant: #f4f4f8;
-  --color-status-vacant-ink: #535b70;
-  --color-status-vacant-edge: #b4bac9;
-  --color-status-paid: #e8f6ef;
-  --color-status-paid-ink: #006054;
-  --color-status-paid-edge: #5caa90;
-  --color-status-due: #fff2c4;
-  --color-status-due-ink: #795100;
-  --color-status-due-edge: #c49b34;
-  --color-status-overdue: #fff0f0;
-  --color-status-overdue-ink: #a3202a;
-  --color-status-overdue-edge: #d56c75;
-  --color-status-occupied: #eef0fb;
-  --color-status-occupied-ink: #414d87;
-  --color-status-occupied-edge: #8992c0;
-  --color-status-maintenance: #e9edf3;
-  --color-status-maintenance-ink: #46536c;
-  --color-status-maintenance-edge: #8794aa;
+  --color-status-vacant: #f6efe5;
+  --color-status-vacant-ink: #4a575c;
+  --color-status-vacant-edge: #bcae9a;
+  --color-status-paid: #e4eeed;
+  --color-status-paid-ink: #355e5b;
+  --color-status-paid-edge: #7fa3a0;
+  --color-status-due: #fbeed4;
+  --color-status-due-ink: #7a5212;
+  --color-status-due-edge: #d3a24a;
+  --color-status-overdue: #fce7e2;
+  --color-status-overdue-ink: #b3301d;
+  --color-status-overdue-edge: #ec8a7a;
+  --color-status-occupied: #f3e5df;
+  --color-status-occupied-ink: #6b3b2f;
+  --color-status-occupied-edge: #b98a7c;
+  --color-status-maintenance: #e8eded;
+  --color-status-maintenance-ink: #3f5458;
+  --color-status-maintenance-edge: #8fa3a5;
 }
 
 :root {
@@ -125,7 +129,7 @@
 
 @utility glass-scrim {
   &::backdrop {
-    background-color: rgb(11 19 43 / 0.3);
+    background-color: rgb(29 47 54 / 0.3);
     backdrop-filter: blur(5px);
   }
 }
@@ -265,7 +269,7 @@ html[data-background-image='visible'] .text-backdrop {
 @media (min-width: 1024px) {
   .app-frame {
     display: grid;
-    grid-template-columns: 208px minmax(0, 1fr);
+    grid-template-columns: 196px minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     min-height: 100dvh;
     width: 100%;
@@ -290,7 +294,7 @@ html[data-background-image='visible'] .text-backdrop {
     align-self: start;
     max-height: 100dvh;
     overflow-y: auto;
-    background: #172033;
+    background: var(--color-surface);
     min-height: 100dvh;
   }
   .app-sidebar .sidebar-navigation > div:not(:last-child) {
@@ -300,31 +304,31 @@ html[data-background-image='visible'] .text-backdrop {
     padding-top: 0.5rem;
   }
   .app-sidebar .sidebar-navigation h2 {
-    color: #94a3b8;
+    color: var(--color-ink-subtle);
     padding-bottom: 0.25rem;
     font-weight: 500;
     letter-spacing: 0;
     text-transform: none;
   }
   .app-sidebar .sidebar-navigation > div {
-    border-color: rgb(255 255 255 / 0.12);
+    border-color: var(--color-border);
   }
   .app-sidebar .sidebar-navigation a {
-    color: #c7cfe0;
+    color: var(--color-ink-muted);
     min-height: 32px;
     padding-block: 5px;
   }
   .app-sidebar .sidebar-navigation a:hover {
-    background: rgb(255 255 255 / 0.08);
-    color: white;
+    background: var(--color-surface-sunken);
+    color: var(--color-ink);
   }
   .app-sidebar .sidebar-navigation a[aria-current='page'] {
-    background: #263c4d;
-    color: #83e0e5;
+    background: var(--color-brand-blue-soft);
+    color: var(--color-brand-blue-deep);
     box-shadow: none;
   }
   .app-sidebar :focus-visible {
-    outline-color: #58d5e5;
+    outline-color: var(--color-brand-blue);
   }
   .app-workspace {
     grid-column: 2;

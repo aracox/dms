@@ -275,26 +275,18 @@ tokens in `src/app/globals.css`.
 Two deliberate deviations from that document, both load-bearing:
 
 1. **Palette.** The doc specifies gold / deep red / royal purple on dark brown. The app uses the
-   owner's earth-tone reference instead (olive, sage, mustard, browns — see Brand colors). Do not
-   introduce the doc's hex values.
-2. **Fonts.** The doc specifies Cinzel + Spectral. The app uses **Kanit** for headings and body,
-   and **Google Sans Code** for `--font-mono`, both via `next/font/google`. Kanit (owner's choice,
-   replacing Google Sans) ships the `thai` subset — Thai is the default locale — so one typeface
-   sets both scripts instead of Latin and Thai landing in different faces.
+   owner's vintage reference instead (teal-navy, vermilion, brown, sage, cream — see Brand
+   colors). Do not introduce the doc's hex values.
+2. **Fonts.** The doc specifies Cinzel + Spectral. The app uses **Prompt** for headings and body,
+   self-hosted from `assets/fonts/` via `next/font/local` (`--font-prompt`), and **Google Sans
+   Code** for `--font-mono` via `next/font/google`. Prompt carries both Thai and Latin glyphs, so
+   one typeface sets both scripts.
 
-   Three things about it are load-bearing:
-
-   - **Kanit's `weight` array must list every weight in use (400, 500, 600, 700).** It is not a
-     variable font — each weight is a separate file — so a weight missing from the array gets
-     faux-bolded or snapped to a neighbour. Add it there before using a new weight anywhere.
-   - **Every stack still lists `--font-noto-sans-thai` second**, and Noto is loaded with
-     `preload: false`. Kanit covers Thai, so Noto is insurance against a load failure rather
-     than the face doing the work. Never drop it from a stack, and do not preload it.
-   - **Generic fallbacks are sans-serif**, not the serif tail the Cinzel/Spectral stacks used.
-
-   Fonts must be referenced through the `next/font` CSS variable, never by family name — naming
-   `'Kanit'` as a string silently bypasses the self-hosted, subsetted font and only works on
-   machines that happen to have it installed locally.
+   - **Prompt is loaded as separate files per weight (400, 500, 600).** A weight with no file
+     gets faux-bolded or snapped to a neighbour — add the file to `src/app/[locale]/layout.tsx`
+     before using a new weight anywhere.
+   - Fonts must be referenced through the CSS variable, never by family name — naming `'Prompt'`
+     as a string bypasses the self-hosted font and only works where it happens to be installed.
 
    The PDFs (contract, receipt) embed their own font, Sarabun, via `lib/pdf/registerFonts.ts` —
    changing the web font does not change them.
@@ -303,10 +295,13 @@ Use the tokens, not ad-hoc values:
 
 - Type: `text-display`, `text-h1`–`text-h4`, `text-body-lg`, `text-body`, `text-body-sm`,
   `text-caption`, `text-code`. Headings and UI labels also take `font-display`.
-- Radius: `rounded-sm` (2px, chips) · `rounded-md` (4px, controls and cards) · `rounded-lg` (6px,
-  overlays) · `rounded-xl` (8px, panels).
+- Radius: `rounded-sm` (4px, chips) · `rounded-md` (6px, controls) · `rounded-lg` (8px, cards and
+  overlays) · `rounded-xl` (12px, panels).
 - Elevation: `shadow-sm` → `shadow-xl`, plus `shadow-glow` reserved for active/selected.
 - Spacing: the 8px base unit maps onto Tailwind's default scale (`2` = 8px, `4` = 16px, `6` = 24px).
+- The type tokens are registered as font sizes in `lib/utils/cn.ts`. If you add one to `@theme`,
+  add it there too — otherwise tailwind-merge reads it as a text colour and silently drops the real
+  colour class beside it (this once left every primary button with dark text on navy).
 
 Controls come from the shared primitives — do not hand-roll a button or an input:
 
@@ -322,18 +317,20 @@ Status colors are defined once as CSS variables in `src/app/globals.css`, which 
 source of truth for palette values. Use the semantic tokens, never raw hex, so a re-theme stays a
 change to that one file.
 
-The palette follows the owner's "Mona Lisa" reference (#727F4B olive, #A9A569 sage, #E9C468
-mustard, #92692E brown, #764B1C dark brown, #352524 near-black). **Token names are roles, not
-hues** — they predate this palette, so `brand-blue` is olive. Do not rename them to match.
+The palette follows the owner's vintage reference (#244855 teal-navy, #E64833 vermilion, #874F41
+brown, #90AEAD sage, #FBE9D0 cream). Surfaces are warm cream rather than white. **Token names are
+roles, not hues** — they predate this palette, so `brand-blue` is teal-navy. Do not rename them to
+match.
 
-| Token              | Use                                                                                                 |
-| ------------------ | --------------------------------------------------------------------------------------------------- |
-| `--brand-blue`     | primary (olive): buttons, card title bands, focus                                                   |
-| `-blue-soft/-deep` | info chips, table headers, links — dark-brown family, kept apart from paid                          |
-| `--brand-yellow`   | warning, payment due (mustard)                                                                      |
-| `--brand-green`    | success, paid (leaf olive)                                                                          |
-| `--brand-red`      | danger, overdue — brick red, deliberately outside the reference so overdue still reads as a warning |
-| `--brand-brown`    | occupied, the billed series in charts                                                               |
+| Token              | Use                                                                        |
+| ------------------ | -------------------------------------------------------------------------- |
+| `--brand-blue`     | primary (teal-navy): buttons, focus, the dashboard's collection card       |
+| `-blue-soft/-deep` | info chips, active nav item, links                                         |
+| `--brand-yellow`   | warning, payment due — ochre, derived to sit with the reference            |
+| `--brand-green`    | success, paid — muted sage-green, kept darker than `--brand-teal`          |
+| `--brand-red`      | danger, overdue (vermilion); use `-deep` for text, the base only for fills |
+| `--brand-brown`    | occupied, the billed series in charts                                      |
+| `--brand-teal`     | sage accent: progress fills, the บ้านพัก segment                           |
 
 ## Floor plan geometry
 

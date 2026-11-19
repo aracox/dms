@@ -23,8 +23,8 @@ export function SidebarToggleButton() {
       variant="ghost"
       size="sm"
       className={cn(
-        'size-9 shrink-0 border-transparent px-0 text-white',
-        'hover:bg-white/12 hover:text-white',
+        'text-ink-muted size-9 shrink-0 border-transparent px-0',
+        'hover:bg-surface-sunken hover:text-ink',
       )}
       aria-label={hidden ? t('showSidebar') : t('hideSidebar')}
       aria-pressed={hidden}

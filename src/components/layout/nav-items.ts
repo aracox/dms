@@ -75,13 +75,16 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/reports', labelKey: 'reports', icon: 'ChartColumn', permission: 'reports:read' },
     ],
   },
-  {
-    labelKey: 'system',
-    items: [
-      { href: '/settings', labelKey: 'settings', icon: 'Settings', permission: 'settings:read' },
-      { href: '/test', labelKey: 'testMode', icon: 'FlaskConical', permission: 'test-mode:use' },
-      { href: '/audit', labelKey: 'auditLog', icon: 'ScrollText', permission: 'audit:read' },
-      { href: '/staff', labelKey: 'staff', icon: 'Users', permission: 'users:manage' },
-    ],
-  },
+];
+
+/**
+ * System administration, reached from the account menu in the header rather
+ * than the sidebar: the owner visits these rarely, and keeping them out of the
+ * sidebar keeps the daily workflow short.
+ */
+export const ACCOUNT_NAV_ITEMS: NavItem[] = [
+  { href: '/settings', labelKey: 'settings', icon: 'Settings', permission: 'settings:read' },
+  { href: '/test', labelKey: 'testMode', icon: 'FlaskConical', permission: 'test-mode:use' },
+  { href: '/audit', labelKey: 'auditLog', icon: 'ScrollText', permission: 'audit:read' },
+  { href: '/staff', labelKey: 'staff', icon: 'Users', permission: 'users:manage' },
 ];

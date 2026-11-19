@@ -27,7 +27,7 @@ export function DesktopSidebar({ role }: { role: AppRole | null }) {
           href="/dashboard"
           aria-label={t('app.name')}
           className={cn(
-            'flex min-w-0 items-center gap-2 text-sm font-medium text-white',
+            'text-ink flex min-w-0 items-center gap-2 text-sm font-medium',
             hidden && 'justify-center',
           )}
         >
