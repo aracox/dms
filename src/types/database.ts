@@ -425,8 +425,15 @@ export type RoomBoardRow = {
   planned_move_out_date: string | null;
 };
 
-/** report_rooms. v_room_board minus test rooms, plus the derived segment (0024). */
-export type ReportRoomRow = RoomBoardRow & {
+/**
+ * report_rooms. v_room_board minus test rooms, plus the derived segment (0024).
+ *
+ * The view was created as `select v.*`, and Postgres expands `*` once, at
+ * creation -- so columns added to v_room_board afterwards (the move-out notice
+ * pair, 0031) are NOT in report_rooms. Read notices from
+ * report_move_out_notices instead.
+ */
+export type ReportRoomRow = Omit<RoomBoardRow, 'notice_given_at' | 'planned_move_out_date'> & {
   property_segment: PropertySegment;
 };
 

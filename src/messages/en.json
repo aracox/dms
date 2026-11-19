@@ -268,7 +268,8 @@
     "overdueAmount": "{amount} overdue",
     "fullyCollected": "Fully collected",
     "averageOccupancy": "Average {rate}%",
-    "occupantsHint": "{count, plural, one {# occupant} other {# occupants}}"
+    "occupantsHint": "{count, plural, one {# occupant} other {# occupants}}",
+    "roomStatus": "Room status"
   },
   "floorPlan": {
     "title": "Floor Plan",

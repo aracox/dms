@@ -268,7 +268,8 @@
     "overdueAmount": "เกินกำหนด {amount}",
     "fullyCollected": "เก็บครบทุกห้อง",
     "averageOccupancy": "ค่าเฉลี่ย {rate}%",
-    "occupantsHint": "ผู้พักรวม {count} คน"
+    "occupantsHint": "ผู้พักรวม {count} คน",
+    "roomStatus": "สถานะห้องพัก"
   },
   "floorPlan": {
     "title": "ผังห้องพัก",

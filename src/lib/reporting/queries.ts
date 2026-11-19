@@ -32,6 +32,7 @@ import type {
   TenantSummaryRow,
 } from '@/types/database';
 import { read } from './read';
+import type { RoomStatusRow } from './room-status';
 import { bySegment } from './segments';
 
 const EMPTY_ROOM_SUMMARY: RoomSummaryRow = {
@@ -59,6 +60,20 @@ export async function getRoomSummaryBySegment(): Promise<Record<PropertySegment,
     supabase.from('report_room_summary_by_segment').select('*'),
   );
   return bySegment(data ?? [], () => EMPTY_ROOM_SUMMARY);
+}
+
+/**
+ * Each real room's status and bill status, for the dashboard's room map.
+ * Reads report_rooms, which drops T01 in SQL.
+ */
+export async function getRoomStatusBoard(): Promise<RoomStatusRow[]> {
+  const supabase = await createClient();
+  const data = await read('report_rooms', () =>
+    supabase
+      .from('report_rooms')
+      .select('room_id, room_number, floor, room_status, financial_status, property_segment'),
+  );
+  return data ?? [];
 }
 
 const EMPTY_FINANCE_SUMMARY: FinanceSummaryRow = {
@@ -269,6 +284,7 @@ export async function getDashboardData() {
     maintenance,
     lostCards,
     overdue,
+    roomStatus,
   ] = await Promise.all([
     getRoomSummary(),
     getRoomSummaryBySegment(),
@@ -283,6 +299,7 @@ export async function getDashboardData() {
     getOpenMaintenance(10),
     getLostCards(),
     getOverdueInvoices(10),
+    getRoomStatusBoard(),
   ]);
 
   return {
@@ -299,5 +316,6 @@ export async function getDashboardData() {
     maintenance,
     lostCards,
     overdue,
+    roomStatus,
   };
 }

@@ -18,6 +18,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 
 import { BusinessOverviewCharts } from '@/components/dashboard/BusinessOverviewCharts';
+import { RoomStatusMap } from '@/components/dashboard/RoomStatusMap';
 import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
 import { MAINTENANCE_TONE, PRIORITY_TONE } from '@/components/room/RoomMaintenanceTab';
@@ -98,6 +99,7 @@ export default async function DashboardPage({
     maintenance: allMaintenance,
     lostCards: allLostCards,
     overdue: allOverdue,
+    roomStatus: allRoomStatus,
   } = await getDashboardData();
 
   // Everything below reads the selected view -- the combined figures, or one
@@ -111,6 +113,7 @@ export default async function DashboardPage({
   const maintenance = filterByView(view, allMaintenance);
   const lostCards = filterByView(view, allLostCards);
   const overdue = filterByView(view, allOverdue);
+  const roomStatus = filterByView(view, allRoomStatus);
 
   const money = (amount: number) => formatTHB(amount, typedLocale);
   const rate = collectionRate(finance);
@@ -420,6 +423,13 @@ export default async function DashboardPage({
           icon={<Wrench size={14} aria-hidden="true" />}
         />
       </section>
+
+      <div className="mb-5">
+        <RoomStatusMap
+          rooms={roomStatus}
+          noticeRoomIds={new Set(allMoveOutNotices.map((notice) => notice.room_id))}
+        />
+      </div>
 
       <section aria-labelledby="business-overview-heading" className="mb-5">
         <h2
