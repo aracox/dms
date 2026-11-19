@@ -129,6 +129,19 @@ export function formatBillingMonth(month: IsoDate | null | undefined, locale: 't
   }).format(new Date(`${month}T12:00:00Z`));
 }
 
+/** Full month name for a 1-12 month number, e.g. 'สิงหาคม' / 'August'. */
+export function formatMonthName(month: number, locale: 'th' | 'en'): string {
+  return new Intl.DateTimeFormat(locale === 'th' ? 'th-TH' : 'en-GB', {
+    timeZone: 'UTC',
+    month: 'long',
+  }).format(new Date(Date.UTC(2000, month - 1, 15)));
+}
+
+/** A Gregorian year for display: Buddhist era for Thai ('2569'), as-is for English ('2026'). */
+export function formatYear(year: number, locale: 'th' | 'en'): string {
+  return String(locale === 'th' ? year + 543 : year);
+}
+
 /** Display a billing month as its full date range, e.g. '1–30 ก.ย. 2569' / '1–30 Sep 2026'. */
 export function formatBillingPeriod(
   month: IsoDate | null | undefined,

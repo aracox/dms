@@ -265,6 +265,15 @@ export async function getMeterUsage(billingMonth?: IsoDate): Promise<MeterUsageR
   return data ?? [];
 }
 
+/** The earliest billing month with a meter reading, or null before the first one. */
+export async function getFirstMeterMonth(): Promise<IsoDate | null> {
+  const supabase = await createClient();
+  const data = await read('report_meter_usage', () =>
+    supabase.from('report_meter_usage').select('*').order('billing_month').limit(1),
+  );
+  return data?.[0]?.billing_month ?? null;
+}
+
 /**
  * Everything the dashboard needs, in parallel.
  * Every query hits a report_* view, so none of them can see T01.

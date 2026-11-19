@@ -5,6 +5,7 @@ import type { MeterUsageRow } from '@/types/database';
 import {
   compareMeterRoomProgress,
   groupMeterReadingsByRoom,
+  isMeterRoomForMonth,
   meterRoomIsComplete,
 } from './room-progress';
 
@@ -48,5 +49,18 @@ describe('meter room progress', () => {
       '103',
       '202',
     ]);
+  });
+
+  it('lists a month for rooms with readings and contracts that had started by then', () => {
+    const readings = groupMeterReadingsByRoom([reading('101', 'electricity')]).get('101');
+    const active = (start: string) => ({ contract_status: 'active' as const, start_date: start });
+    const ended = { contract_status: 'terminated' as const, start_date: '2025-01-15' };
+
+    // A moved-out room still shows in a month it has a reading for.
+    expect(isMeterRoomForMonth(ended, readings, '2026-09-01')).toBe(true);
+    expect(isMeterRoomForMonth(ended, undefined, '2026-09-01')).toBe(false);
+    // An active room is owed readings from its move-in month on, not before.
+    expect(isMeterRoomForMonth(active('2026-09-20'), undefined, '2026-09-01')).toBe(true);
+    expect(isMeterRoomForMonth(active('2026-10-03'), undefined, '2026-09-01')).toBe(false);
   });
 });

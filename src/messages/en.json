@@ -506,7 +506,16 @@
     "usageUnits": "{units} units",
     "recordReading": "Record reading",
     "correctPermissionRequired": "Only an admin can edit a month that already has a reading.",
-    "changeVsLastMonth": "Units used compared with the previous month"
+    "changeVsLastMonth": "Units used compared with the previous month",
+    "filterLabel": "Search meter readings",
+    "filterMonth": "Month",
+    "filterYear": "Year",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "filterRoom": "Room",
+    "allRooms": "All rooms",
+    "clearFilters": "Clear",
+    "noRoomsMatch": "No room matches this search for {month}."
   },
   "billing": {
     "title": "Billing",

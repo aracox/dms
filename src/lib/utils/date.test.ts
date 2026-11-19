@@ -8,6 +8,8 @@ import {
   currentBillingMonth,
   daysBetween,
   dueDateFor,
+  formatMonthName,
+  formatYear,
   isPastDue,
   monthsBetween,
 } from './date';
@@ -104,5 +106,14 @@ describe('contract date validation', () => {
   it('requires the end date to follow the start date', () => {
     expect(daysBetween('2026-01-01', '2026-12-31')).toBeGreaterThan(0);
     expect(daysBetween('2026-12-31', '2026-01-01')).toBeLessThan(0);
+  });
+});
+
+describe('month picker labels', () => {
+  it('names months in each locale and shows Thai years in the Buddhist era', () => {
+    expect(formatMonthName(1, 'en')).toBe('January');
+    expect(formatMonthName(11, 'th')).toBe('พฤศจิกายน');
+    expect(formatYear(2026, 'th')).toBe('2569');
+    expect(formatYear(2026, 'en')).toBe('2026');
   });
 });
