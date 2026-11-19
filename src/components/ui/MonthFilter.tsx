@@ -49,6 +49,7 @@ export function MonthFilter({
   firstMonth,
   choice,
   keep = {},
+  className,
 }: {
   label: string;
   pathname: string;
@@ -58,6 +59,7 @@ export function MonthFilter({
   firstMonth: IsoDate;
   choice: MonthFilterChoice;
   keep?: Record<string, string>;
+  className?: string;
 }) {
   const t = useTranslations('filters');
   const locale = useLocale() as Locale;
@@ -99,7 +101,10 @@ export function MonthFilter({
       action={`/${locale}${pathname}`}
       role="search"
       aria-label={label}
-      className="border-border flex flex-wrap items-center gap-x-4 gap-y-3 border-b p-3"
+      className={cn(
+        'border-border flex flex-wrap items-center gap-x-4 gap-y-3 border-b p-3',
+        className,
+      )}
     >
       {Object.entries(keep).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />

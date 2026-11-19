@@ -432,20 +432,20 @@
   "deposits": {
     "title": "Deposit refunds",
     "subtitle": "{count, plural, one {# waiting} other {# waiting}}, {amount} in total",
-    "empty": "No matching records",
     "previousTenant": "Previous tenant",
     "movedOutOn": "Moved out",
     "recordRefund": "Record refund",
     "deductedShort": "{amount} deducted",
     "confirmRefunded": "Confirm refunded",
     "nonePending": "No deposits waiting to be refunded",
-    "searchPlaceholder": "Search tenant name, phone or room",
-    "resultCount": "{count, plural, one {# record} other {# records}}",
     "status": {
-      "all": "All statuses",
       "pending": "Waiting",
       "refunded": "Refunded"
-    }
+    },
+    "filterLabel": "Search deposit refunds",
+    "pendingTitle": "Waiting for refund · every month",
+    "refundedFor": "Refunded · moved out in {month}",
+    "noRefundedInMonth": "No refunds for tenants who moved out in {month}."
   },
   "reservation": {
     "title": "Reservation",

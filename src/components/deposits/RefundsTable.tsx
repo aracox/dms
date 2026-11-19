@@ -1,13 +1,9 @@
-'use client';
-
-import { CheckCircle2, Clock, Search } from 'lucide-react';
+import { CheckCircle2, Clock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
 
 import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { FormField, Input, Select } from '@/components/ui/Input';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
@@ -15,110 +11,31 @@ import { formatTHB } from '@/lib/billing/money';
 import type { DepositRefundRecord } from '@/lib/contracts/queries';
 import { propertySegment } from '@/lib/reporting/segments';
 import { formatDate } from '@/lib/utils/date';
-import type { PropertySegment } from '@/types/database';
 
 import { DepositSettlementCells } from './DepositSettlementForm';
 
-type StatusFilter = 'all' | DepositRefundRecord['status'];
-const STATUS_FILTERS: StatusFilter[] = ['all', 'pending', 'refunded'];
-const SEGMENTS: PropertySegment[] = ['dorm', 'house'];
-
 /**
- * Every deposit refund, waiting and done, filtered in the browser like the
- * rooms list -- the whole set is a few dozen rows at most. Waiting rows carry
+ * A list of deposit refunds, already filtered by the page. Waiting rows carry
  * the settlement inputs; refunded rows show what was recorded.
  */
 export function RefundsTable({
   records,
   canWrite,
   locale,
+  emptyMessage,
 }: {
   records: DepositRefundRecord[];
   canWrite: boolean;
   locale: Locale;
+  emptyMessage: string;
 }) {
   const t = useTranslations();
-  const [query, setQuery] = useState('');
-  const [status, setStatus] = useState<StatusFilter>('all');
-  const [segment, setSegment] = useState<PropertySegment | 'all'>('all');
-
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    const digits = needle.replace(/\D/g, '');
-
-    return records.filter((record) => {
-      if (status !== 'all' && record.status !== status) return false;
-      if (segment !== 'all' && propertySegment(record.roomType) !== segment) return false;
-      if (!needle) return true;
-      return (
-        record.tenantName.toLowerCase().includes(needle) ||
-        record.roomNumber.toLowerCase().includes(needle) ||
-        // Phones are stored as digits only; ignore dashes/spaces people type.
-        (digits !== '' && record.tenantPhone.replace(/\D/g, '').includes(digits))
-      );
-    });
-  }, [records, query, status, segment]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-4 px-4 pt-4">
-        <FormField label={t('common.search')} htmlFor="refund-search" className="min-w-56 flex-1">
-          <div className="relative">
-            <Search
-              size={14}
-              className="text-ink-subtle pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
-              aria-hidden="true"
-            />
-            <Input
-              id="refund-search"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={t('deposits.searchPlaceholder')}
-              className="pl-9"
-            />
-          </div>
-        </FormField>
-
-        <FormField label={t('rooms.filterByStatus')} htmlFor="refund-status">
-          <Select
-            id="refund-status"
-            value={status}
-            onChange={(event) => setStatus(event.target.value as StatusFilter)}
-            className="w-auto"
-          >
-            {STATUS_FILTERS.map((candidate) => (
-              <option key={candidate} value={candidate}>
-                {t(`deposits.status.${candidate}`)}
-              </option>
-            ))}
-          </Select>
-        </FormField>
-
-        <FormField label={t('segment.column')} htmlFor="refund-segment">
-          <Select
-            id="refund-segment"
-            value={segment}
-            onChange={(event) => setSegment(event.target.value as PropertySegment | 'all')}
-            className="w-auto"
-          >
-            <option value="all">{t('segment.wholeProperty')}</option>
-            {SEGMENTS.map((candidate) => (
-              <option key={candidate} value={candidate}>
-                {t(`segment.${candidate}`)}
-              </option>
-            ))}
-          </Select>
-        </FormField>
-
-        <p className="text-ink-subtle text-caption ml-auto" aria-live="polite">
-          {t('deposits.resultCount', { count: filtered.length })}
-        </p>
-      </div>
-
-      {filtered.length === 0 ? (
+    <>
+      {records.length === 0 ? (
         <div className="p-3">
-          <EmptyState message={t('deposits.empty')} />
+          <EmptyState message={emptyMessage} />
         </div>
       ) : (
         <Table
@@ -137,7 +54,7 @@ export function RefundsTable({
             </tr>
           }
         >
-          {filtered.map((record) => {
+          {records.map((record) => {
             const { contract } = record;
             return (
               // Top-aligned so the text lines up with the inputs, not with their hints.
@@ -217,6 +134,6 @@ export function RefundsTable({
           })}
         </Table>
       )}
-    </div>
+    </>
   );
 }

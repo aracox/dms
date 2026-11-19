@@ -432,20 +432,20 @@
   "deposits": {
     "title": "คืนเงินประกัน",
     "subtitle": "รอคืน {count} รายการ รวม {amount}",
-    "empty": "ไม่พบรายการ",
     "previousTenant": "ผู้เช่าเดิม",
     "movedOutOn": "วันที่ย้ายออก",
     "recordRefund": "บันทึกการคืนเงิน",
     "deductedShort": "หัก {amount}",
     "confirmRefunded": "ยืนยันคืนเงินแล้ว",
     "nonePending": "ไม่มีเงินประกันที่รอคืน",
-    "searchPlaceholder": "ค้นหาชื่อผู้เช่า เบอร์โทร หรือเลขห้อง",
-    "resultCount": "พบ {count} รายการ",
     "status": {
-      "all": "ทุกสถานะ",
       "pending": "รอคืน",
       "refunded": "คืนแล้ว"
-    }
+    },
+    "filterLabel": "ค้นหาการคืนเงินประกัน",
+    "pendingTitle": "รอคืนเงินประกัน · ทุกเดือน",
+    "refundedFor": "คืนแล้ว · ย้ายออก{month}",
+    "noRefundedInMonth": "ไม่มีการคืนเงินประกันของผู้ที่ย้ายออกใน{month}"
   },
   "reservation": {
     "title": "การจอง",
