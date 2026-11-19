@@ -9,7 +9,7 @@ import { PAYMENT_TONE } from '@/components/room/RoomPaymentsTab';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { MonthRoomFilter } from '@/components/ui/MonthRoomFilter';
+import { MonthFilter } from '@/components/ui/MonthFilter';
 import { StatTile } from '@/components/ui/StatTile';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
@@ -27,7 +27,7 @@ import { getCurrentProfile } from '@/lib/supabase/server';
 import { currentBillingMonth, formatBillingMonth, formatDate } from '@/lib/utils/date';
 import {
   firstParam,
-  monthRoomQuery,
+  monthQuery,
   parseMonthParams,
   type SearchParam,
 } from '@/lib/utils/month-filter';
@@ -68,7 +68,7 @@ export default async function PaymentsPage({
   const rooms = filterRoomsByView(view, wholeRooms);
   // A room outside the current segment is ignored rather than showing an empty list.
   const roomFilter = rooms.find((room) => room.room_number === firstParam(query.room))?.room_number;
-  const searchQuery = monthRoomQuery(month, currentMonth, roomFilter);
+  const searchQuery = monthQuery(month, currentMonth, { room: roomFilter });
   const byRoom = <T extends { room_number: string }>(rows: T[]) =>
     roomFilter ? rows.filter((row) => row.room_number === roomFilter) : rows;
 
@@ -121,15 +121,20 @@ export default async function PaymentsPage({
       <div className="space-y-4">
         <Card>
           <CardHeader title={t('payments.historyFor', { month: monthLabel })} />
-          <MonthRoomFilter
+          <MonthFilter
             label={t('payments.filterLabel')}
             pathname="/payments"
             month={month}
             defaultMonth={currentMonth}
             currentMonth={currentMonth}
             firstMonth={firstPaymentMonth ?? currentMonth}
-            rooms={rooms}
-            room={roomFilter}
+            choice={{
+              name: 'room',
+              label: t('filters.room'),
+              allLabel: t('filters.allRooms'),
+              options: rooms.map((room) => ({ value: room.room_number, label: room.room_number })),
+              value: roomFilter,
+            }}
             keep={view === 'all' ? {} : { segment: view }}
           />
           {listedPayments.length === 0 ? (

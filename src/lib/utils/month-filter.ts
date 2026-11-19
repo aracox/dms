@@ -1,6 +1,6 @@
 /**
- * URL state for the month + room search on list pages (meters, billing).
- * See `components/ui/MonthRoomFilter.tsx` for the control itself.
+ * URL state for the month search on list pages (meters, billing, payments,
+ * expenses). See `components/ui/MonthFilter.tsx` for the control itself.
  */
 
 import type { ContractStatus } from '@/types/database';
@@ -33,19 +33,22 @@ export function parseMonthParams(
 }
 
 /**
- * The query string for a month + room search. `defaultMonth` is what the page
- * shows with no month in the URL, so it is left out.
+ * The query string for a month search plus its other filters (e.g. a room).
+ * `defaultMonth` is what the page shows with no month in the URL, so it is
+ * left out, as are filters with no value.
  */
-export function monthRoomQuery(
+export function monthQuery(
   month: IsoDate,
   defaultMonth: IsoDate,
-  room?: string,
+  filters: Record<string, string | undefined> = {},
 ): Record<string, string> {
   return {
     ...(month === defaultMonth
       ? {}
       : { year: month.slice(0, 4), month: String(Number(month.slice(5, 7))) }),
-    ...(room ? { room } : {}),
+    ...Object.fromEntries(
+      Object.entries(filters).filter((entry): entry is [string, string] => Boolean(entry[1])),
+    ),
   };
 }
 

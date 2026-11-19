@@ -603,12 +603,14 @@
     "expenseDate": "Date",
     "addExpense": "Add expense",
     "editExpense": "Edit expense",
-    "noExpenses": "No expenses recorded yet",
     "monthlyTitle": "Monthly common expenses",
     "adHocTitle": "Other expenses (non-recurring)",
-    "historyTitle": "Expense history by month",
     "entryCount": "{count, plural, one {# entry} other {# entries}}",
-    "recordMonth": "Record this month"
+    "recordMonth": "Record this month",
+    "filterLabel": "Search expenses",
+    "historyFor": "Expense history · {month}",
+    "monthTotal": "Total {amount}",
+    "noExpensesInMonth": "No expenses recorded for {month}."
   },
   "expenseCategory": {
     "common_electricity": "Common-area electricity",
@@ -828,6 +830,8 @@
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "clear": "Clear",
-    "noRoomsMatch": "No room matches this search for {month}."
+    "noRoomsMatch": "No room matches this search for {month}.",
+    "category": "Category",
+    "allCategories": "All categories"
   }
 }

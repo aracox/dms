@@ -603,12 +603,14 @@
     "expenseDate": "วันที่",
     "addExpense": "เพิ่มรายจ่าย",
     "editExpense": "แก้ไขรายจ่าย",
-    "noExpenses": "ยังไม่มีรายจ่ายที่บันทึกไว้",
     "monthlyTitle": "ค่าใช้จ่ายส่วนกลางประจำเดือน",
     "adHocTitle": "ค่าใช้จ่ายอื่น ๆ (ไม่ประจำ)",
-    "historyTitle": "ประวัติค่าใช้จ่ายรายเดือน",
     "entryCount": "{count} รายการ",
-    "recordMonth": "บันทึกเดือนนี้"
+    "recordMonth": "บันทึกเดือนนี้",
+    "filterLabel": "ค้นหาค่าใช้จ่าย",
+    "historyFor": "ประวัติค่าใช้จ่าย · {month}",
+    "monthTotal": "รวม {amount}",
+    "noExpensesInMonth": "ไม่มีค่าใช้จ่ายใน{month}"
   },
   "expenseCategory": {
     "common_electricity": "ค่าไฟพื้นที่ส่วนกลาง",
@@ -828,6 +830,8 @@
     "previousMonth": "เดือนก่อนหน้า",
     "nextMonth": "เดือนถัดไป",
     "clear": "ล้างการค้นหา",
-    "noRoomsMatch": "ไม่พบห้องที่ตรงกับการค้นหาใน{month}"
+    "noRoomsMatch": "ไม่พบห้องที่ตรงกับการค้นหาใน{month}",
+    "category": "หมวด",
+    "allCategories": "ทุกหมวด"
   }
 }

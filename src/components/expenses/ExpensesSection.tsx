@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
@@ -9,53 +9,40 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB, sumMoney } from '@/lib/billing/money';
+import { expenseMonth, MONTHLY_CATEGORIES } from '@/lib/common-expenses/month';
 import {
-  billingMonthOf,
   currentBillingMonth,
   formatBillingMonth,
   formatDate,
+  type IsoDate,
 } from '@/lib/utils/date';
 import type { CommonExpenseCategory, CommonExpenseRow } from '@/types/database';
 
 import { AdHocExpenseForm } from './AdHocExpenseForm';
 import { DeleteExpenseButton } from './DeleteExpenseButton';
-import { MonthToggleCell, useOpenMonths } from '@/components/ui/MonthGroup';
-import { Pager, usePager } from '@/components/ui/Pager';
 import { MonthlyExpenseForm } from './MonthlyExpenseForm';
-
-const MONTHLY_CATEGORIES: readonly CommonExpenseCategory[] = [
-  'common_electricity',
-  'common_water',
-  'housekeeping',
-  'gardening',
-  'internet',
-  'transformer_fee',
-];
 
 type FormState = { open: boolean; month: string };
 
-/** Month groups shown per page of the history table. */
-const MONTHS_PER_PAGE = 6;
-
-/** The month an expense counts toward: its billing month, or for 'other' its date's month. */
-function expenseMonth(expense: CommonExpenseRow): string {
-  return expense.category === 'other'
-    ? billingMonthOf(expense.expense_date)
-    : expense.billing_month!;
-}
-
 /**
  * Everything on the expenses page: an entry card per recurring category, the
- * non-recurring ('other') add form, and one history table holding both kinds,
- * grouped by month so each month shows its full shared-cost total.
+ * non-recurring ('other') add form, and a history table of one searched month
+ * (`month`, optionally one `category`) holding both kinds with its total.
+ * `filter` is the page's month search, drawn at the top of the history card.
  */
 export function ExpensesSection({
   expenses,
+  month,
+  category,
+  filter,
   canWrite,
   canDelete,
   locale,
 }: {
   expenses: CommonExpenseRow[];
+  month: IsoDate;
+  category: CommonExpenseCategory | undefined;
+  filter: ReactNode;
   canWrite: boolean;
   canDelete: boolean;
   locale: Locale;
@@ -78,31 +65,20 @@ export function ExpensesSection({
 
   const monthlyEntries = expenses.filter((expense) => expense.category !== 'other');
 
-  // Newest month first. Inside a month: the recurring categories in card
-  // order, then non-recurring ones newest first (the query sorts by date).
-  const months = new Map<string, CommonExpenseRow[]>();
-  for (const expense of expenses) {
-    const month = expenseMonth(expense);
-    months.set(month, [...(months.get(month) ?? []), expense]);
-  }
+  // The recurring categories in card order, then non-recurring ones newest
+  // first (the query sorts by date).
   const rank = (expense: CommonExpenseRow) =>
     expense.category === 'other'
       ? MONTHLY_CATEGORIES.length
       : MONTHLY_CATEGORIES.indexOf(expense.category);
-  const groupedMonths = [...months]
-    .sort(([a], [b]) => b.localeCompare(a))
-    .map(([month, entries]) => ({
-      month,
-      entries: [...entries].sort((a, b) => rank(a) - rank(b)),
-    }));
-  const monthGroups = useOpenMonths(groupedMonths[0]?.month);
-
-  const {
-    page,
-    pageCount,
-    setPage,
-    pageItems: pageMonths,
-  } = usePager(groupedMonths, MONTHS_PER_PAGE);
+  const entries = expenses
+    .filter(
+      (expense) =>
+        expenseMonth(expense) === month &&
+        (category === undefined || expense.category === category),
+    )
+    .sort((a, b) => rank(a) - rank(b));
+  const monthLabel = formatBillingMonth(month, locale);
 
   const editEntry = (expense: CommonExpenseRow) => {
     if (expense.category === 'other') {
@@ -175,11 +151,24 @@ export function ExpensesSection({
         )
       ) : null}
 
-      {expenses.length === 0 ? (
-        <EmptyState message={t('expenses.noExpenses')} />
-      ) : (
-        <Card>
-          <CardHeader title={t('expenses.historyTitle')} />
+      <Card>
+        <CardHeader
+          title={t('expenses.historyFor', { month: monthLabel })}
+          description={t('expenses.entryCount', { count: entries.length })}
+          action={
+            <span className="text-ink font-display text-h4 font-semibold tabular-nums">
+              {t('expenses.monthTotal', {
+                amount: formatTHB(sumMoney(entries.map((entry) => entry.amount)), locale),
+              })}
+            </span>
+          }
+        />
+        {filter}
+        {entries.length === 0 ? (
+          <div className="p-3">
+            <EmptyState message={t('expenses.noExpensesInMonth', { month: monthLabel })} />
+          </div>
+        ) : (
           <Table
             head={
               <tr>
@@ -191,57 +180,38 @@ export function ExpensesSection({
               </tr>
             }
           >
-            {pageMonths.map(({ month, entries }) => [
-              <tr key={month} className="bg-surface-sunken">
-                <MonthToggleCell
-                  colSpan={3}
-                  label={formatBillingMonth(month, locale)}
-                  open={monthGroups.isOpen(month)}
-                  onToggle={() => monthGroups.toggle(month)}
-                />
-                <TD numeric className="font-semibold">
-                  {formatTHB(sumMoney(entries.map((entry) => entry.amount)), locale)}
+            {entries.map((entry) => (
+              <tr key={entry.id}>
+                <TD>
+                  {entry.category === 'other'
+                    ? t('expenses.adHocTitle')
+                    : t(`expenseCategory.${entry.category}`)}
                 </TD>
-                <TD className="text-ink-subtle text-caption">
-                  {t('expenses.entryCount', { count: entries.length })}
+                <TD>{formatDate(entry.expense_date, locale)}</TD>
+                <TD>{entry.description ?? '-'}</TD>
+                <TD numeric className="font-medium">
+                  {formatTHB(entry.amount, locale)}
                 </TD>
-              </tr>,
-              ...(monthGroups.isOpen(month)
-                ? entries.map((entry) => (
-                    <tr key={entry.id}>
-                      <TD>
-                        {entry.category === 'other'
-                          ? t('expenses.adHocTitle')
-                          : t(`expenseCategory.${entry.category}`)}
-                      </TD>
-                      <TD>{formatDate(entry.expense_date, locale)}</TD>
-                      <TD>{entry.description ?? '-'}</TD>
-                      <TD numeric className="font-medium">
-                        {formatTHB(entry.amount, locale)}
-                      </TD>
-                      <TD>
-                        <div className="flex items-center gap-3">
-                          {canWrite ? (
-                            <Button
-                              variant="link"
-                              size="sm"
-                              onClick={() => editEntry(entry)}
-                              className="text-brand-blue-deep hover:text-brand-blue-deep"
-                            >
-                              {t('common.edit')}
-                            </Button>
-                          ) : null}
-                          {canDelete ? <DeleteExpenseButton expenseId={entry.id} /> : null}
-                        </div>
-                      </TD>
-                    </tr>
-                  ))
-                : []),
-            ])}
+                <TD>
+                  <div className="flex items-center gap-3">
+                    {canWrite ? (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() => editEntry(entry)}
+                        className="text-brand-blue-deep hover:text-brand-blue-deep"
+                      >
+                        {t('common.edit')}
+                      </Button>
+                    ) : null}
+                    {canDelete ? <DeleteExpenseButton expenseId={entry.id} /> : null}
+                  </div>
+                </TD>
+              </tr>
+            ))}
           </Table>
-          <Pager page={page} pageCount={pageCount} setPage={setPage} />
-        </Card>
-      )}
+        )}
+      </Card>
     </div>
   );
 }

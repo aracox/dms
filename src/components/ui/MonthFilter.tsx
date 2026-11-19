@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { cn } from '@/lib/utils/cn';
 import { addMonths, formatMonthName, formatYear, type IsoDate } from '@/lib/utils/date';
-import { monthRoomQuery } from '@/lib/utils/month-filter';
+import { monthQuery } from '@/lib/utils/month-filter';
 
 /** The year dropdown always offers 2568-2580 (2025-2037), widened if data or today falls outside. */
 const YEAR_RANGE_START = 2025;
@@ -17,6 +17,17 @@ const MONTH_NUMBERS = Array.from({ length: 12 }, (_, index) => index + 1);
 
 const LABEL_CLASSES = 'text-ink-muted text-body-sm font-medium whitespace-nowrap';
 
+/** The dropdown beside the month: a room on most pages, a category on expenses. */
+export type MonthFilterChoice = {
+  /** URL parameter, e.g. 'room'. */
+  name: string;
+  label: string;
+  /** The empty option, e.g. 'ทุกห้อง'. */
+  allLabel: string;
+  options: { value: string; label: string }[];
+  value: string | undefined;
+};
+
 /**
  * `เดือน [‹] [month] [year] [›]   ห้อง [room]   [ค้นหา]` over a list page.
  *
@@ -24,19 +35,19 @@ const LABEL_CLASSES = 'text-ink-muted text-body-sm font-medium whitespace-nowrap
  * the URL (`?year=2026&month=10&room=201`), survives a reload, and the control
  * ships no JavaScript.
  *
- * `defaultMonth` is the month the page shows with nothing in the URL. The ‹ arrow stops at `firstMonth` (or the month on screen, if earlier) and ›
- * at `currentMonth`. `keep` (e.g. the segment) rides along on every link and
+ * `defaultMonth` is the month the page shows with nothing in the URL. The ‹
+ * arrow stops at `firstMonth` (or the month on screen, if earlier) and › at
+ * `currentMonth`. `keep` (e.g. the segment) rides along on every link and
  * through the form.
  */
-export function MonthRoomFilter({
+export function MonthFilter({
   label,
   pathname,
   month,
   defaultMonth,
   currentMonth,
   firstMonth,
-  rooms,
-  room,
+  choice,
   keep = {},
 }: {
   label: string;
@@ -45,8 +56,7 @@ export function MonthRoomFilter({
   defaultMonth: IsoDate;
   currentMonth: IsoDate;
   firstMonth: IsoDate;
-  rooms: { room_id: string; room_number: string }[];
-  room: string | undefined;
+  choice: MonthFilterChoice;
   keep?: Record<string, string>;
 }) {
   const t = useTranslations('filters');
@@ -57,7 +67,8 @@ export function MonthRoomFilter({
   const yearOptions = Array.from({ length: lastYear - firstYear + 1 }, (_, i) => firstYear + i);
   const previous = month > earliestMonth ? addMonths(month, -1) : null;
   const next = month < currentMonth ? addMonths(month, 1) : null;
-  const searching = month !== defaultMonth || room !== undefined;
+  const searching = month !== defaultMonth || choice.value !== undefined;
+  const chosen = { [choice.name]: choice.value };
 
   const stepLink = (target: IsoDate | null, direction: 'previous' | 'next') => {
     const Icon = direction === 'previous' ? ChevronLeft : ChevronRight;
@@ -72,7 +83,7 @@ export function MonthRoomFilter({
     const stepLabel = t(direction === 'previous' ? 'previousMonth' : 'nextMonth');
     return (
       <Link
-        href={{ pathname, query: { ...keep, ...monthRoomQuery(target, defaultMonth, room) } }}
+        href={{ pathname, query: { ...keep, ...monthQuery(target, defaultMonth, chosen) } }}
         aria-label={stepLabel}
         title={stepLabel}
         className={classes}
@@ -127,14 +138,19 @@ export function MonthRoomFilter({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <label htmlFor="filter-room" className={LABEL_CLASSES}>
-          {t('room')}
+        <label htmlFor="filter-choice" className={LABEL_CLASSES}>
+          {choice.label}
         </label>
-        <Select id="filter-room" name="room" defaultValue={room ?? ''} className="w-40">
-          <option value="">{t('allRooms')}</option>
-          {rooms.map((option) => (
-            <option key={option.room_id} value={option.room_number}>
-              {option.room_number}
+        <Select
+          id="filter-choice"
+          name={choice.name}
+          defaultValue={choice.value ?? ''}
+          className="w-48"
+        >
+          <option value="">{choice.allLabel}</option>
+          {choice.options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </Select>

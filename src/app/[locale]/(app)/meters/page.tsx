@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 import { buttonClasses } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { MonthRoomFilter } from '@/components/ui/MonthRoomFilter';
+import { MonthFilter } from '@/components/ui/MonthFilter';
 import { StatTile } from '@/components/ui/StatTile';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
@@ -25,7 +25,7 @@ import { currentBillingMonth, formatBillingMonth, formatBillingPeriod } from '@/
 import {
   firstParam,
   isRoomForMonth,
-  monthRoomQuery,
+  monthQuery,
   parseMonthParams,
   type SearchParam,
 } from '@/lib/utils/month-filter';
@@ -96,7 +96,7 @@ export default async function MetersPage({
           <SegmentSwitcher
             current={view}
             pathname="/meters"
-            query={monthRoomQuery(billingMonth, currentMonth, roomFilter)}
+            query={monthQuery(billingMonth, currentMonth, { room: roomFilter })}
           />
         }
       />
@@ -137,15 +137,20 @@ export default async function MetersPage({
             month: monthLabel,
           })}
         />
-        <MonthRoomFilter
+        <MonthFilter
           label={t('meters.filterLabel')}
           pathname="/meters"
           month={billingMonth}
           defaultMonth={currentMonth}
           currentMonth={currentMonth}
           firstMonth={firstMeterMonth ?? currentMonth}
-          rooms={rooms}
-          room={roomFilter}
+          choice={{
+            name: 'room',
+            label: t('filters.room'),
+            allLabel: t('filters.allRooms'),
+            options: rooms.map((room) => ({ value: room.room_number, label: room.room_number })),
+            value: roomFilter,
+          }}
           keep={view === 'all' ? {} : { segment: view }}
         />
 

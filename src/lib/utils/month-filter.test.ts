@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isRoomForMonth, monthRoomQuery, parseMonthParams } from './month-filter';
+import { isRoomForMonth, monthQuery, parseMonthParams } from './month-filter';
 
 describe('parseMonthParams', () => {
   it('reads a year and a 1-12 month', () => {
@@ -19,11 +19,13 @@ describe('parseMonthParams', () => {
   });
 });
 
-describe('monthRoomQuery', () => {
+describe('monthQuery', () => {
   it('leaves out the page default month', () => {
-    expect(monthRoomQuery('2026-11-01', '2026-11-01')).toEqual({});
-    expect(monthRoomQuery('2026-11-01', '2026-11-01', '201')).toEqual({ room: '201' });
-    expect(monthRoomQuery('2026-10-01', '2026-11-01')).toEqual({ year: '2026', month: '10' });
+    expect(monthQuery('2026-11-01', '2026-11-01')).toEqual({});
+    expect(monthQuery('2026-11-01', '2026-11-01', { room: '201', category: undefined })).toEqual({
+      room: '201',
+    });
+    expect(monthQuery('2026-10-01', '2026-11-01')).toEqual({ year: '2026', month: '10' });
   });
 });
 

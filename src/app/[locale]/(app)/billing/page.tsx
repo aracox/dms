@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { buttonClasses } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { MonthRoomFilter } from '@/components/ui/MonthRoomFilter';
+import { MonthFilter } from '@/components/ui/MonthFilter';
 import { StatTile } from '@/components/ui/StatTile';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
@@ -32,7 +32,7 @@ import {
 import {
   firstParam,
   isRoomForMonth,
-  monthRoomQuery,
+  monthQuery,
   parseMonthParams,
   type SearchParam,
 } from '@/lib/utils/month-filter';
@@ -116,7 +116,7 @@ export default async function BillingPage({
   const rooms = filterRoomsByView(view, wholeRooms);
   // A room outside the current segment is ignored rather than showing an empty list.
   const roomFilter = rooms.find((room) => room.room_number === firstParam(query.room))?.room_number;
-  const searchQuery = monthRoomQuery(month, currentMonth, roomFilter);
+  const searchQuery = monthQuery(month, currentMonth, { room: roomFilter });
   // Every tile below derives from activeRooms, so they follow the segment and
   // month; the room search narrows the chips and the table only.
   // Listed in room-number order, as getRoomBoard returns them.
@@ -173,15 +173,20 @@ export default async function BillingPage({
       </div>
 
       <Card>
-        <MonthRoomFilter
+        <MonthFilter
           label={t('billing.filterLabel')}
           pathname="/billing"
           month={month}
           defaultMonth={currentMonth}
           currentMonth={currentMonth}
           firstMonth={firstBillMonth ?? currentMonth}
-          rooms={rooms}
-          room={roomFilter}
+          choice={{
+            name: 'room',
+            label: t('filters.room'),
+            allLabel: t('filters.allRooms'),
+            options: rooms.map((room) => ({ value: room.room_number, label: room.room_number })),
+            value: roomFilter,
+          }}
           keep={view === 'all' ? {} : { segment: view }}
         />
         {/* Status chips filter the table only; the tiles above stay whole-list totals. */}
