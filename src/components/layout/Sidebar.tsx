@@ -50,7 +50,7 @@ export function Sidebar({ role, onNavigate }: { role: AppRole | null; onNavigate
   const pathname = usePathname();
 
   return (
-    <nav aria-label={t('dashboard')} className="sidebar-navigation space-y-7">
+    <nav aria-label={t('dashboard')} className="sidebar-navigation space-y-3">
       {NAV_SECTIONS.map((section, sectionIndex) => {
         const visible = section.items.filter(
           (item) => !item.permission || can(role, item.permission as Permission),
@@ -61,10 +61,10 @@ export function Sidebar({ role, onNavigate }: { role: AppRole | null; onNavigate
           // A rule above each labelled section, so its heading reads as a divider.
           <div
             key={section.labelKey ?? `section-${sectionIndex}`}
-            className={section.labelKey ? 'border-border border-t pt-4' : undefined}
+            className={section.labelKey ? 'border-border border-t pt-3' : undefined}
           >
             {section.labelKey ? (
-              <h2 className="text-ink-subtle font-display text-caption px-3 pb-1 font-semibold tracking-wide uppercase">
+              <h2 className="text-ink-subtle font-display px-3 pb-1 text-[11px] font-medium">
                 {t(section.labelKey)}
               </h2>
             ) : null}
@@ -82,9 +82,9 @@ export function Sidebar({ role, onNavigate }: { role: AppRole | null; onNavigate
                       onClick={onNavigate}
                       aria-current={isActive ? 'page' : undefined}
                       className={cn(
-                        'font-display flex items-center gap-2.5 rounded-md px-3 py-2 text-sm whitespace-nowrap',
+                        'font-display flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] whitespace-nowrap',
                         isActive
-                          ? 'bg-brand-blue-soft text-brand-blue-deep font-semibold'
+                          ? 'bg-brand-blue-soft text-brand-blue-deep font-medium'
                           : 'text-ink-muted hover:bg-surface-sunken hover:text-ink',
                       )}
                     >

@@ -14,8 +14,8 @@ export default async function ChangePasswordPage({
 
   return (
     <main className="flex min-h-dvh items-center justify-center px-4 py-10">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 text-center">
+      <div className="glass border-border w-full max-w-md overflow-hidden rounded-xl border shadow-xl">
+        <div className="border-border border-b px-6 py-8 text-center sm:px-8">
           <AppLogo size={56} className="mx-auto rounded-lg" />
           <h1 className="text-ink font-display text-h3 mt-3">
             {t('auth.mustChangePasswordTitle')}
@@ -25,7 +25,7 @@ export default async function ChangePasswordPage({
           </p>
         </div>
 
-        <div className="border-border glass rounded-xl border p-5 shadow-md">
+        <div className="glass-surface px-6 py-7 sm:px-8">
           <ChangePasswordForm />
         </div>
       </div>

@@ -4,7 +4,11 @@ import { Settings } from 'lucide-react';
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { GLASS_TRANSPARENCY, glassOpacity } from '@/lib/appearance/glass';
+import {
+  BACKGROUND_IMAGE_STORAGE_KEY,
+  GLASS_TRANSPARENCY,
+  glassOpacity,
+} from '@/lib/appearance/glass';
 
 function applyTransparency(value: number) {
   document.documentElement.dataset.glassPreference = 'custom';
@@ -12,6 +16,10 @@ function applyTransparency(value: number) {
 }
 
 const GLASS_CHANGE_EVENT = 'dms:glass-transparency-change';
+
+function getStoredBackgroundVisible() {
+  return localStorage.getItem(BACKGROUND_IMAGE_STORAGE_KEY) === 'true';
+}
 
 function getStoredTransparency() {
   const rawValue = localStorage.getItem(GLASS_TRANSPARENCY.storageKey);
@@ -42,6 +50,11 @@ export function GlassSettings() {
     getStoredTransparency,
     () => GLASS_TRANSPARENCY.defaultValue,
   );
+  const backgroundVisible = useSyncExternalStore(
+    subscribeToTransparency,
+    getStoredBackgroundVisible,
+    () => false,
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
@@ -52,6 +65,12 @@ export function GlassSettings() {
       applyTransparency(transparency);
     }
   }, [transparency]);
+
+  useEffect(() => {
+    document.documentElement.dataset.backgroundImage = getStoredBackgroundVisible()
+      ? 'visible'
+      : 'hidden';
+  }, [backgroundVisible]);
 
   useEffect(() => {
     if (!open) return;
@@ -82,7 +101,7 @@ export function GlassSettings() {
         aria-label={t('open')}
         aria-expanded={open}
         aria-controls="glass-settings-panel"
-        className="border-border bg-surface/55 text-ink-muted hover:border-brand-blue hover:text-brand-blue-deep flex size-9 items-center justify-center rounded-full border shadow-sm backdrop-blur-md transition-colors"
+        className="border-border bg-surface/55 text-ink-muted hover:border-brand-blue hover:text-brand-blue-deep flex size-9 items-center justify-center rounded-md border transition-colors"
         onClick={() => setOpen((current) => !current)}
       >
         <Settings size={17} aria-hidden="true" />
@@ -127,6 +146,18 @@ export function GlassSettings() {
             <span>{t('solid')}</span>
             <span>{t('clear')}</span>
           </div>
+          <label className="border-border text-ink text-body-sm mt-4 flex min-h-11 cursor-pointer items-center justify-between gap-4 border-t pt-4">
+            <span>{t('backgroundImage')}</span>
+            <input
+              type="checkbox"
+              checked={backgroundVisible}
+              className="accent-brand-blue size-4 shrink-0 cursor-pointer"
+              onChange={(event) => {
+                localStorage.setItem(BACKGROUND_IMAGE_STORAGE_KEY, String(event.target.checked));
+                window.dispatchEvent(new Event(GLASS_CHANGE_EVENT));
+              }}
+            />
+          </label>
           <p id={hintId} className="text-ink-muted text-caption mt-3">
             {t('hint')}
           </p>

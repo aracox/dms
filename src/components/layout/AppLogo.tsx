@@ -3,10 +3,8 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils/cn';
 
 /**
- * The Baan Chomplern house-and-leaf mark on a cream tile. The tile is what
- * keeps the olive roof readable on the dark-brown sidebar as well as on the
- * cream toolbar. Decorative: every use sits next to, or inside a link labelled
- * with, the app name.
+ * Keep the property's house-and-leaf mark on a white tile within the glass
+ * frame. Decorative: each use sits next to, or in a link labelled with, its name.
  */
 export function AppLogo({ size = 28, className }: { size?: number; className?: string }) {
   return (

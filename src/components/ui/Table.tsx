@@ -15,10 +15,10 @@ export function Table({
   return (
     <div className="overflow-x-auto">
       <table className={cn('text-body-sm w-full min-w-[32rem] border-collapse', className)}>
-        <thead className="border-brand-blue/30 bg-brand-blue-soft text-brand-blue-deep font-display text-caption border-b text-left">
+        <thead className="border-border bg-surface-muted/70 text-ink-muted font-display text-caption border-b text-left">
           {head}
         </thead>
-        <tbody className="divide-border [&>tr:hover]:bg-surface-muted divide-y [&>tr]:transition-colors">
+        <tbody className="divide-border [&>tr:hover]:bg-brand-blue/5 divide-y [&>tr]:transition-colors">
           {children}
         </tbody>
       </table>
@@ -36,7 +36,10 @@ export function TH({
   className?: string;
 }) {
   return (
-    <th scope="col" className={cn('px-4 py-3 font-medium', numeric && 'text-right', className)}>
+    <th
+      scope="col"
+      className={cn('px-3 py-2 font-medium whitespace-nowrap', numeric && 'text-right', className)}
+    >
       {children}
     </th>
   );
@@ -52,8 +55,13 @@ export function TD({
   className?: string;
 }) {
   return (
-    // h-12 pins the spec's 48px row height; padding alone drifts with content.
-    <td className={cn('h-12 px-4 py-3', numeric && 'text-right font-mono tabular-nums', className)}>
+    <td
+      className={cn(
+        'h-10 px-3 py-2 align-middle',
+        numeric && 'text-right whitespace-nowrap tabular-nums',
+        className,
+      )}
+    >
       {children}
     </td>
   );

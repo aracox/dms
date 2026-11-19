@@ -16,15 +16,18 @@ export function DesktopSidebar({ role }: { role: AppRole | null }) {
   const { hidden } = useSidebar();
 
   return (
-    <aside className={cn('app-sidebar hidden shrink-0 py-4 lg:block', hidden ? 'px-2' : 'px-4')}>
+    <aside className={cn('app-sidebar hidden shrink-0 py-3 lg:block', hidden ? 'px-2' : 'px-3')}>
       <div
-        className={cn('mb-4 flex items-center gap-2', hidden ? 'flex-col' : 'justify-between px-3')}
+        className={cn(
+          'mb-4 flex min-h-8 items-center gap-2',
+          hidden ? 'flex-col' : 'justify-between px-2',
+        )}
       >
         <Link
           href="/dashboard"
           aria-label={t('app.name')}
           className={cn(
-            'flex min-w-0 items-center gap-2 text-sm font-semibold text-white',
+            'flex min-w-0 items-center gap-2 text-sm font-medium text-white',
             hidden && 'justify-center',
           )}
         >

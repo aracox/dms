@@ -27,6 +27,22 @@ async function main() {
     // seed.sql manages its own begin/commit.
     await client.query(sql);
 
+    const { rows: missingSettings } = await client.query<{ key: string; segment: string }>(`
+      select required.key, segments.segment
+      from (values ('property_name'), ('owner_name'), ('payment_bank'), ('property_address'))
+        as required(key)
+      cross join unnest(enum_range(null::property_segment)) as segments(segment)
+      left join segment_settings s
+        on s.key = required.key and s.segment = segments.segment
+      where s.key is null
+    `);
+    if (missingSettings.length > 0) {
+      throw new Error(
+        'Missing document settings: ' +
+          missingSettings.map(({ key, segment }) => `${segment}.${key}`).join(', '),
+      );
+    }
+
     const { rows } = await client.query<{
       total: string;
       real_rooms: string;

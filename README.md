@@ -84,8 +84,8 @@ npx vitest run -t "excludes the T01 payment from collected revenue"
 | Variable                        | Where            | Purpose                                    |
 | ------------------------------- | ---------------- | ------------------------------------------ |
 | `NEXT_PUBLIC_SUPABASE_URL`      | browser + server | Project URL                                |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | browser + server | Anon key; RLS applies                      |
-| `SUPABASE_SERVICE_ROLE_KEY`     | **server only**  | Bypasses RLS. Seeding and system jobs      |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | browser + server | Publishable key; RLS applies (legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` also supported) |
+| `SUPABASE_SERVICE_ROLE_KEY`     | **server only**  | Secret (`sb_secret_…`) or legacy service-role key. Bypasses RLS for admin tasks and system jobs |
 | `SUPABASE_DB_URL`               | scripts only     | Direct Postgres URI for `db:push` / `seed` |
 | `NEXT_PUBLIC_SITE_URL`          | optional         | Public origin for auth redirects           |
 

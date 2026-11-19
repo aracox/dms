@@ -137,7 +137,7 @@ export function ExpenseYearCharts({
                 aria-label={labels.chooseCategory}
                 value={compared}
                 onChange={(event) => setCompared(event.target.value as CommonExpenseCategory)}
-                className="bg-surface h-9 w-auto"
+                className="h-9 w-auto"
               >
                 {CATEGORY_RING.map((slot) => (
                   <option key={slot.category} value={slot.category}>

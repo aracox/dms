@@ -20,7 +20,7 @@ export function UserMenu({
   const t = useTranslations();
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-3">
       <Link
         href="/profile"
         aria-label={t('nav.profile')}

@@ -58,7 +58,7 @@ export function YearStepper({
   return (
     <nav
       aria-label={navigationLabel}
-      className="border-border bg-surface flex h-9 items-stretch overflow-hidden rounded-md border"
+      className="glass-surface border-border flex h-9 items-stretch overflow-hidden rounded-md border"
     >
       {step('previous', onPrevious, previousLabel)}
       <span

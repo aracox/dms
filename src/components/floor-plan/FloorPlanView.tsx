@@ -115,7 +115,7 @@ export function FloorPlanView({
                 'disabled:cursor-not-allowed disabled:opacity-35',
                 isActive
                   ? 'border-brand-blue bg-brand-blue text-white'
-                  : 'border-border bg-surface text-ink-muted enabled:hover:text-ink',
+                  : 'glass-surface border-border text-ink-muted enabled:hover:text-ink',
               )}
             >
               {t('floorPlan.floor', { floor: candidate.floor })}

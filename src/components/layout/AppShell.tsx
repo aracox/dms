@@ -32,8 +32,11 @@ export async function AppShell({
   return (
     <SidebarProvider>
       <AppFrame>
-        <header className="app-toolbar border-border bg-surface sticky top-0 z-10 border-b">
-          <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+        <a href="#main-content" className="skip-link">
+          {t('nav.skipToContent')}
+        </a>
+        <header className="app-toolbar glass border-border sticky top-0 z-10 border-b">
+          <div className="flex min-h-13 items-center justify-between gap-3 px-4 py-2 lg:px-6">
             <div className="flex min-w-0 items-center gap-1 sm:gap-2">
               <MobileNavigation role={profile.role} />
               <Link
@@ -41,8 +44,10 @@ export async function AppShell({
                 aria-label={t('app.name')}
                 className="text-ink flex min-w-0 items-center gap-2"
               >
-                <AppLogo size={28} />
-                <span className="font-display text-h4 hidden truncate font-semibold sm:inline">
+                <span className="lg:hidden">
+                  <AppLogo size={24} />
+                </span>
+                <span className="font-display text-body-sm lg:text-ink-muted hidden truncate font-medium sm:inline">
                   {t('app.name')}
                 </span>
               </Link>
@@ -59,7 +64,11 @@ export async function AppShell({
         <div className="app-body flex flex-col lg:flex-row">
           <DesktopSidebar role={profile.role} />
 
-          <main className="app-workspace bg-surface relative min-w-0 flex-1 px-4 py-6 lg:px-8 lg:py-8">
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="app-workspace relative min-w-0 flex-1 px-4 py-5 lg:px-6 lg:py-6"
+          >
             {/* Covers the content only; the sidebar and toolbar never reload. */}
             <Suspense fallback={null}>
               <RouteChangeIndicator />
@@ -83,10 +92,10 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div>
+    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="text-backdrop min-w-0 rounded-md">
         <h1 className="text-ink font-display text-h2">{title}</h1>
-        {description ? <p className="text-ink-muted text-body-sm mt-1">{description}</p> : null}
+        {description ? <p className="text-ink-muted text-caption mt-1">{description}</p> : null}
       </div>
       {action}
     </div>

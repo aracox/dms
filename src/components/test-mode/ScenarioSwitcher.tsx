@@ -45,7 +45,7 @@ export function ScenarioSwitcher({ currentScenario }: { currentScenario: TestSce
                 'text-caption rounded-md border px-2.5 py-1.5 font-medium disabled:opacity-60',
                 currentScenario === scenario
                   ? 'border-brand-blue bg-brand-blue text-white'
-                  : 'border-border bg-surface text-ink-muted hover:text-ink',
+                  : 'glass-surface border-border text-ink-muted hover:text-ink',
               )}
             >
               {t(`testMode.scenarios.${scenario}`)}

@@ -1,8 +1,8 @@
 import { useTranslations } from 'next-intl';
 
-import { buttonClasses } from '@/components/ui/Button';
 import { Link } from '@/i18n/navigation';
 import { SEGMENT_VIEWS, type SegmentView } from '@/lib/reporting/segments';
+import { cn } from '@/lib/utils/cn';
 
 /**
  * Picks which slice of the property a page reports on.
@@ -31,7 +31,7 @@ export function SegmentSwitcher({
     <div
       role="group"
       aria-label={t('segment.filterLabel')}
-      className="border-border bg-surface-sunken inline-flex gap-1 rounded-md border p-1"
+      className="glass-surface border-border inline-flex shrink-0 gap-0.5 rounded-md border p-0.5 [--glass-fill:var(--color-surface-sunken)]"
     >
       {SEGMENT_VIEWS.map((view) => {
         const active = view === current;
@@ -41,7 +41,10 @@ export function SegmentSwitcher({
             key={view}
             href={{ pathname, query: view === 'all' ? query : { ...query, segment: view } }}
             aria-current={active ? 'true' : undefined}
-            className={buttonClasses(active ? 'primary' : 'ghost', 'sm')}
+            className={cn(
+              'text-caption inline-flex h-8 items-center rounded-sm px-3 font-medium whitespace-nowrap transition-colors',
+              active ? 'bg-surface text-ink shadow-sm' : 'text-ink-muted hover:text-ink',
+            )}
           >
             {view === 'all' ? t('segment.wholeProperty') : t(`segment.${view}`)}
           </Link>

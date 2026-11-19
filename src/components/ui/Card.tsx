@@ -2,13 +2,7 @@ import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/utils/cn';
 
-/**
- * Surface container, per design/questui-DESIGN.md's card spec.
- *
- * `accent` adds the 2px top border the system reserves for headline cards.
- * `elevated` raises the shadow and fades in the accent glow on hover over
- * 300ms -- the spec's preferred timing (Don't #9: no faster, no flashier).
- */
+/** Content surface that follows the shared glass transparency preference. */
 export function Card({
   className,
   accent,
@@ -23,11 +17,9 @@ export function Card({
   return (
     <section
       className={cn(
-        'bg-surface overflow-hidden rounded-xl border',
-        elevated
-          ? 'border-brand-yellow/40 hover:shadow-glow shadow-lg transition-shadow duration-300'
-          : 'border-border shadow-sm',
-        accent && 'border-t-brand-yellow border-t-2',
+        'glass-surface overflow-hidden rounded-lg border',
+        elevated ? 'border-border shadow-lg' : 'border-border',
+        accent && 'border-t-brand-blue border-t-2',
         className,
       )}
     >
@@ -50,24 +42,21 @@ export function CardHeader({
   return (
     <header
       className={cn(
-        'border-brand-blue-deep bg-brand-blue flex items-start justify-between gap-4 border-b px-6 py-4',
+        'border-border flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3',
         className,
       )}
     >
       <div className="min-w-0">
-        <h2 className="font-display text-h4 font-semibold text-white">{title}</h2>
-        {description ? <p className="text-caption mt-1 text-white/85">{description}</p> : null}
+        <h2 className="text-ink font-display text-h4 font-medium">{title}</h2>
+        {description ? <p className="text-ink-muted text-caption mt-1">{description}</p> : null}
       </div>
-      {/* Header controls sit on the brand-blue band, so give them a white face. */}
-      {action ? (
-        <div className="[&_a]:bg-surface [&_button]:bg-surface shrink-0">{action}</div>
-      ) : null}
+      {action ? <div className="shrink-0">{action}</div> : null}
     </header>
   );
 }
 
 export function CardBody({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn('p-6', className)}>{children}</div>;
+  return <div className={cn('p-4', className)}>{children}</div>;
 }
 
 /** Label/value row. The workhorse of the room detail panels. */

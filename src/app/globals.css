@@ -1,217 +1,135 @@
 @import 'tailwindcss';
 
-/*
- * Palette. Defined once here; components use the semantic tokens
- * (bg-status-paid, text-brand-blue) rather than raw hex, so a re-theme is a
- * change to this file alone.
- *
- * Earth tones from the owner's reference ("Mona Lisa": olive #727F4B, sage
- * #A9A569, mustard #E9C468, brown #92692E, dark brown #764B1C, near-black
- * #352524). The token names are roles, not hues, and predate this palette:
- *   brand-blue   = primary (olive); its -soft/-deep are the dark-brown family
- *                  used for info chips, table headers and links, so they never
- *                  blur into paid's olive
- *   brand-green  = success / paid (leaf olive)
- *   brand-yellow = warning / due (mustard) brand-red    = danger / overdue (brick)
- *   brand-brown  = occupied, secondary chart series
- * Red is not in the reference; overdue keeps a warm brick red on purpose so an
- * unpaid bill still reads as a warning. Primary is a shade darker than the
- * reference olive so white text on it passes 4.5:1.
- */
+/* Compact workspace: neutral surfaces, clear ink, restrained teal accents. */
 @theme {
-  --color-brand-blue: rgb(103 115 63);
-  --color-brand-yellow: rgb(233 196 104);
-  --color-brand-green: rgb(107 128 67);
-  --color-brand-red: rgb(181 69 47);
-  --color-brand-brown: rgb(146 105 46);
+  --color-brand-blue: #006b7c;
+  --color-brand-blue-soft: #e1f4f7;
+  --color-brand-blue-deep: #005765;
+  --color-brand-yellow: #fed766;
+  --color-brand-yellow-soft: #fff2c4;
+  --color-brand-yellow-deep: #795100;
+  --color-brand-green: #006b62;
+  --color-brand-green-soft: #e8f6ef;
+  --color-brand-green-deep: #006054;
+  --color-brand-red: #b72a32;
+  --color-brand-red-soft: #fff0f0;
+  --color-brand-red-deep: #a3202a;
+  --color-brand-brown: #5964a0;
+  --color-brand-brown-soft: #eef0fb;
+  --color-brand-brown-deep: #414d87;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f7f8fa;
+  --color-surface-sunken: #eef1f4;
+  --color-border: #e2e6ec;
+  --color-border-strong: #b4becb;
+  --color-ink: #0b132b;
+  --color-ink-muted: #535b70;
+  --color-ink-subtle: #657087;
+  --color-brand-coral: #fe4a49;
+  --color-brand-teal: #009fb7;
+  --color-brand-teal-hover: #20afc1;
 
-  /* Tints, for fills behind dark text. */
-  --color-brand-blue-soft: rgb(238 232 229);
-  --color-brand-yellow-soft: rgb(251 243 220);
-  --color-brand-green-soft: rgb(236 241 226);
-  --color-brand-red-soft: rgb(247 227 221);
-  --color-brand-brown-soft: rgb(243 234 219);
+  /* Retain distinct series and category colors for report charts. */
+  --color-chart-recurring: #006b7c;
+  --color-chart-adhoc: #bf7200;
+  --color-chart-cat-1: #006b7c;
+  --color-chart-cat-2: #5278c5;
+  --color-chart-cat-3: #bf7200;
+  --color-chart-cat-4: #27865a;
+  --color-chart-cat-5: #c34c57;
+  --color-chart-cat-6: #895ab2;
+  --color-chart-cat-7: #85720b;
 
-  /* Shades, for text and borders that must pass contrast on a tint. */
-  --color-brand-blue-deep: rgb(74 50 46);
-  --color-brand-yellow-deep: rgb(122 92 18);
-  --color-brand-green-deep: rgb(67 85 42);
-  --color-brand-red-deep: rgb(138 46 29);
-  --color-brand-brown-deep: rgb(118 75 28);
+  --font-display: var(--font-prompt), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-prompt), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-google-sans-code), ui-monospace, monospace;
 
-  /*
-   * Two-series chart pair for the expenses report (recurring vs non-recurring).
-   * Earth tones stepped until they pass the dataviz palette validator against
-   * the cream surface: CVD ΔE 11.2, normal-vision ΔE 20.9. The ochre is under
-   * 3:1 on cream, so charts using it must also show a legend and a table view.
-   */
-  --color-chart-recurring: rgb(79 122 42);
-  --color-chart-adhoc: rgb(208 140 28);
-
-  /*
-   * Seven-slot categorical set for the expense-category donut, one fixed
-   * color per category. Validated as a ring (slot 7 wraps to slot 1) against
-   * the cream surface: CVD ΔE >= 11.3, normal-vision ΔE >= 18.5. The ring
-   * order IS the safety mechanism -- draw slices in slot order, never sorted
-   * by size. Slot 3 is the ochre above, so non-recurring matches the bar chart.
-   * Ochre and khaki are under 3:1, so the donut always carries a value legend.
-   */
-  --color-chart-cat-1: rgb(79 122 42); /* common_electricity -- olive */
-  --color-chart-cat-2: rgb(59 111 192); /* common_water -- blue */
-  --color-chart-cat-3: rgb(208 140 28); /* other (non-recurring) -- ochre */
-  --color-chart-cat-4: rgb(0 137 123); /* housekeeping -- teal */
-  --color-chart-cat-5: rgb(192 80 42); /* gardening -- terracotta */
-  --color-chart-cat-6: rgb(123 74 160); /* internet -- plum */
-  --color-chart-cat-7: rgb(184 154 16); /* transformer_fee -- khaki */
-
-  /* Warm cream work surfaces, sand separators, dark-brown ink. */
-  --color-surface: rgb(255 253 248);
-  --color-surface-muted: rgb(248 244 235);
-  --color-surface-sunken: rgb(240 234 221);
-  --color-border: rgb(230 223 209);
-  --color-border-strong: rgb(207 196 175);
-  --color-ink: rgb(53 37 36);
-  --color-ink-muted: rgb(110 95 85);
-  --color-ink-subtle: rgb(151 138 126);
-
-  /*
-   * Must reference the next/font variable, not the family name: naming
-   * 'Kanit' as a string only picks it up if the user happens to have it
-   * installed locally, silently bypassing the self-hosted, subsetted font. The
-   * variables are set on <html> in [locale]/layout.tsx.
-   *
-   * Noto Sans Thai still sits second in every stack. Kanit ships the thai
-   * subset, so Noto is no longer the face carrying Thai -- it is insurance if a
-   * face fails to load, and is not preloaded. Browsers resolve font-family per
-   * glyph, so keeping it costs nothing.
-   */
-  --font-display:
-    var(--font-kanit), var(--font-noto-sans-thai), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-kanit), var(--font-noto-sans-thai), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-google-sans-code), ui-monospace, 'Cascadia Code', monospace;
-}
-
-/*
- * Type ramp. Sizes and line heights follow design/questui-DESIGN.md.
- * Dense surfaces (tables, filter bars, badges) use body-sm and caption -- the
- * system's own small end -- because this app trades motion for information
- * density; body/body-lg are for prose and field values.
- */
-@theme {
   --text-display: 40px;
-  --text-display--line-height: 1.15;
-  --text-display--font-weight: 700;
-
+  --text-display--line-height: 1.3;
+  --text-display--font-weight: 500;
   --text-h1: 32px;
-  --text-h1--line-height: 1.2;
-  --text-h1--font-weight: 700;
-
-  --text-h2: 24px;
-  --text-h2--line-height: 1.25;
+  --text-h1--line-height: 1.4;
+  --text-h1--font-weight: 500;
+  --text-h2: 22px;
+  --text-h2--line-height: 1.4;
   --text-h2--font-weight: 600;
-
-  --text-h3: 20px;
-  --text-h3--line-height: 1.3;
-  --text-h3--font-weight: 600;
-
-  --text-h4: 16px;
-  --text-h4--line-height: 1.35;
-  --text-h4--font-weight: 400;
-
+  --text-h3: 18px;
+  --text-h3--line-height: 1.5;
+  --text-h3--font-weight: 500;
+  --text-h4: 14px;
+  --text-h4--line-height: 1.5;
+  --text-h4--font-weight: 500;
   --text-body-lg: 18px;
-  --text-body-lg--line-height: 1.7;
-
+  --text-body-lg--line-height: 1.75;
   --text-body: 16px;
-  --text-body--line-height: 1.7;
-
+  --text-body--line-height: 1.75;
   --text-body-sm: 14px;
-  --text-body-sm--line-height: 1.6;
-
+  --text-body-sm--line-height: 1.5;
   --text-caption: 12px;
-  --text-caption--line-height: 1.4;
-  --text-caption--font-weight: 500;
-
+  --text-caption--line-height: 1.5;
+  --text-caption--font-weight: 400;
   --text-code: 14px;
-  --text-code--line-height: 1.6;
-}
+  --text-code--line-height: 1.65;
 
-/*
- * Radius. Subtle and angular, per the design system: chips 2px, controls and
- * cards 4px, overlays 6px, panels 8px.
- */
-@theme {
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 6px;
-  --radius-xl: 8px;
-}
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --shadow-sm: 0 2px 6px rgb(11 19 43 / 0.04);
+  --shadow-md: 0 3px 12px rgb(11 19 43 / 0.06);
+  --shadow-lg: 0 12px 40px rgb(11 19 43 / 0.09);
+  --shadow-xl: 0 20px 64px rgb(11 19 43 / 0.09), 0 3px 12px rgb(11 19 43 / 0.06);
+  --shadow-glow: 0 0 0 3px rgb(0 107 124 / 0.15);
+  --blur-glass: 24px;
 
-/*
- * Elevation. The design system specifies gold-tinted shadows throughout; on a
- * light surface a coloured shadow under every card reads as smudge rather than
- * craft, so the ladder is neutral and the accent glow is kept for the state
- * the system actually reserves it for -- active/selected (Do #2).
- */
-@theme {
-  --shadow-sm: 0 1px 3px rgb(24 30 40 / 0.06);
-  --shadow-md: 0 2px 8px rgb(24 30 40 / 0.08);
-  --shadow-lg: 0 4px 16px rgb(24 30 40 / 0.1);
-  --shadow-xl: 0 8px 32px rgb(24 30 40 / 0.14);
-  --shadow-glow: 0 0 0 3px rgb(246 194 74 / 0.35);
-}
-
-/* Frosted surfaces share one user-adjustable opacity value. */
-@theme {
-  --blur-glass: 12px;
+  --color-status-vacant: #f4f4f8;
+  --color-status-vacant-ink: #535b70;
+  --color-status-vacant-edge: #b4bac9;
+  --color-status-paid: #e8f6ef;
+  --color-status-paid-ink: #006054;
+  --color-status-paid-edge: #5caa90;
+  --color-status-due: #fff2c4;
+  --color-status-due-ink: #795100;
+  --color-status-due-edge: #c49b34;
+  --color-status-overdue: #fff0f0;
+  --color-status-overdue-ink: #a3202a;
+  --color-status-overdue-edge: #d56c75;
+  --color-status-occupied: #eef0fb;
+  --color-status-occupied-ink: #414d87;
+  --color-status-occupied-edge: #8992c0;
+  --color-status-maintenance: #e9edf3;
+  --color-status-maintenance-ink: #46536c;
+  --color-status-maintenance-edge: #8794aa;
 }
 
 :root {
-  --glass-opacity: 72%;
+  color-scheme: light;
+  --glass-opacity: 76%;
 }
 
-/*
- * Only the standard property is written here, never -webkit-backdrop-filter:
- * Lightning CSS adds the prefix from the browserslist targets, and writing it
- * by hand makes it treat the standard declaration as redundant and drop it --
- * which silently disables glass in Firefox, the one engine that supports the
- * unprefixed property and not the prefixed one.
- */
+/* Lightning CSS supplies the backdrop prefix for the supported browsers. */
 @utility glass {
-  background-color: color-mix(in srgb, var(--color-surface) var(--glass-opacity, 72%), transparent);
-  backdrop-filter: blur(var(--glass-blur, var(--blur-glass))) saturate(1.8);
+  background-color: color-mix(in srgb, var(--color-surface) var(--glass-opacity, 76%), transparent);
+  backdrop-filter: blur(var(--glass-blur, var(--blur-glass))) saturate(1.1);
 }
 
-/* Applied to the originating element; styles its ::backdrop. */
+/* Components share the appearance slider without fading their text or icons. */
+@utility glass-surface {
+  background-color: var(--glass-fill, var(--color-surface));
+  background-color: color-mix(
+    in srgb,
+    var(--glass-fill, var(--color-surface)) var(--glass-opacity, 76%),
+    transparent
+  );
+}
+
 @utility glass-scrim {
   &::backdrop {
-    /*
-     * The var()s carry literal fallbacks on purpose: ::backdrop did not
-     * inherit custom properties from its originating element before Chrome
-     * 122, so the @theme tokens can resolve to nothing in this one place.
-     */
-    background-color: color-mix(in srgb, var(--color-ink, rgb(53 37 36)) 35%, transparent);
-    backdrop-filter: blur(var(--blur-glass, 12px));
+    background-color: rgb(11 19 43 / 0.3);
+    backdrop-filter: blur(5px);
   }
 }
 
-/*
- * Drawer choreography. A native <dialog> opened with showModal() is painted in
- * the top layer on the same frame, so without this it just appears -- which is
- * the "immediate" feel. Two pieces are needed, and both are easy to miss:
- *
- *   - @starting-style supplies the pre-open value. A dialog goes from
- *     display:none straight to [open], and an element being rendered for the
- *     first time has no previous value to interpolate from, so the entrance is
- *     instant without it.
- *   - display and overlay are transitioned with allow-discrete so the panel
- *     stays painted, and stays in the top layer, for the whole exit instead of
- *     being cut to display:none the moment close() runs. Skip these and the
- *     open animates but the close still snaps.
- *
- * 300ms matches the design system's stated preference (Don't #9: subtle fades,
- * no faster and no flashier). The global prefers-reduced-motion block below
- * collapses all of it to ~0 without any extra handling here.
- */
 @utility drawer-panel {
   translate: 100% 0;
   transition:
@@ -249,15 +167,12 @@
   }
 }
 
-/*
- * Fallbacks. Translucency without a blur behind it lets scrolling content
- * collide with the header text, so drop to a solid surface when the filter is
- * unavailable -- or when the user has asked for less transparency. These sit
- * outside @layer on purpose, so they win over the generated utility.
- */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass {
     background-color: var(--color-surface);
+  }
+  .glass-surface {
+    background-color: var(--glass-fill, var(--color-surface));
   }
 }
 
@@ -266,89 +181,106 @@
     background-color: var(--color-surface);
     backdrop-filter: none;
   }
-
+  html:not([data-glass-preference='custom']) .glass-surface {
+    background-color: var(--glass-fill, var(--color-surface));
+  }
   html:not([data-glass-preference='custom']) .glass-scrim::backdrop {
     backdrop-filter: none;
   }
 }
 
-/*
- * Spacing follows the 8px base unit from the design system. No new tokens are
- * needed -- Tailwind's default scale already lands on it:
- *   xs 4px = 1 · sm 8px = 2 · md 16px = 4 · lg 24px = 6
- *   xl 32px = 8 · 2xl 48px = 12 · 3xl 64px = 16
- */
-
-/*
- * Room status colours. Colour is never the only signal -- every consumer pairs
- * these with an icon and a text label (see components/status/status-styles.ts).
- */
-@theme {
-  --color-status-vacant: rgb(242 239 234);
-  --color-status-vacant-ink: rgb(110 99 88);
-  --color-status-vacant-edge: rgb(210 203 192);
-
-  --color-status-paid: rgb(236 241 226);
-  --color-status-paid-ink: rgb(67 85 42);
-  --color-status-paid-edge: rgb(114 127 75);
-
-  --color-status-due: rgb(251 243 220);
-  --color-status-due-ink: rgb(122 92 18);
-  --color-status-due-edge: rgb(233 196 104);
-
-  --color-status-overdue: rgb(247 227 221);
-  --color-status-overdue-ink: rgb(138 46 29);
-  --color-status-overdue-edge: rgb(181 69 47);
-
-  --color-status-occupied: rgb(243 234 219);
-  --color-status-occupied-ink: rgb(118 75 28);
-  --color-status-occupied-edge: rgb(146 105 46);
-
-  --color-status-maintenance: rgb(236 232 226);
-  --color-status-maintenance-ink: rgb(79 70 62);
-  --color-status-maintenance-edge: rgb(156 145 133);
-}
-
-html {
-  color-scheme: light;
-}
-
 body {
+  margin: 0;
   background-color: var(--color-surface-muted);
-  background-image:
-    radial-gradient(ellipse at 100% 0%, rgb(169 165 105 / 0.55), transparent 60%),
-    radial-gradient(ellipse at 0% 60%, rgb(146 105 46 / 0.6), transparent 65%),
-    linear-gradient(165deg, #352524 5%, #5a3a22 35%, #764b1c 72%, #92692e);
+  background-image: none;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
   background-attachment: fixed;
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
 }
 
+html[data-background-image='visible'] body {
+  background-image: url('/sabai-hub-watercolor.webp');
+  background-color: #fff3df;
+}
+
 .app-frame {
   min-height: 100dvh;
+}
+.app-workspace {
+  --glass-blur: 2px;
+}
+
+/* Backplates are needed only when the optional illustration is visible. */
+html[data-background-image='visible'] .text-backdrop,
+html[data-background-image='visible']
+  .app-workspace
+  :is(h1, h2, h3, h4, h5, h6, p, label, legend, dt):not(
+    :where(.glass, .glass-surface, .text-backdrop) *
+  ) {
+  background-color: rgb(255 255 255 / 0.96);
+}
+
+html[data-background-image='visible']
+  .app-workspace
+  :is(h1, h2, h3, h4, h5, h6, p, label, legend, dt):not(
+    :where(.glass, .glass-surface, .text-backdrop) *
+  ) {
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+html[data-background-image='visible'] .text-backdrop {
+  padding: 8px 12px;
+}
+
+.app-sidebar {
+  border-right: 1px solid var(--color-border);
+}
+.sidebar-navigation a {
+  min-height: 40px;
+  transition: background-color 160ms ease;
+}
+.sidebar-navigation a[aria-current='page'] {
+  box-shadow: inset 3px 0 var(--color-brand-blue);
+}
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 24px;
+  z-index: 50;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-brand-blue);
+}
+.skip-link:focus {
+  top: 24px;
 }
 
 @media (min-width: 1024px) {
   .app-frame {
     display: grid;
-    grid-template-columns: 232px minmax(0, 1fr);
+    grid-template-columns: 208px minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     min-height: 100dvh;
+    width: 100%;
+    overflow: clip;
   }
-
   .app-body {
     display: contents;
   }
-
   .app-frame[data-sidebar-hidden='true'] {
-    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-columns: 60px minmax(0, 1fr);
   }
-
   .app-toolbar {
     grid-column: 2;
     grid-row: 1;
   }
-
   .app-sidebar {
     grid-column: 1;
     grid-row: 1 / span 2;
@@ -358,77 +290,61 @@ body {
     align-self: start;
     max-height: 100dvh;
     overflow-y: auto;
+    background: #172033;
+    min-height: 100dvh;
   }
-
-  /* Section headings: small but bold mustard, so they read as headings, not faded text. */
-  .app-sidebar .sidebar-navigation h2 {
-    color: var(--color-brand-yellow);
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: none;
-  }
-
-  .app-sidebar .sidebar-navigation > div {
-    border-color: rgb(255 255 255 / 0.18);
-  }
-
-  /*
-   * Compact spacing so the whole menu fits a laptop screen without scrolling.
-   * Desktop only -- the mobile drawer keeps the roomier, touch-sized rows.
-   * Unlayered, so these beat the space-y/py utilities on the same elements.
-   */
   .app-sidebar .sidebar-navigation > div:not(:last-child) {
     margin-block-end: 0.5rem;
   }
-
   .app-sidebar .sidebar-navigation > div[class*='border-t'] {
     padding-top: 0.5rem;
   }
-
   .app-sidebar .sidebar-navigation h2 {
-    padding-bottom: 0.125rem;
-  }
-
-  .app-sidebar .sidebar-navigation ul > li + li {
-    margin-top: 0;
-  }
-
-  .app-sidebar .sidebar-navigation a {
-    padding-top: 0.3125rem;
-    padding-bottom: 0.3125rem;
-  }
-
-  .app-sidebar .sidebar-navigation a {
-    color: white;
-    border-radius: 6px;
-    font-weight: 400;
-  }
-
-  .app-sidebar .sidebar-navigation a:hover {
-    background: rgb(255 255 255 / 0.12);
-  }
-
-  .app-sidebar .sidebar-navigation a[aria-current='page'] {
-    background: rgb(255 255 255 / 0.22);
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.15);
+    color: #94a3b8;
+    padding-bottom: 0.25rem;
     font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
   }
-
+  .app-sidebar .sidebar-navigation > div {
+    border-color: rgb(255 255 255 / 0.12);
+  }
+  .app-sidebar .sidebar-navigation a {
+    color: #c7cfe0;
+    min-height: 32px;
+    padding-block: 5px;
+  }
+  .app-sidebar .sidebar-navigation a:hover {
+    background: rgb(255 255 255 / 0.08);
+    color: white;
+  }
+  .app-sidebar .sidebar-navigation a[aria-current='page'] {
+    background: #263c4d;
+    color: #83e0e5;
+    box-shadow: none;
+  }
+  .app-sidebar :focus-visible {
+    outline-color: #58d5e5;
+  }
   .app-workspace {
     grid-column: 2;
     grid-row: 2;
   }
 }
 
-/*
- * Route-change overlay (RouteChangeIndicator). Transparent at first so a fast
- * navigation never flashes; fades in only if the page is still loading.
- */
-.route-overlay {
-  background-color: color-mix(in srgb, var(--color-surface) 70%, transparent);
-  animation: route-overlay-in 150ms ease-out 250ms both;
+@media (prefers-reduced-transparency: reduce) {
+  body {
+    background: var(--color-surface-muted);
+  }
+  .app-workspace {
+    background: var(--color-surface);
+  }
 }
 
+.route-overlay {
+  background-color: color-mix(in srgb, var(--color-surface) 85%, transparent);
+  animation: route-overlay-in 150ms ease-out 250ms both;
+}
 @keyframes route-overlay-in {
   from {
     opacity: 0;
@@ -437,30 +353,21 @@ body {
     opacity: 1;
   }
 }
-
-/* Visible keyboard focus. The floor plan is fully keyboard navigable. */
 :focus-visible {
   outline: 2px solid var(--color-brand-blue);
-  outline-offset: 2px;
+  outline-offset: 4px;
 }
-
-/*
- * The floor-plan room groups are the one exception: they draw their own focus
- * ring in SVG (see FloorPlanSvg). A CSS outline on an SVG <g> is drawn around
- * the group's bounding box -- which includes the selected room's 4px stroke and
- * every text child -- and outline-offset pushes it further out again, so the
- * ring lands outside the room and over its neighbour instead of hugging it. It
- * also ignores the rect's rx, so the corners never match.
- *
- * This has to live here, not as an `outline-none` utility on the element: the
- * rule above is unlayered, Tailwind's utilities are in @layer utilities, and
- * unlayered CSS wins over layered regardless of source order.
- */
 svg g[role='button']:focus-visible {
   outline: none;
 }
-
-/* The spec asks for information density over motion; keep transitions short. */
+@media (pointer: coarse) {
+  input:not([type='checkbox'], [type='radio'], [type='range']),
+  select,
+  textarea {
+    font-size: 16px;
+    min-height: 48px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -469,12 +376,19 @@ svg g[role='button']:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
-
 @media print {
   body {
     background: white;
   }
-
+  .app-frame {
+    display: block;
+    margin: 0;
+    width: 100%;
+    border: 0;
+    box-shadow: none;
+  }
+  .app-sidebar,
+  .app-toolbar,
   .no-print {
     display: none !important;
   }

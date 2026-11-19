@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "Baan Chomplern",
-    "shortName": "Baan Chomplern",
+    "name": "Sabai Hub",
+    "shortName": "Sabai Hub",
     "tagline": "Rooms, contracts, billing and maintenance in one place"
   },
   "appearance": {
@@ -10,9 +10,11 @@
     "transparency": "Glass transparency",
     "solid": "Solid",
     "clear": "Clear",
-    "hint": "Adjusts glass surfaces on this device."
+    "backgroundImage": "Show background image",
+    "hint": "Appearance preferences are saved on this device."
   },
   "nav": {
+    "skipToContent": "Skip to content",
     "menu": "Menu",
     "openMenu": "Open navigation menu",
     "closeMenu": "Close navigation menu",

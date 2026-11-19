@@ -12,15 +12,7 @@ const TONE_ACCENT: Record<StatTone, string> = {
   red: 'text-brand-red-deep',
 };
 
-const TONE_SURFACE: Record<StatTone, string> = {
-  neutral: 'bg-surface-muted',
-  blue: 'bg-brand-blue-soft/50',
-  green: 'bg-brand-green-soft/50',
-  yellow: 'bg-brand-yellow-soft/50',
-  red: 'bg-brand-red-soft/50',
-};
-
-/** Dashboard metric with a subtle status tint and a clear numeric hierarchy. */
+/** Compact, neutral metric surface; color reinforces the value's meaning. */
 export function StatTile({
   label,
   value,
@@ -37,19 +29,20 @@ export function StatTile({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        'border-border relative overflow-hidden rounded-xl border p-4',
-        TONE_SURFACE[tone],
-        className,
-      )}
-    >
-      <div className="flex items-start justify-between gap-2">
+    <div className={cn('glass-surface border-border min-w-0 rounded-lg border p-4', className)}>
+      <div className="flex min-h-5 items-start justify-between gap-2">
         <p className="text-ink-muted text-caption font-medium">{label}</p>
-        {icon ? <span className="text-ink-subtle">{icon}</span> : null}
+        {icon ? <span className={cn('shrink-0 pt-0.5', TONE_ACCENT[tone])}>{icon}</span> : null}
       </div>
-      <p className={cn('mt-1.5 text-2xl font-semibold tabular-nums', TONE_ACCENT[tone])}>{value}</p>
-      {hint ? <p className="text-ink-subtle text-caption mt-0.5">{hint}</p> : null}
+      <p
+        className={cn(
+          'mt-2 min-w-0 text-2xl leading-8 font-medium break-words tabular-nums',
+          TONE_ACCENT[tone],
+        )}
+      >
+        {value}
+      </p>
+      {hint ? <p className="text-ink-muted text-caption mt-1">{hint}</p> : null}
     </div>
   );
 }

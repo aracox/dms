@@ -94,14 +94,14 @@ export default async function DashboardPage({
         action={<SegmentSwitcher current={view} pathname="/dashboard" />}
       />
 
-      <section aria-labelledby="rooms-heading" className="mb-6">
+      <section aria-labelledby="rooms-heading" className="mb-5">
         <h2
           id="rooms-heading"
-          className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase"
+          className="text-ink-muted font-display text-caption mb-3 font-medium"
         >
           {t('dashboard.rooms')}
         </h2>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-6">
           <StatTile label={t('dashboard.totalRooms')} value={rooms.total_rooms} tone="blue" />
           <StatTile label={t('dashboard.occupied')} value={rooms.occupied} tone="green" />
           <StatTile
@@ -131,14 +131,14 @@ export default async function DashboardPage({
         </div>
       </section>
 
-      <section aria-labelledby="finance-heading" className="mb-6">
+      <section aria-labelledby="finance-heading" className="mb-5">
         <h2
           id="finance-heading"
-          className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase"
+          className="text-ink-muted font-display text-caption mb-3 font-medium"
         >
           {t('dashboard.finance')}
         </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
           <StatTile
             label={t('dashboard.expectedRevenue')}
             value={money(finance.expected_rent)}
@@ -166,10 +166,10 @@ export default async function DashboardPage({
         </div>
       </section>
 
-      <section aria-labelledby="business-overview-heading" className="mb-6">
+      <section aria-labelledby="business-overview-heading" className="mb-5">
         <h2
           id="business-overview-heading"
-          className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase"
+          className="text-ink-muted font-display text-caption mb-3 font-medium"
         >
           {t('dashboard.businessOverview')}
         </h2>
@@ -198,14 +198,14 @@ export default async function DashboardPage({
         />
       </section>
 
-      <section aria-labelledby="tenants-heading" className="mb-6">
+      <section aria-labelledby="tenants-heading" className="mb-5">
         <h2
           id="tenants-heading"
-          className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase"
+          className="text-ink-muted font-display text-caption mb-3 font-medium"
         >
           {t('tenant.title')}
         </h2>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
           <StatTile
             label={t('dashboard.registeredTenants')}
             value={tenants.registered_tenants}
@@ -229,7 +229,7 @@ export default async function DashboardPage({
         </div>
       </section>
 
-      <h2 className="text-ink-muted font-display mb-3 text-[11px] tracking-[1px] uppercase">
+      <h2 className="text-ink-muted font-display text-caption mb-3 font-medium">
         {t('dashboard.operations')}
       </h2>
       <div className="grid gap-4 xl:grid-cols-2">

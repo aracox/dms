@@ -1,7 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { BulkGenerateInvoicesButton } from '@/components/billing/BulkGenerateInvoicesButton';
-import { SegmentBadge } from '@/components/dashboard/SegmentBadge';
 import { SegmentSwitcher } from '@/components/dashboard/SegmentSwitcher';
 import { PageHeader } from '@/components/layout/AppShell';
 import { INVOICE_TONE } from '@/components/room/RoomBillingTab';
@@ -94,13 +93,7 @@ export default async function BillingPage({
         }
       />
 
-      {canGenerate ? (
-        <div className="mb-6">
-          <BulkGenerateInvoicesButton />
-        </div>
-      ) : null}
-
-      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
         <StatTile label={t('billing.activeRooms')} value={activeRooms.length} tone="blue" />
         <StatTile
           label={t('billing.outstanding')}
@@ -111,38 +104,41 @@ export default async function BillingPage({
         <StatTile label={t('billing.withoutInvoice')} value={roomsWithoutInvoice} />
       </div>
 
-      {/* Status chips filter the table only; the tiles above stay whole-list totals. */}
-      <div
-        role="group"
-        aria-label={t('billing.filterByStatus')}
-        className="mb-4 flex flex-wrap items-center gap-2"
-      >
-        {STATUS_FILTERS.filter(
-          (option) => option === 'all' || option === status || statusCounts[option] > 0,
-        ).map((option) => (
-          <Link
-            key={option}
-            href={{
-              pathname: '/billing',
-              query: {
-                ...(view === 'all' ? {} : { segment: view }),
-                ...(option === 'all' ? {} : { status: option }),
-              },
-            }}
-            aria-current={option === status ? 'true' : undefined}
-            className={buttonClasses(option === status ? 'primary' : 'secondary', 'sm')}
-          >
-            {option === 'all'
-              ? t('billing.allStatuses')
-              : option === 'none'
-                ? t('room.noInvoice')
-                : t(`invoiceStatus.${option}`)}
-            <span className="opacity-75">({statusCounts[option]})</span>
-          </Link>
-        ))}
-      </div>
-
       <Card>
+        {/* Status chips filter the table only; the tiles above stay whole-list totals. */}
+        <div className="border-border flex flex-wrap items-center justify-between gap-3 border-b p-3">
+          <div
+            role="group"
+            aria-label={t('billing.filterByStatus')}
+            className="flex flex-wrap items-center gap-1.5"
+          >
+            {STATUS_FILTERS.filter(
+              (option) => option === 'all' || option === status || statusCounts[option] > 0,
+            ).map((option) => (
+              <Link
+                key={option}
+                href={{
+                  pathname: '/billing',
+                  query: {
+                    ...(view === 'all' ? {} : { segment: view }),
+                    ...(option === 'all' ? {} : { status: option }),
+                  },
+                }}
+                aria-current={option === status ? 'true' : undefined}
+                className={buttonClasses(option === status ? 'primary' : 'secondary', 'sm')}
+              >
+                {option === 'all'
+                  ? t('billing.allStatuses')
+                  : option === 'none'
+                    ? t('room.noInvoice')
+                    : t(`invoiceStatus.${option}`)}
+                <span className="opacity-75">({statusCounts[option]})</span>
+              </Link>
+            ))}
+          </div>
+          {canGenerate ? <BulkGenerateInvoicesButton /> : null}
+        </div>
+
         {listedRooms.length === 0 ? (
           <div className="p-4">
             <EmptyState
@@ -155,10 +151,10 @@ export default async function BillingPage({
           </div>
         ) : (
           <Table
+            className="min-w-[42rem]"
             head={
               <tr>
                 <TH>{t('room.roomNumber')}</TH>
-                <TH>{t('segment.column')}</TH>
                 <TH>{t('tenant.title')}</TH>
                 <TH>{t('common.month')}</TH>
                 <TH>{t('common.status')}</TH>
@@ -172,19 +168,19 @@ export default async function BillingPage({
 
               return (
                 <tr key={room.room_id}>
-                  <TD>
+                  <TD className="whitespace-nowrap">
                     <Link
                       href={billingHref}
-                      className="text-brand-blue-deep font-semibold underline"
+                      className="text-brand-blue-deep font-semibold hover:underline"
                     >
                       {room.room_number}
                     </Link>
-                  </TD>
-                  <TD>
-                    <SegmentBadge segment={propertySegment(room.room_type)} />
+                    <span className="text-ink-muted text-caption mt-0.5 block">
+                      {t(`segment.${propertySegment(room.room_type)}`)}
+                    </span>
                   </TD>
                   <TD>{room.tenant_name ?? t('common.notAvailable')}</TD>
-                  <TD>
+                  <TD className="whitespace-nowrap">
                     {room.billing_month
                       ? formatBillingMonth(room.billing_month, typedLocale)
                       : t('common.notAvailable')}

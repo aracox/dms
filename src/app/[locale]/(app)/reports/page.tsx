@@ -96,7 +96,7 @@ export default async function ReportsPage({
   const yearNavigator = (
     <nav
       aria-label={t('reports.yearNavigation')}
-      className="border-border bg-surface flex h-9 items-stretch overflow-hidden rounded-md border"
+      className="glass-surface border-border flex h-9 items-stretch overflow-hidden rounded-md border"
     >
       {stepButton(previousYear, 'previous')}
       <span

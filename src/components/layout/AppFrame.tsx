@@ -9,7 +9,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
   const { hidden } = useSidebar();
 
   return (
-    <div className="app-frame min-h-dvh" data-sidebar-hidden={hidden ? 'true' : undefined}>
+    <div className="app-frame" data-sidebar-hidden={hidden ? 'true' : undefined}>
       {children}
     </div>
   );

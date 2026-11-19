@@ -19,14 +19,14 @@ export default async function LoginPage({
 
   return (
     <main className="flex min-h-dvh items-center justify-center px-4 py-10">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 text-center">
+      <div className="glass border-border w-full max-w-md overflow-hidden rounded-xl border shadow-xl">
+        <div className="border-border border-b px-6 py-8 text-center sm:px-8">
           <AppLogo size={56} className="mx-auto rounded-lg" />
           <h1 className="text-ink font-display text-h3 mt-3">{t('app.name')}</h1>
           <p className="text-ink-muted text-body-sm mt-0.5">{t('auth.signInSubtitle')}</p>
         </div>
 
-        <div className="border-border glass rounded-xl border p-5 shadow-md">
+        <div className="glass-surface px-6 py-7 sm:px-8">
           {passwordChanged ? (
             <p className="border-brand-green bg-brand-green-soft text-brand-green-deep text-caption mb-4 rounded-md border px-3 py-2">
               {t('auth.passwordChangedSignInAgain')}
@@ -35,7 +35,7 @@ export default async function LoginPage({
           <LoginForm />
         </div>
 
-        <div className="mt-4 flex justify-center">
+        <div className="border-border flex justify-center border-t px-6 py-4">
           <LocaleSwitcher />
         </div>
       </div>

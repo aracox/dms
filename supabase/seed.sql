@@ -76,8 +76,21 @@ insert into settings (key, value, description) values
 -- describe the property itself and must not be split.
 insert into settings (key, value, description, is_segment_scoped) values
   ('currency',                '"THB"'::jsonb, 'Display currency', false),
-  ('dormitory', '{"name_th":"บ้านชมเพลิน","name_en":"Baan Chomplern","floors":3,"real_rooms":24}'::jsonb,
+  ('dormitory', '{"name_th":"สบายฮับ","name_en":"Sabai Hub","floors":3,"real_rooms":24}'::jsonb,
     'Property identity shown in headers and on invoices', false);
+
+-- Restore document settings introduced by migrations 0030, 0034 and 0035.
+-- The settings_seed_segments trigger creates both segments for each key.
+insert into settings (key, value, description)
+select 'property_name', value, 'Segment-specific property name shown on contracts and receipts'
+from settings where key = 'dormitory';
+
+insert into settings (key, value, description) values
+  ('owner_name', '{"name_th":"","name_en":"","id_card":"","address":"","phone":""}'::jsonb,
+    'Segment-specific owner identity shown on contracts'),
+  ('payment_bank', '{"bank_name":"","account_number":"","account_name":""}'::jsonb,
+    'Segment-specific bank account shown on contracts'),
+  ('property_address', '""'::jsonb, 'Segment-specific property address shown on contracts');
 
 -- ===========================================================================
 -- Rooms -- all room and house rents are exactly 3,500 THB.

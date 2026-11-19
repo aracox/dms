@@ -49,7 +49,7 @@ export function Drawer({
         // Clicking the backdrop closes; clicking the panel does not.
         if (event.target === dialogRef.current) onClose();
       }}
-      className="glass glass-scrim drawer-panel border-surface/50 text-ink m-0 ml-auto h-full max-h-none w-full max-w-md border-l p-0 shadow-xl [--glass-blur:20px] open:flex open:flex-col"
+      className="glass glass-scrim drawer-panel border-border text-ink m-0 ml-auto h-full max-h-none w-full max-w-md rounded-l-xl border-l p-0 shadow-xl open:flex open:flex-col"
     >
       <header className="border-border flex items-start justify-between gap-4 border-b px-4 py-3">
         <div className="min-w-0">
@@ -67,7 +67,7 @@ export function Drawer({
         </Button>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">{children}</div>
+      <div className="glass-surface min-h-0 flex-1 overflow-y-auto p-4">{children}</div>
 
       {footer ? <footer className="border-border border-t px-4 py-3">{footer}</footer> : null}
     </dialog>

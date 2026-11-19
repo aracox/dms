@@ -3,8 +3,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
 
 /**
- * Shared control box for text inputs and selects: 40px tall, 8px/12px padding,
- * 4px radius, per design/questui-DESIGN.md.
+ * Compact desktop fields with clear borders and visible keyboard focus.
  *
  * One deliberate deviation from the spec: focus keeps the border at 1px and
  * leans on the ring for emphasis instead of thickening to 2px. A width change
@@ -12,17 +11,18 @@ import { cn } from '@/lib/utils/cn';
  * the dense meter/billing forms where fields sit shoulder to shoulder.
  */
 const CONTROL_BASE = [
-  'h-10 w-full rounded-md border bg-surface px-3 py-2 text-body-sm text-ink',
+  'glass-surface h-9 w-full rounded-md border px-3 py-1.5 text-body-sm text-ink',
   'transition-colors duration-150',
   'placeholder:text-ink-subtle',
   'focus:outline-none focus:ring-3',
-  'disabled:cursor-not-allowed disabled:bg-surface-sunken disabled:opacity-60 disabled:hover:border-border',
+  'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-border disabled:[--glass-fill:var(--color-surface-sunken)]',
 ].join(' ');
 
 const CONTROL_TONE = {
-  default: 'border-border hover:border-brand-blue focus:border-brand-blue focus:ring-brand-blue/25',
+  default:
+    'border-border-strong hover:border-brand-blue focus:border-brand-blue focus:ring-brand-blue/20',
   error:
-    'border-brand-red hover:border-brand-red focus:border-brand-red focus:ring-brand-red/25 bg-brand-red-soft/30',
+    'border-brand-red hover:border-brand-red focus:border-brand-red focus:ring-brand-red/25 [--glass-fill:var(--color-brand-red-soft)]',
 } as const;
 
 function controlClasses(invalid: boolean | undefined, className: string | undefined) {
@@ -51,7 +51,7 @@ export function Textarea({
   return (
     <textarea
       aria-invalid={invalid || undefined}
-      className={controlClasses(invalid, cn('h-auto min-h-20 resize-y py-2', className))}
+      className={controlClasses(invalid, cn('h-auto min-h-25 resize-y py-2', className))}
       {...props}
     />
   );
@@ -100,7 +100,7 @@ export function FormField({
 }) {
   return (
     <div className={cn('min-w-0', className)}>
-      <label htmlFor={htmlFor} className="text-ink text-body-sm mb-1.5 block font-medium">
+      <label htmlFor={htmlFor} className="text-ink-muted text-caption mb-1 block font-medium">
         {label}
         {required ? (
           <span className="text-brand-red-deep ml-0.5" aria-hidden="true">

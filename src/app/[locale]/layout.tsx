@@ -1,28 +1,26 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Google_Sans_Code, Kanit, Noto_Sans_Thai } from 'next/font/google';
+import { Google_Sans_Code } from 'next/font/google';
+import localFont from 'next/font/local';
 import { notFound } from 'next/navigation';
+import Script from 'next/script';
 import type { ReactNode } from 'react';
 
 import { routing } from '@/i18n/routing';
+import { BACKGROUND_IMAGE_INIT_SCRIPT } from '@/lib/appearance/glass';
 
 import '../globals.css';
 
-/**
- * Kanit, headings and body both.
- *
- * It carries the `thai` subset, so one typeface sets both scripts and Thai
- * renders in the same face as Latin. Kanit is NOT a variable font -- each
- * weight is a separate file -- so `weight` must list every step the type ramp
- * and the font-* utilities use (400, 500, 600, 700). A weight left out here
- * gets faux-bolded or snapped to the nearest loaded one by the browser.
- */
-const kanit = Kanit({
-  subsets: ['thai', 'latin'],
-  weight: ['400', '500', '600', '700'],
+// The reference's Prompt files carry both Thai and Latin glyphs.
+const prompt = localFont({
+  src: [
+    { path: '../../../assets/fonts/prompt-regular.ttf', weight: '400', style: 'normal' },
+    { path: '../../../assets/fonts/prompt-medium.ttf', weight: '500', style: 'normal' },
+    { path: '../../../assets/fonts/prompt-semibold.ttf', weight: '600', style: 'normal' },
+  ],
   display: 'swap',
-  variable: '--font-kanit',
+  variable: '--font-prompt',
 });
 
 /**
@@ -35,20 +33,6 @@ const googleSansCode = Google_Sans_Code({
   weight: ['400'],
   display: 'swap',
   variable: '--font-google-sans-code',
-});
-
-/**
- * Fallback only, second in every stack (see globals.css). Kanit covers
- * Thai, so this exists purely as insurance against a face failing to load.
- * `preload: false` on purpose: preloading it would ship a font the browser is
- * never expected to need.
- */
-const notoSansThai = Noto_Sans_Thai({
-  subsets: ['thai'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-noto-sans-thai',
 });
 
 export function generateStaticParams() {
@@ -92,10 +76,13 @@ export default async function LocaleLayout({
     // own attributes, not for the tree inside them.
     <html
       lang={locale}
-      className={`${kanit.variable} ${googleSansCode.variable} ${notoSansThai.variable}`}
+      className={`${prompt.variable} ${googleSansCode.variable}`}
       suppressHydrationWarning
     >
       <body className="font-sans antialiased" suppressHydrationWarning>
+        <Script id="background-image-preference" strategy="beforeInteractive">
+          {BACKGROUND_IMAGE_INIT_SCRIPT}
+        </Script>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>

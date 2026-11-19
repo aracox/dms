@@ -26,7 +26,7 @@ export function LocaleSwitcher() {
 
   return (
     <div className="flex items-center gap-1" role="group" aria-label={t('language')}>
-      <Languages size={15} className="text-ink-subtle" aria-hidden="true" />
+      <Languages size={15} className="text-ink-subtle hidden sm:block" aria-hidden="true" />
       {routing.locales.map((candidate) => {
         const isActive = candidate === locale;
 
@@ -35,6 +35,7 @@ export function LocaleSwitcher() {
             key={candidate}
             type="button"
             lang={candidate}
+            aria-label={LOCALE_LABELS[candidate]}
             aria-current={isActive ? 'true' : undefined}
             disabled={isPending}
             onClick={() => {
@@ -43,14 +44,15 @@ export function LocaleSwitcher() {
               });
             }}
             className={cn(
-              'text-caption rounded px-1.5 py-1 font-medium',
+              'text-caption inline-flex min-h-9 items-center rounded-sm px-1.5 py-1.5 font-medium sm:px-2.5',
               isActive
                 ? 'bg-brand-blue-soft text-brand-blue-deep'
                 : 'text-ink-muted hover:bg-surface-sunken hover:text-ink',
               isPending && 'opacity-60',
             )}
           >
-            {LOCALE_LABELS[candidate]}
+            <span className="sm:hidden">{candidate === 'en' ? 'EN' : 'ไทย'}</span>
+            <span className="hidden sm:inline">{LOCALE_LABELS[candidate]}</span>
           </button>
         );
       })}
