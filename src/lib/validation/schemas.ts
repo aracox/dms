@@ -32,6 +32,15 @@ const money = z.number().finite().min(0, 'validation.money.negative');
 
 const positiveMoney = z.number().finite().positive('validation.money.notPositive');
 
+/** A number read off a meter: required -- a blank must never become 0. */
+const meterNumber = z
+  .number({ error: 'validation.required' })
+  .finite()
+  .min(0, 'validation.money.negative');
+
+/** How money was handed over, outside a bill ('deposit' is a bill's method only). */
+const receivedMethod = z.enum(['cash', 'bank_transfer', 'promptpay']);
+
 // --- Rooms -----------------------------------------------------------------
 
 export const roomSchema = z.object({
@@ -428,6 +437,10 @@ export const moveInSchema = z
       .min(1, 'validation.contract.occupantsMin')
       .max(20, 'validation.contract.occupantsRange'),
     activate_cards: z.boolean().default(true),
+    meter_start_electricity: meterNumber,
+    meter_start_water: meterNumber,
+    /** Null: the deposit has not been paid yet. */
+    deposit_received_method: receivedMethod.nullable(),
   })
   .refine((value) => value.end_date > value.start_date, {
     error: 'validation.contract.endBeforeStart',
@@ -441,6 +454,14 @@ export const moveOutSchema = z.object({
   terminated_at: isoDate,
   termination_reason: z.string().trim().max(500).optional(),
   return_cards: z.boolean().default(true),
+  meter_end_electricity: meterNumber,
+  meter_end_water: meterNumber,
+});
+
+/** Records that an active contract's deposit has been paid. */
+export const recordDepositReceivedSchema = z.object({
+  contract_id: uuid,
+  method: receivedMethod,
 });
 
 export type MoveOutInput = z.infer<typeof moveOutSchema>;

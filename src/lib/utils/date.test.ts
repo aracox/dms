@@ -8,6 +8,7 @@ import {
   currentBillingMonth,
   daysBetween,
   dueDateFor,
+  invoiceDueDate,
   formatMonthName,
   formatYear,
   isPastDue,
@@ -115,5 +116,18 @@ describe('month picker labels', () => {
     expect(formatMonthName(11, 'th')).toBe('พฤศจิกายน');
     expect(formatYear(2026, 'th')).toBe('2569');
     expect(formatYear(2026, 'en')).toBe('2026');
+  });
+});
+
+describe('invoiceDueDate', () => {
+  it('keeps the usual due day for a bill issued on time', () => {
+    expect(invoiceDueDate('2026-11-01', 5, '2026-11-01')).toBe('2026-11-05');
+    expect(invoiceDueDate('2026-11-01', 5, '2026-11-05')).toBe('2026-11-05');
+  });
+
+  it('gives a late bill five days instead of making it overdue at birth', () => {
+    // Issued 20 Nov for November, due day 5: the 5th has passed.
+    expect(invoiceDueDate('2026-11-01', 5, '2026-11-20')).toBe('2026-11-25');
+    expect(invoiceDueDate('2026-11-01', 5, '2026-11-29')).toBe('2026-12-04');
   });
 });

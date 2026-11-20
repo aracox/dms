@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { amountOwed } from '@/lib/billing/calc';
 import { createClient } from '@/lib/supabase/server';
 import type { ContractRow, RoomType } from '@/types/database';
 
@@ -13,6 +14,8 @@ export interface DepositRefundRecord {
   tenantPhone: string;
   /** 'pending' until deposit_settled_at is set. */
   status: 'pending' | 'refunded';
+  /** What the tenant still owes on their own bills -- 0 once refunded. */
+  owed: number;
 }
 
 /**
@@ -43,7 +46,8 @@ export async function getDepositRefunds(): Promise<DepositRefundRecord[]> {
   const all = [...pending, ...settled];
   if (all.length === 0) return [];
 
-  const [rooms, tenants] = await Promise.all([
+  const pendingIds = pending.map((row) => row.id);
+  const [rooms, tenants, invoices] = await Promise.all([
     supabase
       .from('rooms')
       .select('id, room_number, room_type')
@@ -52,7 +56,22 @@ export async function getDepositRefunds(): Promise<DepositRefundRecord[]> {
       .from('tenants')
       .select('id, full_name, phone')
       .in('id', [...new Set(all.map((row) => row.tenant_id))]),
+    // Waiting refunds show what the tenant still owes, so a full refund is
+    // never given by accident against an unpaid bill.
+    pendingIds.length
+      ? supabase
+          .from('invoices')
+          .select('id, contract_id, status, total')
+          .in('contract_id', pendingIds)
+      : Promise.resolve({ data: [] }),
   ]);
+  const invoiceIds = (invoices.data ?? []).map((invoice) => invoice.id);
+  const { data: payments } = invoiceIds.length
+    ? await supabase
+        .from('payments')
+        .select('invoice_id, amount, status')
+        .in('invoice_id', invoiceIds)
+    : { data: [] };
 
   const toRecord = (
     contract: ContractRow,
@@ -67,6 +86,17 @@ export async function getDepositRefunds(): Promise<DepositRefundRecord[]> {
       tenantName: tenant?.full_name ?? '',
       tenantPhone: tenant?.phone ?? '',
       status,
+      owed:
+        status === 'pending'
+          ? amountOwed(
+              (invoices.data ?? [])
+                .filter((invoice) => invoice.contract_id === contract.id)
+                .map((invoice) => ({
+                  ...invoice,
+                  payments: (payments ?? []).filter((payment) => payment.invoice_id === invoice.id),
+                })),
+            )
+          : 0,
     };
   };
   const movedOut = (row: ContractRow) => row.terminated_at ?? row.end_date;

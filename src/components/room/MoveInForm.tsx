@@ -5,7 +5,7 @@ import { useActionState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
-import { Input, Textarea } from '@/components/ui/Input';
+import { Input, Select, Textarea } from '@/components/ui/Input';
 import { RequiredMark } from '@/components/ui/RequiredMark';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB } from '@/lib/billing/money';
@@ -15,6 +15,9 @@ import type { RoomReservationRow } from '@/types/database';
 const INITIAL_STATE: MoveInState = { error: null };
 
 const LABEL_CLASS = 'text-ink block text-body-sm font-medium';
+
+/** How a deposit can be handed over ('deposit' is only for paying bills from one). */
+export const DEPOSIT_METHODS = ['cash', 'bank_transfer', 'promptpay'] as const;
 
 function TextField({
   name,
@@ -80,6 +83,7 @@ export function MoveInForm({
   defaultRent,
   defaultDeposit,
   defaultDueDay,
+  defaultMeters,
   startDate,
   endDate,
   reservation,
@@ -89,6 +93,8 @@ export function MoveInForm({
   defaultRent: number;
   defaultDeposit: number;
   defaultDueDay: number;
+  /** The meters' last known numbers (e.g. the previous tenant's move-out), to check against the meter. */
+  defaultMeters: { electricity: number | null; water: number | null };
   startDate: string;
   endDate: string;
   reservation: RoomReservationRow | null;
@@ -223,7 +229,28 @@ export function MoveInForm({
               defaultValue={defaultDueDay}
               required
             />
+            <TextField
+              state={state}
+              name="meter_start_electricity"
+              label={t('contract.meterStartElectricity')}
+              type="number"
+              min={0}
+              step="0.01"
+              defaultValue={defaultMeters.electricity ?? undefined}
+              required
+            />
+            <TextField
+              state={state}
+              name="meter_start_water"
+              label={t('contract.meterStartWater')}
+              type="number"
+              min={0}
+              step="0.01"
+              defaultValue={defaultMeters.water ?? undefined}
+              required
+            />
           </div>
+          <p className="text-ink-subtle text-caption mt-2">{t('contract.meterStartHint')}</p>
 
           <label className="text-ink text-body-sm mt-4 flex items-center gap-2">
             <input
@@ -234,6 +261,31 @@ export function MoveInForm({
             />
             {t('contract.activateCards')}
           </label>
+
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <label className="text-ink text-body-sm flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="deposit_received"
+                defaultChecked={state.values ? state.values.deposit_received === 'on' : true}
+                className="accent-brand-blue size-5 rounded-sm"
+              />
+              {t('contract.depositReceivedNow')}
+            </label>
+            <Select
+              name="deposit_received_method"
+              aria-label={t('payments.method')}
+              defaultValue={state.values?.deposit_received_method ?? 'cash'}
+              className="w-auto"
+            >
+              {DEPOSIT_METHODS.map((method) => (
+                <option key={method} value={method}>
+                  {t(`paymentMethod.${method}`)}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <p className="text-ink-subtle text-caption mt-1">{t('contract.depositHeldHint')}</p>
         </CardBody>
       </Card>
 

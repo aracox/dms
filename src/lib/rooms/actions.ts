@@ -4,6 +4,7 @@ import { getLocale } from 'next-intl/server';
 import { revalidatePath } from 'next/cache';
 
 import { redirect } from '@/i18n/navigation';
+import { lastMeterNumber } from '@/lib/meters/tenancy';
 import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { uploadTenantDocuments } from '@/lib/tenant-documents/upload';
@@ -39,6 +40,12 @@ export interface UpdateRoomStatusState {
 }
 
 const NON_OCCUPIED_STATUSES = ['vacant', 'reserved', 'maintenance'] as const;
+
+/** A meter number from the form; blank stays NaN so validation asks for it instead of reading 0. */
+function meterNumberField(formData: FormData, name: string): number {
+  const raw = String(formData.get(name) ?? '').trim();
+  return raw === '' ? Number.NaN : Number(raw);
+}
 
 /**
  * Sets a room's status among vacant / reserved / under maintenance. Refused
@@ -168,6 +175,12 @@ export async function moveInAction(
     payment_due_day: Number(formData.get('payment_due_day')),
     occupant_count: Number(formData.get('occupant_count')),
     activate_cards: formData.get('activate_cards') === 'on',
+    meter_start_electricity: meterNumberField(formData, 'meter_start_electricity'),
+    meter_start_water: meterNumberField(formData, 'meter_start_water'),
+    deposit_received_method:
+      formData.get('deposit_received') === 'on'
+        ? String(formData.get('deposit_received_method') ?? '')
+        : null,
   });
 
   if (!parsed.success) {
@@ -202,6 +215,10 @@ export async function moveInAction(
     p_payment_due_day: contractFields.payment_due_day,
     p_occupant_count: contractFields.occupant_count,
     p_activate_cards: contractFields.activate_cards,
+    p_meter_electricity: contractFields.meter_start_electricity,
+    p_meter_water: contractFields.meter_start_water,
+    p_deposit_received_on: contractFields.deposit_received_method ? bangkokToday() : null,
+    p_deposit_received_method: contractFields.deposit_received_method,
   });
 
   if (error) {
@@ -265,6 +282,8 @@ export async function moveOutAction(
     terminated_at: String(formData.get('terminated_at') ?? ''),
     termination_reason: String(formData.get('termination_reason') ?? '').trim() || undefined,
     return_cards: formData.get('return_cards') === 'on',
+    meter_end_electricity: meterNumberField(formData, 'meter_end_electricity'),
+    meter_end_water: meterNumberField(formData, 'meter_end_water'),
   });
 
   if (!parsed.success) {
@@ -278,11 +297,41 @@ export async function moveOutAction(
   }
 
   const supabase = await createClient();
+
+  // A final number below the last known one is a typo, and would bill nothing.
+  const [{ data: readings }, { data: contracts }] = await Promise.all([
+    supabase
+      .from('meter_readings')
+      .select('billing_month, meter_type, current_reading')
+      .eq('room_id', roomId)
+      .order('billing_month', { ascending: false })
+      .limit(24),
+    supabase
+      .from('contracts')
+      .select(
+        'id, status, start_date, terminated_at, meter_start_electricity, meter_start_water, meter_end_electricity, meter_end_water',
+      )
+      .eq('room_id', roomId),
+  ]);
+  for (const type of ['electricity', 'water'] as const) {
+    const last = lastMeterNumber({
+      type,
+      readings: readings ?? [],
+      contracts: contracts ?? [],
+      through: parsed.data.terminated_at,
+    });
+    const final =
+      type === 'electricity' ? parsed.data.meter_end_electricity : parsed.data.meter_end_water;
+    if (last !== null && final < last) return { error: `contract.meterBelowLast.${type}` };
+  }
+
   const { error } = await supabase.rpc('move_out_room', {
     p_contract_id: parsed.data.contract_id,
     p_terminated_at: parsed.data.terminated_at,
     p_termination_reason: parsed.data.termination_reason ?? null,
     p_return_cards: parsed.data.return_cards,
+    p_meter_electricity: parsed.data.meter_end_electricity,
+    p_meter_water: parsed.data.meter_end_water,
   });
 
   if (error) return { error: 'errors.generic' };

@@ -52,6 +52,7 @@ export function SettleDepositForm({
           contractId={contractId}
           roomId={roomId}
           deposit={deposit}
+          owed={outstanding}
           locale={locale}
         />
       </CardBody>

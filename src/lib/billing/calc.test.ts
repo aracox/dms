@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  amountOwed,
   buildMonthlyInvoiceItems,
   confirmedPaid,
   deriveFinancialStatus,
@@ -11,6 +12,8 @@ import {
   meterAmount,
   meterUsage,
   outstanding,
+  rentForMonth,
+  rentPeriodLabel,
   validatePaymentAmount,
 } from './calc';
 import { formatTHB, round2, sumMoney } from './money';
@@ -268,5 +271,64 @@ describe('floor plan financial status', () => {
         graceDays: 5,
       }),
     ).toBe('overdue');
+  });
+});
+
+describe('rentForMonth', () => {
+  const rent = (startDate: string, endedOn: string | null, billingMonth = '2026-11-01') =>
+    rentForMonth({ monthlyRent: 8000, billingMonth, startDate, endedOn });
+
+  it('bills the plain monthly rent for a month the contract fully covers', () => {
+    expect(rent('2026-01-01', null).amount).toBe(8000);
+    expect(rent('2026-11-01', null)).toMatchObject({ amount: 8000, days: 30, daysInMonth: 30 });
+  });
+
+  it('prorates the move-in month by the days from the start date', () => {
+    // 20-30 Nov: 11 of 30 days. 8000 * 11 / 30 = 2933.333... -> 2933.33
+    expect(rent('2026-11-20', null)).toEqual({
+      amount: 2933.33,
+      days: 11,
+      daysInMonth: 30,
+      from: '2026-11-20',
+      to: '2026-11-30',
+    });
+  });
+
+  it('prorates the move-out month up to and including the last day', () => {
+    // 1-20 Nov: 20 of 30 days.
+    expect(rent('2026-01-01', '2026-11-20')).toMatchObject({ amount: 5333.33, days: 20 });
+  });
+
+  it('handles a contract that starts and ends inside the same month', () => {
+    expect(rent('2026-11-10', '2026-11-19')).toMatchObject({ amount: 2666.67, days: 10 });
+  });
+
+  it('uses the real length of the month', () => {
+    // February 2027 has 28 days: 14 days is exactly half.
+    expect(rent('2027-02-15', null, '2027-02-01')).toMatchObject({
+      amount: 4000,
+      days: 14,
+      daysInMonth: 28,
+    });
+  });
+
+  it('labels a part month with the days it covers', () => {
+    expect(rentPeriodLabel(rent('2026-11-20', null))).toBe('20/11–30/11 (11/30)');
+  });
+});
+
+describe('amountOwed', () => {
+  it('sums unpaid balances, ignoring cancelled, draft and pending money', () => {
+    const paid = (amount: number) => ({ amount, status: 'confirmed' as const });
+    expect(
+      amountOwed([
+        { status: 'overdue', total: 8380, payments: [] },
+        { status: 'partially_paid', total: 4940, payments: [paid(2000)] },
+        { status: 'cancelled', total: 9999, payments: [] },
+        { status: 'draft', total: 500, payments: [] },
+        { status: 'paid', total: 3500, payments: [paid(3500)] },
+        { status: 'issued', total: 100.1, payments: [{ amount: 50, status: 'pending' }] },
+      ]),
+    ).toBe(11420.1);
   });
 });

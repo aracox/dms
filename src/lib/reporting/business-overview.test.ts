@@ -14,6 +14,8 @@ const row = (overrides: Partial<BusinessOverviewRow> = {}): BusinessOverviewRow 
   expense_amount: 14_850,
   net_after_expenses: 65_310,
   collection_rate: 92.6,
+  repair_amount: 0,
+  other_income: 0,
   ...overrides,
 });
 

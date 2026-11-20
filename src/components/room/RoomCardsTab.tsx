@@ -9,7 +9,7 @@ import { formatTHB } from '@/lib/billing/money';
 import { can } from '@/lib/permissions';
 import type { RoomDetail } from '@/lib/rooms/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
-import { formatDate } from '@/lib/utils/date';
+import { bangkokToday, formatDate } from '@/lib/utils/date';
 import type { CardStatus } from '@/types/database';
 
 import { CardActions } from './CardActions';
@@ -103,7 +103,7 @@ export async function RoomCardsTab({ detail, locale }: { detail: RoomDetail; loc
 
               return (
                 <tr key={event.id}>
-                  <TD>{formatDate(event.created_at.slice(0, 10), locale)}</TD>
+                  <TD>{formatDate(bangkokToday(new Date(event.created_at)), locale)}</TD>
                   <TD>{card?.card_number ?? t('common.notAvailable')}</TD>
                   <TD>{t(`cardAction.${event.action}`)}</TD>
                   <TD>

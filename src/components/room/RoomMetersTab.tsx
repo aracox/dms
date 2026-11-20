@@ -21,6 +21,7 @@ export async function RoomMetersTab({ detail, locale }: { detail: RoomDetail; lo
     <MetersSection
       roomId={detail.room.id}
       readings={detail.meterReadings}
+      contracts={detail.contractHistory}
       rates={{ electricity: rateFor('electricity'), water: rateFor('water') }}
       canRecord={canRecord}
       canCorrect={canCorrect}

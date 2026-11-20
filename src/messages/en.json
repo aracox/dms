@@ -207,7 +207,8 @@
   "paymentMethod": {
     "cash": "Cash",
     "bank_transfer": "Bank transfer",
-    "promptpay": "PromptPay"
+    "promptpay": "PromptPay",
+    "deposit": "From deposit"
   },
   "paymentStatus": {
     "pending": "Pending",
@@ -254,7 +255,7 @@
     "collected": "Collected",
     "commonExpenses": "Common expenses",
     "collectionRate": "Current collection rate",
-    "netAfterExpenses": "Current net after common expenses",
+    "netAfterExpenses": "Current net after expenses (incl. repairs and card fees)",
     "noOverviewData": "No monthly business history is available",
     "contractsExpiring": "Contracts expiring soon",
     "moveOutNotices": "Move-out notices",
@@ -280,7 +281,9 @@
     "fullyCollected": "Fully collected",
     "averageOccupancy": "Average {rate}%",
     "occupantsHint": "{count, plural, one {# occupant} other {# occupants}}",
-    "roomStatus": "Room status"
+    "roomStatus": "Room status",
+    "depositsHeld": "Deposits held (not income)",
+    "expensesWithRepairs": "Common expenses + repairs"
   },
   "floorPlan": {
     "title": "Floor Plan",
@@ -427,7 +430,26 @@
     "giveNoticeHint": "Records that the tenant plans to leave. The room stays occupied until that date, then moves out automatically — you can still move out earlier if needed.",
     "plannedMoveOutDate": "Planned move-out date",
     "noticeGiven": "Notice given — leaving {date}",
-    "cancelNotice": "Cancel notice"
+    "cancelNotice": "Cancel notice",
+    "alreadySettled": "This deposit has already been settled.",
+    "deductionBelowOwed": "To pay the unpaid bills from the deposit, the refund must be lower by at least what is owed.",
+    "meterStartElectricity": "Electricity meter at move-in",
+    "meterStartWater": "Water meter at move-in",
+    "meterStartHint": "Read the numbers off the meters. The first month’s usage counts from them.",
+    "depositReceivedNow": "Deposit received",
+    "depositHeldHint": "A deposit is held for the tenant. It is not income.",
+    "markDepositReceived": "Mark deposit received",
+    "depositReceivedOn": "Received {date} ({method})",
+    "depositNotReceived": "Not recorded as received yet",
+    "meterEndElectricity": "Electricity meter at move-out",
+    "meterEndWater": "Water meter at move-out",
+    "meterLast": "Last: {value}",
+    "meterBelowLast": {
+      "electricity": "The electricity number is below the last one. Please check it.",
+      "water": "The water number is below the last one. Please check it."
+    },
+    "moveOutOwedWarning": "The tenant still owes {amount} on issued bills. Collect it before they leave.",
+    "moveOutLastBillHint": "After the move-out, issue the last bill from the Billing tab: rent by the day, and usage up to move-out day."
   },
   "deposits": {
     "title": "Deposit refunds",
@@ -445,7 +467,11 @@
     "filterLabel": "Search deposit refunds",
     "pendingTitle": "Waiting for refund · every month",
     "refundedFor": "Refunded · moved out in {month}",
-    "noRefundedInMonth": "No refunds for tenants who moved out in {month}."
+    "noRefundedInMonth": "No refunds for tenants who moved out in {month}.",
+    "owedWarning": "Still owes {amount} on unpaid bills",
+    "owedExceedsDeposit": "Still owes {amount}, more than the deposit: collect it from the tenant",
+    "payBillsFromDeposit": "Pay the unpaid {amount} from the deposit",
+    "paidBillsReason": "Unpaid bills paid from the deposit"
   },
   "reservation": {
     "title": "Reservation",
@@ -481,7 +507,8 @@
     "filterByStatus": "Filter by status",
     "allStatuses": "All statuses",
     "resultCount": "{count} cards",
-    "noResults": "No cards match these filters"
+    "noResults": "No cards match these filters",
+    "replacementFeeOnSpot": "Collect the {amount} replacement fee now (counted as income today, not billed)"
   },
   "meters": {
     "title": "Meter Readings",

@@ -5,19 +5,35 @@ import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { RequiredMark } from '@/components/ui/RequiredMark';
+import type { Locale } from '@/i18n/routing';
+import { formatAmount, formatTHB } from '@/lib/billing/money';
 import { moveOutAction, type MoveOutState } from '@/lib/rooms/actions';
 
 const INITIAL_STATE: MoveOutState = { error: null };
 
-/** Collapsed by default: "Move out" reveals the termination form. */
+/**
+ * Collapsed by default: "Move out" reveals the termination form. It warns
+ * when the tenant still owes on their bills -- the owner normally collects
+ * before the keys come back -- and takes the meters' final numbers, which put
+ * the usage up to move-out day on the tenant's last bill.
+ */
 export function MoveOutForm({
   contractId,
   roomId,
   today,
+  owed,
+  lastMeters,
+  locale,
 }: {
   contractId: string;
   roomId: string;
   today: string;
+  /** Still unpaid on this contract's issued bills (amountOwed). */
+  owed: number;
+  /** The meters' last known numbers, shown so a typo stands out. */
+  lastMeters: { electricity: number | null; water: number | null };
+  locale: Locale;
 }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
@@ -36,6 +52,15 @@ export function MoveOutForm({
       <input type="hidden" name="contract_id" value={contractId} />
       <input type="hidden" name="room_id" value={roomId} />
 
+      {owed > 0 ? (
+        <p
+          role="status"
+          className="border-brand-yellow bg-brand-yellow-soft text-ink text-caption rounded-md border px-3 py-2"
+        >
+          {t('contract.moveOutOwedWarning', { amount: formatTHB(owed, locale) })}
+        </p>
+      ) : null}
+
       <div>
         <label className="text-ink text-body-sm block font-medium">
           {t('contract.terminatedAt')}
@@ -48,6 +73,32 @@ export function MoveOutForm({
           required
           className="mt-1"
         />
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        {(['electricity', 'water'] as const).map((type) => (
+          <div key={type}>
+            <label className="text-ink text-body-sm block font-medium">
+              {t(
+                type === 'electricity' ? 'contract.meterEndElectricity' : 'contract.meterEndWater',
+              )}
+              <RequiredMark />
+            </label>
+            <Input
+              name={`meter_end_${type}`}
+              type="number"
+              min={0}
+              step="0.01"
+              required
+              className="mt-1"
+            />
+            {lastMeters[type] !== null ? (
+              <p className="text-ink-subtle text-caption mt-1">
+                {t('contract.meterLast', { value: formatAmount(lastMeters[type], locale) })}
+              </p>
+            ) : null}
+          </div>
+        ))}
       </div>
 
       <div>
@@ -75,6 +126,8 @@ export function MoveOutForm({
           {t('common.close')}
         </Button>
       </div>
+
+      <p className="text-ink-subtle text-caption">{t('contract.moveOutLastBillHint')}</p>
 
       {state.error ? <p className="text-brand-red-deep text-caption">{t(state.error)}</p> : null}
     </form>

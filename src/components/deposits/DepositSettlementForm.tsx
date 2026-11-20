@@ -9,11 +9,14 @@ import { TD } from '@/components/ui/Table';
 import type { Locale } from '@/i18n/routing';
 import { formatTHB, subtractMoney } from '@/lib/billing/money';
 import { settleDepositAction, type SettleDepositState } from '@/lib/contracts/actions';
+import { cn } from '@/lib/utils/cn';
 
 interface SettlementProps {
   contractId: string;
   roomId: string;
   deposit: number;
+  /** What the tenant still owes on their bills (amountOwed). */
+  owed: number;
   locale: Locale;
 }
 
@@ -22,11 +25,18 @@ interface SettlementProps {
  * here is a preview -- settleDepositAction derives the stored figure from the
  * deposit it reads itself. Shared by the card form (room Contract tab) and the
  * table-row cells (deposits page) so both record a settlement the same way.
+ *
+ * When the tenant still owes money, the owner normally asks them to pay it, so
+ * nothing is deducted by default. Ticking "pay from the deposit" lowers the
+ * refund by what is owed and has settle_deposit mark those bills paid.
  */
-function useDepositSettlement({ contractId, roomId, deposit, locale }: SettlementProps) {
+function useDepositSettlement({ contractId, roomId, deposit, owed, locale }: SettlementProps) {
   const t = useTranslations();
   const [refund, setRefund] = useState(String(deposit));
   const [reason, setReason] = useState('');
+  const [payBills, setPayBills] = useState(false);
+  // Owing more than the deposit: it cannot clear the bills, the tenant pays the rest.
+  const canPayBills = owed > 0 && owed <= deposit;
   const [state, setState] = useState<SettleDepositState>({ error: null });
   const [isPending, startTransition] = useTransition();
 
@@ -42,6 +52,7 @@ function useDepositSettlement({ contractId, roomId, deposit, locale }: Settlemen
       formData.set('room_id', roomId);
       formData.set('refund', refund);
       formData.set('reason', reason);
+      if (payBills) formData.set('pay_bills', 'on');
       setState(await settleDepositAction({ error: null }, formData));
     });
   }
@@ -49,10 +60,28 @@ function useDepositSettlement({ contractId, roomId, deposit, locale }: Settlemen
   const errorFor = (field: SettleDepositState['field']) =>
     state.field === field && state.error ? t(state.error) : undefined;
 
+  function togglePayBills(checked: boolean) {
+    setPayBills(checked);
+    if (!checked) return;
+    const afterBills = subtractMoney(deposit, owed);
+    if (refund === '' || Number(refund) > afterBills) setRefund(String(afterBills));
+    if (!reason.trim()) setReason(t('deposits.paidBillsReason'));
+  }
+
   return {
     t,
     refund,
     setRefund,
+    payBills,
+    togglePayBills,
+    canPayBills,
+    owedNotice:
+      owed > 0
+        ? t(canPayBills ? 'deposits.owedWarning' : 'deposits.owedExceedsDeposit', {
+            amount: formatTHB(owed, locale),
+          })
+        : null,
+    payBillsLabel: t('deposits.payBillsFromDeposit', { amount: formatTHB(owed, locale) }),
     reason,
     setReason,
     isPending,
@@ -79,6 +108,7 @@ export function DepositSettlementForm(props: SettlementProps) {
 
   return (
     <div className="space-y-3">
+      {s.canPayBills ? <PayBillsCheckbox s={s} /> : null}
       <FormField
         label={s.t('contract.actualRefund')}
         htmlFor={refundId}
@@ -140,7 +170,7 @@ export function DepositSettlementCells(props: SettlementProps) {
 
   return (
     <>
-      <TD className="w-40 align-top">
+      <TD className="w-56 align-top">
         <Input
           type="number"
           min={0}
@@ -160,6 +190,10 @@ export function DepositSettlementCells(props: SettlementProps) {
             {s.t('deposits.deductedShort', { amount: formatTHB(s.deduction, props.locale) })}
           </p>
         ) : null}
+        {s.owedNotice ? (
+          <p className="text-brand-yellow-deep text-caption mt-1 font-medium">{s.owedNotice}</p>
+        ) : null}
+        {s.canPayBills ? <PayBillsCheckbox s={s} className="mt-1" /> : null}
       </TD>
       <TD className="min-w-56 align-top">
         <Input
@@ -195,5 +229,27 @@ export function DepositSettlementCells(props: SettlementProps) {
         ) : null}
       </TD>
     </>
+  );
+}
+
+/** Opt-in: pay the tenant's unpaid bills out of the deposit as part of the settlement. */
+function PayBillsCheckbox({
+  s,
+  className,
+}: {
+  s: ReturnType<typeof useDepositSettlement>;
+  className?: string;
+}) {
+  return (
+    <label className={cn('text-ink text-caption flex items-start gap-2', className)}>
+      <input
+        type="checkbox"
+        checked={s.payBills}
+        onChange={(event) => s.togglePayBills(event.target.checked)}
+        disabled={s.isPending}
+        className="accent-brand-blue mt-0.5 size-4 shrink-0 rounded-sm"
+      />
+      {s.payBillsLabel}
+    </label>
   );
 }

@@ -33,7 +33,8 @@ import {
 } from '@/lib/utils/month-filter';
 import type { PaymentMethod } from '@/types/database';
 
-const PAYMENT_METHODS: PaymentMethod[] = ['cash', 'bank_transfer', 'promptpay'];
+// 'deposit' too, so the method tiles add up to the received total.
+const PAYMENT_METHODS: PaymentMethod[] = ['cash', 'bank_transfer', 'promptpay', 'deposit'];
 
 export default async function PaymentsPage({
   params,
@@ -95,7 +96,7 @@ export default async function PaymentsPage({
         action={<SegmentSwitcher current={view} pathname="/payments" query={searchQuery} />}
       />
 
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
         <StatTile
           label={t('payments.received')}
           value={formatTHB(receivedBy(), typedLocale)}

@@ -12,6 +12,7 @@ import {
   contractPeriodSchema,
   contractRentSchema,
   giveMoveOutNoticeSchema,
+  recordDepositReceivedSchema,
   renewContractSchema,
   settleDepositSchema,
 } from '@/lib/validation/schemas';
@@ -52,6 +53,48 @@ export async function updateContractRentAction(
   if (error) return { error: 'errors.generic' };
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
+  return { error: null };
+}
+
+export interface RecordDepositReceivedState {
+  error: string | null;
+}
+
+/**
+ * Records that an active contract's deposit has been paid, today -- for a
+ * tenant who paid after moving in, or a contract from before move-in
+ * recorded it. Held money, not income: nothing here touches payments.
+ */
+export async function recordDepositReceivedAction(
+  _previous: RecordDepositReceivedState,
+  formData: FormData,
+): Promise<RecordDepositReceivedState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'contracts:write');
+
+  const roomId = String(formData.get('room_id') ?? '');
+
+  const parsed = recordDepositReceivedSchema.safeParse({
+    contract_id: String(formData.get('contract_id') ?? ''),
+    method: String(formData.get('method') ?? ''),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('contracts')
+    .update({ deposit_received_on: bangkokToday(), deposit_received_method: parsed.data.method })
+    .eq('id', parsed.data.contract_id)
+    .eq('status', 'active')
+    .is('deposit_received_on', null);
+
+  if (error) return { error: 'errors.generic' };
+
+  if (roomId) revalidatePath(`/rooms/${roomId}`);
+  revalidatePath('/dashboard');
   return { error: null };
 }
 
@@ -210,6 +253,14 @@ export interface SettleDepositState {
  * itself, since the final figure often is not known (a damage check, the
  * last utility bill) until after the tenant has already left.
  */
+/** The errors settle_deposit (0045) raises by translation key, and the field each belongs to. */
+const SETTLE_DEPOSIT_ERRORS: Record<string, { field?: 'refund' }> = {
+  'contract.notTerminated': {},
+  'contract.alreadySettled': {},
+  'contract.refundExceedsDeposit': { field: 'refund' },
+  'contract.deductionBelowOwed': { field: 'refund' },
+};
+
 export async function settleDepositAction(
   _previous: SettleDepositState,
   formData: FormData,
@@ -251,20 +302,24 @@ export async function settleDepositAction(
     return { error: 'contract.deductionReasonRequired', field: 'reason' };
   }
 
-  const { error } = await supabase
-    .from('contracts')
-    .update({
-      deposit_deduction: deduction,
-      deposit_refund: parsed.data.refund,
-      deposit_settled_at: bangkokToday(),
-      deposit_settlement_note: parsed.data.reason,
-    })
-    .eq('id', parsed.data.contract_id);
+  // One transaction: the settlement and, if asked, paying the tenant's unpaid
+  // bills from the deposit (payment method 'deposit').
+  const { error } = await supabase.rpc('settle_deposit', {
+    p_contract_id: parsed.data.contract_id,
+    p_refund: parsed.data.refund,
+    p_reason: parsed.data.reason ?? null,
+    p_pay_bills: formData.get('pay_bills') === 'on',
+  });
 
-  if (error) return { error: 'errors.generic' };
+  if (error) {
+    // settle_deposit raises translation keys for the cases staff can fix.
+    const known = SETTLE_DEPOSIT_ERRORS[error.message];
+    return known ? { error: error.message, field: known.field } : { error: 'errors.generic' };
+  }
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
   revalidatePath('/refunds');
+  revalidatePath('/payments');
   return { error: null };
 }
 

@@ -6,6 +6,8 @@ import { useActionState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { recordMeterReadingAction, type RecordMeterReadingState } from '@/lib/meters/actions';
+import { lastMeterNumber, type MeterContract } from '@/lib/meters/tenancy';
+import { addDays, addMonths } from '@/lib/utils/date';
 import type { MeterReadingRow, MeterType } from '@/types/database';
 
 const SAVE_INITIAL_STATE: RecordMeterReadingState = { error: null };
@@ -19,6 +21,7 @@ export function MeterReadingForm({
   roomId,
   meterType,
   readings,
+  contracts,
   defaultRate,
   canRecord,
   canCorrect,
@@ -31,6 +34,7 @@ export function MeterReadingForm({
   roomId: string;
   meterType: MeterType;
   readings: MeterReadingRow[];
+  contracts: readonly MeterContract[];
   defaultRate: number;
   canRecord: boolean;
   canCorrect: boolean;
@@ -71,12 +75,18 @@ export function MeterReadingForm({
 
   const billingMonth = `${month}-01`;
   const existing = readings.find((reading) => reading.billing_month === billingMonth);
+  // Where this month's usage starts: the last reading, or a move-in / move-out
+  // number recorded since. Blank -- never 0 -- when nothing is known, so a
+  // room's first reading cannot bill every unit the meter has ever counted.
   const previousDefault =
     existing?.previous_reading ??
-    [...readings]
-      .filter((reading) => reading.billing_month < billingMonth)
-      .sort((a, b) => (a.billing_month < b.billing_month ? 1 : -1))[0]?.current_reading ??
-    0;
+    lastMeterNumber({
+      type: meterType,
+      readings,
+      contracts,
+      through: addDays(addMonths(billingMonth, 1), -1),
+    }) ??
+    undefined;
   const canSave = existing ? canCorrect : canRecord;
 
   return (

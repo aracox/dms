@@ -37,7 +37,12 @@ const LABELS = {
     amountReceived: 'จำนวนเงินที่รับชำระ',
     receivedBy: 'ผู้รับเงิน',
     payer: 'ผู้ชำระเงิน',
-    paymentMethod: { cash: 'เงินสด', bank_transfer: 'โอนเงิน', promptpay: 'พร้อมเพย์' },
+    paymentMethod: {
+      cash: 'เงินสด',
+      bank_transfer: 'โอนเงิน',
+      promptpay: 'พร้อมเพย์',
+      deposit: 'หักจากเงินประกัน',
+    },
   },
   en: {
     title: 'Payment Receipt',
@@ -52,7 +57,12 @@ const LABELS = {
     amountReceived: 'Amount received',
     receivedBy: 'Received by',
     payer: 'Payer',
-    paymentMethod: { cash: 'Cash', bank_transfer: 'Bank transfer', promptpay: 'PromptPay' },
+    paymentMethod: {
+      cash: 'Cash',
+      bank_transfer: 'Bank transfer',
+      promptpay: 'PromptPay',
+      deposit: 'From deposit',
+    },
   },
 } satisfies Record<'th' | 'en', Record<string, unknown>>;
 

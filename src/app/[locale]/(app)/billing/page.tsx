@@ -23,12 +23,7 @@ import {
   type MonthBill,
 } from '@/lib/rooms/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
-import {
-  billingMonthOf,
-  currentBillingMonth,
-  formatBillingMonth,
-  type IsoDate,
-} from '@/lib/utils/date';
+import { billingMonthOf, currentBillingMonth, formatBillingMonth } from '@/lib/utils/date';
 import {
   firstParam,
   isRoomForMonth,
@@ -56,16 +51,15 @@ function parseStatusFilter(value: SearchParam): StatusFilter {
 }
 
 /**
- * Puts the month's bill in place of the room board's latest one. The money
- * status follows v_room_board's rules, except that overdue comes from the bill
- * itself (the daily sweep marks it) rather than from the grace-day arithmetic.
+ * Puts a month's bill in place of the room board's latest one, naming the
+ * tenant on the bill's own contract. The money status follows v_room_board's
+ * rules, except that overdue comes from the bill itself (the daily sweep marks
+ * it) rather than from the grace-day arithmetic. A move-in month is billed
+ * (prorated), so a room without a bill is simply 'none'.
  */
-function withMonthBill(room: RoomBoardRow, bill: MonthBill | undefined, month: IsoDate) {
-  const movedIn = room.start_date !== null && billingMonthOf(room.start_date) === month;
+function withMonthBill(room: RoomBoardRow, bill: MonthBill | undefined) {
   const financialStatus: FinancialStatus = !bill
-    ? movedIn
-      ? 'first_month'
-      : 'none'
+    ? 'none'
     : bill.status === 'paid'
       ? 'paid'
       : bill.status === 'overdue'
@@ -75,6 +69,7 @@ function withMonthBill(room: RoomBoardRow, bill: MonthBill | undefined, month: I
           : 'payment_due';
   return {
     ...room,
+    tenant_name: bill ? bill.tenant_name : room.tenant_name,
     invoice_id: bill?.invoice_id ?? null,
     billing_month: bill?.billing_month ?? null,
     invoice_status: bill?.status ?? null,
@@ -122,7 +117,19 @@ export default async function BillingPage({
   // Listed in room-number order, as getRoomBoard returns them.
   const activeRooms = rooms
     .filter((room) => isRoomForMonth(room, monthBills.has(room.room_id), month))
-    .map((room) => withMonthBill(room, monthBills.get(room.room_id), month));
+    .flatMap((room) => {
+      // One row per bill -- two in a turnover month -- plus a "no bill" row for
+      // the tenant in the room now if their contract has none yet.
+      const bills = monthBills.get(room.room_id) ?? [];
+      const currentTenantBilled =
+        room.contract_id === null ||
+        billingMonthOf(room.start_date ?? month) > month ||
+        bills.some((bill) => bill.contract_id === room.contract_id);
+      return [
+        ...bills.map((bill) => withMonthBill(room, bill)),
+        ...(currentTenantBilled ? [] : [withMonthBill(room, undefined)]),
+      ];
+    });
   const searchedRooms = roomFilter
     ? activeRooms.filter((room) => room.room_number === roomFilter)
     : activeRooms;
@@ -142,10 +149,8 @@ export default async function BillingPage({
     status === 'all' ? searchedRooms : searchedRooms.filter((room) => statusOf(room) === status);
   const totalOutstanding = activeRooms.reduce((sum, room) => sum + room.outstanding, 0);
   const overdueRooms = activeRooms.filter((room) => room.financial_status === 'overdue').length;
-  // A tenant who moved in this month is not behind yet -- their first bill is next month's.
-  const roomsWithoutInvoice = activeRooms.filter(
-    (room) => room.invoice_id === null && room.financial_status !== 'first_month',
-  ).length;
+  // A move-in month is billed too (prorated), so every row without a bill counts.
+  const roomsWithoutInvoice = activeRooms.filter((room) => room.invoice_id === null).length;
 
   return (
     <>
@@ -254,7 +259,7 @@ export default async function BillingPage({
               const billingHref = `/billing/${room.room_id}`;
 
               return (
-                <tr key={room.room_id}>
+                <tr key={`${room.room_id}-${room.invoice_id ?? 'none'}`}>
                   <TD className="whitespace-nowrap">
                     <Link
                       href={billingHref}

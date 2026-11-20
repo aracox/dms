@@ -5,7 +5,9 @@ import { buttonClasses } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader, Field, FieldGrid } from '@/components/ui/Card';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
+import { amountOwed } from '@/lib/billing/calc';
 import { formatAmount, formatTHB } from '@/lib/billing/money';
+import { lastMeterNumber } from '@/lib/meters/tenancy';
 import { can } from '@/lib/permissions';
 import { getHeldReservation } from '@/lib/reservations/queries';
 import type { RoomDetail } from '@/lib/rooms/queries';
@@ -95,7 +97,29 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
                 noticeNote={contract.notice_note}
                 locale={locale}
               />
-              <MoveOutForm contractId={contract.id} roomId={room.id} today={bangkokToday()} />
+              <MoveOutForm
+                contractId={contract.id}
+                roomId={room.id}
+                today={bangkokToday()}
+                owed={amountOwed(
+                  detail.invoices.filter((invoice) => invoice.contract_id === contract.id),
+                )}
+                lastMeters={{
+                  electricity: lastMeterNumber({
+                    type: 'electricity',
+                    readings: detail.meterReadings,
+                    contracts: detail.contractHistory,
+                    through: bangkokToday(),
+                  }),
+                  water: lastMeterNumber({
+                    type: 'water',
+                    readings: detail.meterReadings,
+                    contracts: detail.contractHistory,
+                    through: bangkokToday(),
+                  }),
+                }}
+                locale={locale}
+              />
             </div>
           ) : null}
         </CardBody>

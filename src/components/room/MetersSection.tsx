@@ -12,6 +12,7 @@ import { YearStepper } from '@/components/ui/YearStepper';
 import type { Locale } from '@/i18n/routing';
 import { formatAmount, formatTHB, sumMoney } from '@/lib/billing/money';
 import { deleteMeterReadingAction, type DeleteMeterReadingState } from '@/lib/meters/actions';
+import type { MeterContract } from '@/lib/meters/tenancy';
 import { currentBillingMonth, formatBillingMonth } from '@/lib/utils/date';
 import type { MeterReadingRow, MeterType } from '@/types/database';
 
@@ -66,6 +67,7 @@ function DeleteReadingButton({ roomId, readingId }: { roomId: string; readingId:
 export function MetersSection({
   roomId,
   readings,
+  contracts,
   rates,
   canRecord,
   canCorrect,
@@ -74,6 +76,8 @@ export function MetersSection({
 }: {
   roomId: string;
   readings: MeterReadingRow[];
+  /** The room's contracts: their move-in / move-out meter numbers start and end usage. */
+  contracts: readonly MeterContract[];
   rates: Record<MeterType, number>;
   canRecord: boolean;
   canCorrect: boolean;
@@ -132,6 +136,7 @@ export function MetersSection({
                   roomId={roomId}
                   meterType={meterType}
                   readings={readings.filter((reading) => reading.meter_type === meterType)}
+                  contracts={contracts}
                   defaultRate={rates[meterType]}
                   canRecord={canRecord}
                   canCorrect={canCorrect}

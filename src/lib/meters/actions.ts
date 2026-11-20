@@ -87,27 +87,34 @@ export async function recordMeterReadingAction(
     recorded_by: profile!.id,
   };
 
-  const { error } = existing
-    ? await supabase.from('meter_readings').update(payload).eq('id', existing.id)
-    : await supabase.from('meter_readings').insert(payload);
+  const { data: saved, error } = existing
+    ? await supabase.from('meter_readings').update(payload).eq('id', existing.id).select('id')
+    : await supabase.from('meter_readings').insert(payload).select('id');
 
-  if (error) return { error: 'errors.generic' };
+  if (error || !saved?.[0]) return { error: 'errors.generic' };
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
   revalidatePath('/billing');
 
-  // The DB trigger (0036) carries the reading onto this month's invoice only
-  // while it is unpaid. If it has been (partly) paid, say so rather than let
-  // staff assume the bill changed.
-  const { data: invoice } = await supabase
-    .from('invoices')
-    .select('status')
-    .eq('room_id', parsed.data.room_id)
-    .eq('billing_month', parsed.data.billing_month)
-    .neq('status', 'cancelled')
-    .maybeSingle();
+  // The DB trigger (0046) carries the reading onto this month's bill only
+  // while it is unpaid. If no bill took it and one of the month's bills has
+  // been (partly) paid, say so rather than let staff assume the bill changed.
+  // A turnover month has a bill per contract, so look at all of them.
+  const [{ data: carrying }, { data: invoices }] = await Promise.all([
+    supabase.from('invoice_items').select('id').eq('meter_reading_id', saved[0].id).limit(1),
+    supabase
+      .from('invoices')
+      .select('status')
+      .eq('room_id', parsed.data.room_id)
+      .eq('billing_month', parsed.data.billing_month)
+      .neq('status', 'cancelled'),
+  ]);
 
-  const paid = invoice?.status === 'paid' || invoice?.status === 'partially_paid';
+  const paid =
+    !carrying?.length &&
+    (invoices ?? []).some(
+      (invoice) => invoice.status === 'paid' || invoice.status === 'partially_paid',
+    );
   return { error: null, notice: paid ? 'meters.invoiceNotUpdatedPaid' : null };
 }
 

@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { TD, TH, Table } from '@/components/ui/Table';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { confirmedPaid, outstanding } from '@/lib/billing/calc';
+import { amountOwed } from '@/lib/billing/calc';
 import { formatTHB } from '@/lib/billing/money';
 import {
   contractDisplayStatus,
@@ -24,6 +24,7 @@ import { addDays, daysBetween, formatDate } from '@/lib/utils/date';
 import { ContractPeriodField } from './ContractPeriodField';
 import { ContractRentField } from './ContractRentField';
 import { ContractSubscriptionsCard } from './ContractSubscriptionsCard';
+import { DepositReceivedForm } from './DepositReceivedForm';
 import { ContractOccupantsField, TenantContactField } from './EditableTenantFields';
 import { RenewContractForm } from './RenewContractForm';
 import { SettleDepositForm } from './SettleDepositForm';
@@ -122,12 +123,7 @@ export async function RoomContractTab({
     ? await loadTenantName(pendingSettlement.tenant_id)
     : '';
   const settlementOutstanding = pendingSettlement
-    ? detail.invoices
-        .filter((invoice) => invoice.contract_id === pendingSettlement.id)
-        .reduce(
-          (sum, invoice) => sum + outstanding(invoice.total, confirmedPaid(invoice.payments)),
-          0,
-        )
+    ? amountOwed(detail.invoices.filter((invoice) => invoice.contract_id === pendingSettlement.id))
     : 0;
 
   return (
@@ -294,7 +290,27 @@ export async function RoomContractTab({
                   value={formatTHB(contract.monthly_rent, locale)}
                 />
               )}
-              <Field label={t('room.deposit')} value={formatTHB(contract.deposit, locale)} />
+              <Field
+                label={t('room.deposit')}
+                value={
+                  <>
+                    {formatTHB(contract.deposit, locale)}
+                    {!contract.deposit_received_on && canEditContract ? (
+                      <DepositReceivedForm contractId={contract.id} roomId={detail.room.id} />
+                    ) : null}
+                  </>
+                }
+                hint={
+                  contract.deposit_received_on
+                    ? t('contract.depositReceivedOn', {
+                        date: formatDate(contract.deposit_received_on, locale),
+                        method: contract.deposit_received_method
+                          ? t(`paymentMethod.${contract.deposit_received_method}`)
+                          : '-',
+                      })
+                    : t('contract.depositNotReceived')
+                }
+              />
               <Field label={t('room.paymentDueDay')} value={contract.payment_due_day} />
             </FieldGrid>
           ) : (

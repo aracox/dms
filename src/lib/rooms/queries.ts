@@ -88,24 +88,27 @@ export async function getRoomBoardByNumber(roomNumber: string): Promise<RoomBoar
   return data ?? null;
 }
 
-/** A room's bill for one billing month, with confirmed payments taken off. */
+/** A bill for one billing month, with confirmed payments taken off. */
 export type MonthBill = {
   invoice_id: string;
   room_id: string;
+  contract_id: string | null;
   billing_month: string;
   status: InvoiceStatus;
   outstanding: number;
+  /** The tenant on the bill's own contract -- not whoever is in the room now. */
+  tenant_name: string | null;
 };
 
 /**
- * Each room's bill for one billing month, keyed by room id. Cancelled bills are
- * skipped; when a month holds a bill and its reissue, the newest wins -- the
- * same pick v_room_board makes for the latest bill.
+ * Each room's live bills for one billing month, keyed by room id: one per
+ * contract, so a turnover month lists the outgoing and incoming tenant
+ * separately. Cancelled bills are skipped.
  */
 export async function getBillsForMonth(
   month: IsoDate,
   options: { includeTest?: boolean } = {},
-): Promise<Map<string, MonthBill>> {
+): Promise<Map<string, MonthBill[]>> {
   const supabase = await createClient();
 
   let query = supabase
@@ -132,6 +135,21 @@ export async function getBillsForMonth(
     throw new Error(`payments for ${month}: ${paymentError.message}`, { cause: paymentError });
   }
 
+  const contractIds = [
+    ...new Set((invoices ?? []).flatMap((invoice) => invoice.contract_id ?? [])),
+  ];
+  const { data: contracts } = contractIds.length
+    ? await supabase.from('contracts').select('id, tenant_id').in('id', contractIds)
+    : { data: [] as { id: string; tenant_id: string }[] };
+  const tenantIds = [...new Set((contracts ?? []).map((contract) => contract.tenant_id))];
+  const { data: tenants } = tenantIds.length
+    ? await supabase.from('tenants').select('id, full_name').in('id', tenantIds)
+    : { data: [] as { id: string; full_name: string }[] };
+  const tenantNameOf = (contractId: string | null) => {
+    const tenantId = contracts?.find((contract) => contract.id === contractId)?.tenant_id;
+    return tenants?.find((tenant) => tenant.id === tenantId)?.full_name ?? null;
+  };
+
   const paidByInvoice = new Map<string, number[]>();
   for (const payment of payments ?? []) {
     paidByInvoice.set(payment.invoice_id, [
@@ -140,16 +158,20 @@ export async function getBillsForMonth(
     ]);
   }
 
-  const bills = new Map<string, MonthBill>();
+  const bills = new Map<string, MonthBill[]>();
   for (const invoice of invoices ?? []) {
-    if (bills.has(invoice.room_id)) continue; // newest first, so the first one wins
-    bills.set(invoice.room_id, {
-      invoice_id: invoice.id,
-      room_id: invoice.room_id,
-      billing_month: invoice.billing_month,
-      status: invoice.status,
-      outstanding: subtractMoney(invoice.total, sumMoney(paidByInvoice.get(invoice.id) ?? [])),
-    });
+    bills.set(invoice.room_id, [
+      ...(bills.get(invoice.room_id) ?? []),
+      {
+        invoice_id: invoice.id,
+        room_id: invoice.room_id,
+        contract_id: invoice.contract_id,
+        billing_month: invoice.billing_month,
+        status: invoice.status,
+        outstanding: subtractMoney(invoice.total, sumMoney(paidByInvoice.get(invoice.id) ?? [])),
+        tenant_name: tenantNameOf(invoice.contract_id),
+      },
+    ]);
   }
   return bills;
 }

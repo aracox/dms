@@ -62,9 +62,7 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
   const canDeleteInvoices = can(profile?.role, 'invoices:delete');
   const canRecordPayment = can(profile?.role, 'payments:record');
 
-  const liveInvoiceMonths = detail.invoices
-    .filter((invoice) => invoice.status !== 'cancelled')
-    .map((invoice) => invoice.billing_month);
+  const liveInvoices = detail.invoices.filter((invoice) => invoice.status !== 'cancelled');
 
   const fees = Object.fromEntries(
     INVOICE_EXTRA_FEE_KEYS.map((key) => [
@@ -81,9 +79,13 @@ export async function RoomBillingTab({ detail, locale }: { detail: RoomDetail; l
             <GenerateInvoiceForm
               roomId={detail.room.id}
               fees={fees}
-              liveInvoiceMonths={liveInvoiceMonths}
+              rates={{
+                electricity: Number(detail.settings.electricity_rate ?? 0),
+                water: Number(detail.settings.water_rate ?? 0),
+              }}
+              contracts={detail.contractHistory}
+              liveInvoices={liveInvoices}
               subscribedKeys={detail.contractSubscriptions}
-              monthlyRent={billableContract?.monthly_rent ?? 0}
               meterReadings={detail.meterReadings}
               locale={locale}
             />

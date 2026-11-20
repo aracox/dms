@@ -236,6 +236,7 @@ describe('the SQL enforces exclusion, not just the TypeScript', () => {
   );
   const expenseMonths = readRepoFile('../../../supabase/migrations/0040_report_expense_months.sql');
   const payments = readRepoFile('../../../supabase/migrations/0043_report_payments.sql');
+  const moneyFixes = readRepoFile('../../../supabase/migrations/0046_tenancy_money_fixes.sql');
   const tables = readRepoFile('../../../supabase/migrations/0002_core_tables.sql');
   const triggers = readRepoFile('../../../supabase/migrations/0005_functions_and_triggers.sql');
 
@@ -277,6 +278,15 @@ describe('the SQL enforces exclusion, not just the TypeScript', () => {
 
   it('filters is_test in report_payments (0043)', () => {
     assertReportViewsFilterTestData(payments, 1);
+  });
+
+  it('filters is_test on every source of the 0046 views (deposits held, repairs, card fees)', () => {
+    assertReportViewsFilterTestData(moneyFixes, 2);
+    // Overview: the 0039 sources plus repairs and card fees.
+    const overview = moneyFixes.slice(
+      moneyFixes.indexOf('create or replace view report_business_overview'),
+    );
+    expect(overview.match(/is_test = false/g)!.length).toBeGreaterThanOrEqual(9);
   });
 
   it('filters is_test in every per-segment report_ view', () => {

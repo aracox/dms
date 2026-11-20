@@ -28,7 +28,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { StatTile } from '@/components/ui/StatTile';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { formatTHB, round2 } from '@/lib/billing/money';
+import { formatTHB, round2, sumMoney } from '@/lib/billing/money';
 import { summarizeBusinessOverview } from '@/lib/reporting/business-overview';
 import { getDashboardData } from '@/lib/reporting/queries';
 import {
@@ -115,6 +115,7 @@ export default async function DashboardPage({
     lostCards: allLostCards,
     overdue: allOverdue,
     roomStatus: allRoomStatus,
+    depositsHeld: allDepositsHeld,
   } = await getDashboardData();
 
   // Everything below reads the selected view -- the combined figures, or one
@@ -128,6 +129,7 @@ export default async function DashboardPage({
   const maintenance = filterByView(view, allMaintenance);
   const lostCards = filterByView(view, allLostCards);
   const overdue = filterByView(view, allOverdue);
+  const depositsHeld = sumMoney(filterByView(view, allDepositsHeld).map((row) => row.deposit));
   const roomStatus = filterByView(view, allRoomStatus);
 
   const money = (amount: number) => formatTHB(amount, typedLocale);
@@ -394,11 +396,18 @@ export default async function DashboardPage({
             </ul>
           ) : null}
 
-          <div className="mt-auto flex items-baseline justify-between gap-3 rounded-lg bg-white/10 px-3.5 py-3">
-            <span className="text-caption text-white/80">{t('dashboard.expectedRevenue')}</span>
-            <span className="text-body font-semibold tabular-nums">
-              {money(finance.expected_rent)}
-            </span>
+          <div className="mt-auto flex flex-col gap-2">
+            <div className="flex items-baseline justify-between gap-3 rounded-lg bg-white/10 px-3.5 py-3">
+              <span className="text-caption text-white/80">{t('dashboard.expectedRevenue')}</span>
+              <span className="text-body font-semibold tabular-nums">
+                {money(finance.expected_rent)}
+              </span>
+            </div>
+            {/* Held for tenants and refunded at move-out: shown apart from income. */}
+            <div className="flex items-baseline justify-between gap-3 rounded-lg bg-white/10 px-3.5 py-3">
+              <span className="text-caption text-white/80">{t('dashboard.depositsHeld')}</span>
+              <span className="text-body font-semibold tabular-nums">{money(depositsHeld)}</span>
+            </div>
           </div>
         </section>
       </div>
@@ -472,7 +481,7 @@ export default async function DashboardPage({
             financialHint: t('dashboard.financialTrendHint'),
             billed: t('dashboard.billed'),
             collected: t('dashboard.collected'),
-            expenses: t('dashboard.commonExpenses'),
+            expenses: t('dashboard.expensesWithRepairs'),
             collectionRate: t('dashboard.collectionRate'),
             netAfterExpenses: t('dashboard.netAfterExpenses'),
             noData: t('dashboard.noOverviewData'),

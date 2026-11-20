@@ -97,6 +97,7 @@ export function RefundsTable({
                     contractId={contract.id}
                     roomId={contract.room_id}
                     deposit={contract.deposit}
+                    owed={record.owed}
                     locale={locale}
                   />
                 ) : record.status === 'pending' ? (

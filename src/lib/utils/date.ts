@@ -103,6 +103,26 @@ export function dueDateFor(billingMonth: IsoDate, paymentDueDay: number): IsoDat
   return `${billingMonth.slice(0, 7)}-${String(day).padStart(2, '0')}`;
 }
 
+/** Days a late bill gets before it falls due. */
+export const LATE_BILL_DAYS_TO_PAY = 5;
+
+/**
+ * When a bill issued on `issueDate` falls due: the contract's due day in the
+ * billing month, as always -- unless that day has already passed when the bill
+ * is issued (a bill generated late, or a tenant who moved in after the due
+ * day), in which case it is due LATE_BILL_DAYS_TO_PAY days after issuing. So a
+ * bill is never overdue the day it is created, and bills issued on time keep
+ * their usual due date.
+ */
+export function invoiceDueDate(
+  billingMonth: IsoDate,
+  paymentDueDay: number,
+  issueDate: IsoDate,
+): IsoDate {
+  const usual = dueDateFor(billingMonth, paymentDueDay);
+  return usual < issueDate ? addDays(issueDate, LATE_BILL_DAYS_TO_PAY) : usual;
+}
+
 const DATE_STYLES: Record<'th' | 'en', Intl.DateTimeFormatOptions> = {
   // Thai users expect the Buddhist calendar in day/month/year order.
   th: { timeZone: BANGKOK_TZ, dateStyle: 'medium' },

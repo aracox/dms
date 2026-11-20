@@ -21,6 +21,7 @@ import type {
   BusinessOverviewRow,
   ExpenseMonthRow,
   ContractExpiringRow,
+  DepositHeldRow,
   FinanceSummaryRow,
   MaintenanceReportRow,
   MeterUsageRow,
@@ -233,6 +234,15 @@ export async function getLostCards(): Promise<AccessCardReportRow[]> {
   return data ?? [];
 }
 
+/** Deposits received and not yet settled: held for tenants, never income. */
+export async function getDepositsHeld(): Promise<DepositHeldRow[]> {
+  const supabase = await createClient();
+  const data = await read('report_deposits_held', () =>
+    supabase.from('report_deposits_held').select('*'),
+  );
+  return data ?? [];
+}
+
 export async function getAccessCardReport(): Promise<AccessCardReportRow[]> {
   const supabase = await createClient();
   const data = await read('report_access_cards', () =>
@@ -304,6 +314,7 @@ export async function getDashboardData() {
     lostCards,
     overdue,
     roomStatus,
+    depositsHeld,
   ] = await Promise.all([
     getRoomSummary(),
     getRoomSummaryBySegment(),
@@ -319,6 +330,7 @@ export async function getDashboardData() {
     getLostCards(),
     getOverdueInvoices(10),
     getRoomStatusBoard(),
+    getDepositsHeld(),
   ]);
 
   return {
@@ -336,5 +348,6 @@ export async function getDashboardData() {
     lostCards,
     overdue,
     roomStatus,
+    depositsHeld,
   };
 }

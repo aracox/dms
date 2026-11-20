@@ -10,9 +10,17 @@
  */
 
 import type { FinancialStatus, InvoiceItemType, InvoiceStatus } from '@/types/database';
-import { bangkokToday, billingMonthOf, isPastDue, type IsoDate } from '@/lib/utils/date';
+import {
+  addDays,
+  addMonths,
+  bangkokToday,
+  billingMonthOf,
+  daysBetween,
+  isPastDue,
+  type IsoDate,
+} from '@/lib/utils/date';
 
-import { multiplyMoney, round2, subtractMoney, sumMoney } from './money';
+import { fromSatang, multiplyMoney, round2, subtractMoney, sumMoney, toSatang } from './money';
 
 export class MeterReadingError extends Error {}
 
@@ -87,6 +95,27 @@ export function outstanding(total: number, paid: number): number {
   return remaining > 0 ? remaining : 0;
 }
 
+/** Bills that still expect money: what settle_deposit (0045) pays from a deposit. */
+export const OWING_INVOICE_STATUSES: readonly InvoiceStatus[] = [
+  'issued',
+  'overdue',
+  'partially_paid',
+];
+
+/**
+ * What a tenant still owes across their bills: the unpaid balance of every bill
+ * that expects money. Drafts and cancelled bills owe nothing.
+ */
+export function amountOwed(
+  invoices: readonly { status: InvoiceStatus; total: number; payments: readonly PaymentInput[] }[],
+): number {
+  return sumMoney(
+    invoices
+      .filter((invoice) => OWING_INVOICE_STATUSES.includes(invoice.status))
+      .map((invoice) => outstanding(invoice.total, confirmedPaid(invoice.payments))),
+  );
+}
+
 /**
  * Mirrors the status branch of recalc_invoice(), including its precedence:
  * paid beats partially_paid beats overdue. A partly-paid invoice past its due
@@ -151,6 +180,53 @@ export function validatePaymentAmount(input: {
   if (input.amount <= 0) return { ok: false, reason: 'not_positive', maxAllowed };
   if (input.amount > maxAllowed) return { ok: false, reason: 'exceeds_total', maxAllowed };
   return { ok: true };
+}
+
+export interface MonthRent {
+  amount: number;
+  /** Days of the month the contract covers. */
+  days: number;
+  daysInMonth: number;
+  /** First and last day billed, so a part month can say which days it covers. */
+  from: IsoDate;
+  to: IsoDate;
+}
+
+/**
+ * Rent a contract owes for one billing month, prorated by days for the month
+ * it starts in and the month it ends in: monthly rent x days covered / days in
+ * the month, rounded to the satang. A month the contract covers fully is the
+ * plain monthly rent. `endedOn` is the contract's last day, or null while it
+ * runs on (see contractEndedOn).
+ */
+export function rentForMonth(input: {
+  monthlyRent: number;
+  billingMonth: IsoDate;
+  startDate: IsoDate;
+  endedOn: IsoDate | null;
+}): MonthRent {
+  const monthStart = billingMonthOf(input.billingMonth);
+  const monthEnd = addDays(addMonths(monthStart, 1), -1);
+  const daysInMonth = daysBetween(monthStart, monthEnd) + 1;
+  const from = input.startDate > monthStart ? input.startDate : monthStart;
+  const to = input.endedOn !== null && input.endedOn < monthEnd ? input.endedOn : monthEnd;
+  const days = Math.max(daysBetween(from, to) + 1, 0);
+
+  const amount =
+    days >= daysInMonth
+      ? input.monthlyRent
+      : fromSatang(Math.round((toSatang(input.monthlyRent) * days) / daysInMonth));
+
+  return { amount, days, daysInMonth, from, to };
+}
+
+/**
+ * "20/11–30/11 (11/30)": the days a prorated rent line covers, stored as the
+ * line's description. Numbers only, so it reads the same in either language.
+ */
+export function rentPeriodLabel(rent: Pick<MonthRent, 'from' | 'to' | 'days' | 'daysInMonth'>) {
+  const dayMonth = (date: IsoDate) => `${Number(date.slice(8, 10))}/${Number(date.slice(5, 7))}`;
+  return `${dayMonth(rent.from)}–${dayMonth(rent.to)} (${rent.days}/${rent.daysInMonth})`;
 }
 
 /**

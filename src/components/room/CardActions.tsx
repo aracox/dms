@@ -123,7 +123,7 @@ export function CardActions({
       </div>
       {fee > 0 ? (
         <p className="text-brand-red-deep text-caption">
-          {t('cards.replacementFee')}: {formatTHB(fee, locale)}
+          {t('cards.replacementFeeOnSpot', { amount: formatTHB(fee, locale) })}
         </p>
       ) : null}
       {errorMessage}

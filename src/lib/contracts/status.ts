@@ -1,3 +1,4 @@
+import { addDays } from '@/lib/utils/date';
 import type { ContractRow, ContractStatus } from '@/types/database';
 
 export type ContractDisplayStatus = ContractStatus | 'awaiting_refund';
@@ -36,24 +37,60 @@ export function pendingDepositSettlement<
     : null;
 }
 
+type BillableContract = Pick<ContractRow, 'status' | 'start_date' | 'end_date' | 'terminated_at'>;
+
 /**
- * The contract a room's invoice for `billingMonth` belongs to, given that
- * room's contracts newest first. A contract covers the months from its start
- * through the month it ended -- so a tenant who moved out on the 31st can
- * still be billed for that last month after the room is vacant. Drafts never
- * bill. When two contracts touch the same month (a renewal) the newer wins.
+ * A contract's last billable day, or null while it runs on (an active
+ * contract past its end_date is still running). A terminated contract ends on
+ * its termination date. A renewed one ('expired') ends on its end_date -- or
+ * the day before the contract that replaced it starts, if that is earlier:
+ * renewal does not shorten the old contract, and an early renewal must not
+ * bill the overlap twice. `newer` is the room's next contract, if any.
  */
-export function contractForBillingMonth<
-  T extends Pick<ContractRow, 'status' | 'start_date' | 'end_date' | 'terminated_at'>,
->(roomContractsNewestFirst: readonly T[], billingMonth: string): T | null {
+export function contractEndedOn(
+  contract: BillableContract,
+  newer?: Pick<ContractRow, 'start_date'>,
+): string | null {
+  if (contract.status === 'terminated') return contract.terminated_at;
+  if (contract.status !== 'expired') return null;
+  if (!newer) return contract.end_date;
+  const dayBeforeNewer = addDays(newer.start_date, -1);
+  return dayBeforeNewer < contract.end_date ? dayBeforeNewer : contract.end_date;
+}
+
+/**
+ * Every contract a room bills for `billingMonth`, given that room's contracts
+ * newest first: each covers the months from its start through the month it
+ * ended, so a tenant who moved out on the 20th still owes that month and the
+ * one who moved in on the 21st owes it too -- one bill each. Drafts never
+ * bill. The first one returned is the tenant in the room at month end, whose
+ * bill carries that month's meter readings.
+ */
+export function contractsForBillingMonth<T extends BillableContract>(
+  roomContractsNewestFirst: readonly T[],
+  billingMonth: string,
+): T[] {
   const month = billingMonth.slice(0, 7);
-  return (
-    roomContractsNewestFirst.find((contract) => {
-      if (contract.status === 'draft') return false;
-      if (contract.start_date.slice(0, 7) > month) return false;
-      if (contract.status === 'active') return true;
-      const endedOn = contract.status === 'terminated' ? contract.terminated_at : contract.end_date;
-      return endedOn !== null && endedOn.slice(0, 7) >= month;
-    }) ?? null
+  return roomContractsNewestFirst.filter((contract, index) => {
+    if (contract.status === 'draft') return false;
+    if (contract.start_date.slice(0, 7) > month) return false;
+    if (contract.status === 'active') return true;
+    const endedOn = contractEndedOn(contract, roomContractsNewestFirst[index - 1]);
+    // An end before the start: a renewal on the contract's first day.
+    return endedOn !== null && endedOn >= contract.start_date && endedOn.slice(0, 7) >= month;
+  });
+}
+
+/** The contracts in `billingMonth` that have no live (non-cancelled) bill yet. */
+export function unbilledContracts<T extends BillableContract & Pick<ContractRow, 'id'>>(
+  roomContractsNewestFirst: readonly T[],
+  liveInvoices: readonly { contract_id: string | null; billing_month: string }[],
+  billingMonth: string,
+): T[] {
+  return contractsForBillingMonth(roomContractsNewestFirst, billingMonth).filter(
+    (contract) =>
+      !liveInvoices.some(
+        (invoice) => invoice.contract_id === contract.id && invoice.billing_month === billingMonth,
+      ),
   );
 }

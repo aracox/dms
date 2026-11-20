@@ -44,7 +44,8 @@ export type InvoiceStatus =
 export type InvoiceItemType =
   'rent' | 'electricity' | 'water' | 'internet' | 'parking' | 'other' | 'discount';
 
-export type PaymentMethod = 'cash' | 'bank_transfer' | 'promptpay';
+/** 'deposit': paid out of the tenant's deposit at move-out (settle_deposit, 0045). */
+export type PaymentMethod = 'cash' | 'bank_transfer' | 'promptpay' | 'deposit';
 
 export type PaymentStatus = 'pending' | 'confirmed' | 'cancelled';
 
@@ -209,6 +210,15 @@ export type ContractRow = {
   /** The date the tenant said they will vacate. Independent of end_date. */
   planned_move_out_date: string | null;
   notice_note: string | null;
+  /** Meter numbers on move-in day (0046): where this tenant's usage starts. */
+  meter_start_electricity: number | null;
+  meter_start_water: number | null;
+  /** Meter numbers on move-out day (0046): billed on the tenant's last bill. */
+  meter_end_electricity: number | null;
+  meter_end_water: number | null;
+  /** When the deposit was paid; null = not recorded. Money held, never income. */
+  deposit_received_on: string | null;
+  deposit_received_method: PaymentMethod | null;
   is_test: boolean;
   created_at: string;
   updated_at: string;
@@ -463,8 +473,13 @@ export type BusinessOverviewRow = {
   billed_amount: number;
   collected_amount: number;
   expense_amount: number;
+  /** collected + other_income - expense_amount. */
   net_after_expenses: number;
   collection_rate: number;
+  /** The part of expense_amount that is completed repairs (0046). */
+  repair_amount: number;
+  /** Money received outside bills: card replacement fees, paid on the spot (0046). */
+  other_income: number;
 };
 
 /**
@@ -561,6 +576,17 @@ export type PaymentReportRow = {
   room_number: string;
   property_segment: PropertySegment;
   tenant_name: string | null;
+};
+
+/** report_deposits_held: deposits received and not yet settled (0046). */
+export type DepositHeldRow = {
+  contract_id: string;
+  room_id: string;
+  room_number: string;
+  property_segment: PropertySegment;
+  deposit: number;
+  deposit_received_on: string;
+  deposit_received_method: PaymentMethod | null;
 };
 
 export type MeterUsageRow = {
@@ -832,6 +858,7 @@ export type Database = {
       report_outstanding: ViewDef<OutstandingRow>;
       report_payment_collection: ViewDef<PaymentCollectionRow>;
       report_payments: ViewDef<PaymentReportRow>;
+      report_deposits_held: ViewDef<DepositHeldRow>;
       report_meter_usage: ViewDef<MeterUsageRow>;
       report_maintenance: ViewDef<MaintenanceReportRow>;
       report_access_cards: ViewDef<AccessCardReportRow>;
@@ -887,8 +914,21 @@ export type Database = {
           p_activate_cards: boolean;
           p_line_id?: string | null;
           p_address?: string | null;
+          p_meter_electricity?: number | null;
+          p_meter_water?: number | null;
+          p_deposit_received_on?: string | null;
+          p_deposit_received_method?: PaymentMethod | null;
         };
         Returns: { contract_id: string; tenant_id: string }[];
+      };
+      settle_deposit: {
+        Args: {
+          p_contract_id: string;
+          p_refund: number;
+          p_reason: string | null;
+          p_pay_bills: boolean;
+        };
+        Returns: undefined;
       };
       move_out_room: {
         Args: {
@@ -896,6 +936,8 @@ export type Database = {
           p_terminated_at: string;
           p_termination_reason: string | null;
           p_return_cards: boolean;
+          p_meter_electricity?: number | null;
+          p_meter_water?: number | null;
         };
         Returns: undefined;
       };

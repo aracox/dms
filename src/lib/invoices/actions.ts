@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { INVOICE_EXTRA_FEE_KEYS, type InvoiceExtraFeeKey } from '@/lib/invoices/fees';
-import { generateInvoiceForRoom } from '@/lib/invoices/generate';
+import { generateInvoicesForRoom } from '@/lib/invoices/generate';
 import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { currentBillingMonth } from '@/lib/utils/date';
@@ -13,7 +13,12 @@ export interface GenerateInvoiceState {
   error: string | null;
 }
 
-/** Thin form wrapper around generateInvoiceForRoom: parse, generate, revalidate. */
+/**
+ * Thin form wrapper around generateInvoicesForRoom: parse, generate,
+ * revalidate. Creates the room's missing bills for the month -- usually one,
+ * two in a turnover month -- with the ticked extras on the bill of the tenant
+ * in the room at month end.
+ */
 export async function generateInvoiceAction(
   _previous: GenerateInvoiceState,
   formData: FormData,
@@ -37,14 +42,15 @@ export async function generateInvoiceAction(
     .filter((key): key is InvoiceExtraFeeKey => feeKeys.includes(key));
 
   const supabase = await createClient();
-  const result = await generateInvoiceForRoom(supabase, {
+  const result = await generateInvoicesForRoom(supabase, {
     roomId: parsed.data.room_id,
     billingMonth: parsed.data.billing_month,
-    extraKeys,
+    extras: extraKeys,
   });
 
-  if (!result.error) revalidatePath(`/rooms/${parsed.data.room_id}`);
-  return result;
+  // A partial run (one bill of two created) still changed the room.
+  if (result.created > 0) revalidatePath(`/rooms/${parsed.data.room_id}`);
+  return { error: result.error };
 }
 
 export interface BulkGenerateOutcome {
@@ -63,10 +69,12 @@ export interface BulkGenerateInvoicesState {
 }
 
 /**
- * Generates this month's invoice for every active, non-test contract that
- * doesn't already have one, pricing each room's subscribed extras from
- * contract_subscriptions instead of a human re-ticking checkboxes. Every room
- * is independent: one failing (or already invoiced) never blocks the rest.
+ * Generates this month's bills for every room with an active, non-test
+ * contract, creating whatever each room is missing -- including the outgoing
+ * tenant's part-month bill in a turnover month -- and pricing each contract's
+ * extras from its contract_subscriptions instead of a human re-ticking
+ * checkboxes. Every room is independent: one failing (or already billed)
+ * never blocks the rest.
  */
 export async function bulkGenerateInvoicesAction(
   _previous: BulkGenerateInvoicesState,
@@ -80,53 +88,37 @@ export async function bulkGenerateInvoicesAction(
 
   const { data: contracts } = await supabase
     .from('contracts')
-    .select('id, room_id')
+    .select('room_id')
     .eq('status', 'active')
     .eq('is_test', false);
 
-  if (!contracts || contracts.length === 0) {
+  const roomIds = [...new Set((contracts ?? []).map((contract) => contract.room_id))];
+  if (roomIds.length === 0) {
     return { error: null, result: { createdCount: 0, skipped: [], failed: [] } };
   }
 
-  const roomIds = contracts.map((contract) => contract.room_id);
-  const contractIds = contracts.map((contract) => contract.id);
-
-  const [{ data: rooms }, { data: subscriptionRows }] = await Promise.all([
-    supabase.from('rooms').select('id, room_number').in('id', roomIds),
-    supabase
-      .from('contract_subscriptions')
-      .select('contract_id, fee_key')
-      .in('contract_id', contractIds),
-  ]);
-
+  const { data: rooms } = await supabase.from('rooms').select('id, room_number').in('id', roomIds);
   const roomNumberById = new Map((rooms ?? []).map((room) => [room.id, room.room_number]));
-  const subscriptionsByContract = new Map<string, InvoiceExtraFeeKey[]>();
-  for (const row of subscriptionRows ?? []) {
-    const list = subscriptionsByContract.get(row.contract_id) ?? [];
-    list.push(row.fee_key as InvoiceExtraFeeKey);
-    subscriptionsByContract.set(row.contract_id, list);
-  }
 
   const outcomes = await Promise.all(
-    contracts.map(async (contract) => {
-      const roomNumber = roomNumberById.get(contract.room_id) ?? contract.room_id;
-      const { error } = await generateInvoiceForRoom(supabase, {
-        roomId: contract.room_id,
+    roomIds.map(async (roomId) => {
+      const roomNumber = roomNumberById.get(roomId) ?? roomId;
+      const { error, created } = await generateInvoicesForRoom(supabase, {
+        roomId,
         billingMonth,
-        extraKeys: subscriptionsByContract.get(contract.id) ?? [],
+        extras: 'subscriptions',
       });
-      return { roomNumber, error };
+      return { roomNumber, error, created };
     }),
   );
 
-  const skipped = outcomes.filter(
-    (outcome): outcome is BulkGenerateOutcome => outcome.error === 'billing.invoiceAlreadyExists',
-  );
-  const failed = outcomes.filter(
-    (outcome): outcome is BulkGenerateOutcome =>
-      outcome.error !== null && outcome.error !== 'billing.invoiceAlreadyExists',
-  );
-  const createdCount = outcomes.length - skipped.length - failed.length;
+  const skipped = outcomes
+    .filter((outcome) => outcome.error === 'billing.invoiceAlreadyExists')
+    .map(({ roomNumber, error }) => ({ roomNumber, error: error! }));
+  const failed = outcomes
+    .filter((outcome) => outcome.error !== null && outcome.error !== 'billing.invoiceAlreadyExists')
+    .map(({ roomNumber, error }) => ({ roomNumber, error: error! }));
+  const createdCount = outcomes.reduce((sum, outcome) => sum + outcome.created, 0);
 
   revalidatePath('/billing');
   return { error: null, result: { createdCount, skipped, failed } };

@@ -207,7 +207,8 @@
   "paymentMethod": {
     "cash": "เงินสด",
     "bank_transfer": "โอนเงิน",
-    "promptpay": "พร้อมเพย์"
+    "promptpay": "พร้อมเพย์",
+    "deposit": "หักจากเงินประกัน"
   },
   "paymentStatus": {
     "pending": "รอตรวจสอบ",
@@ -254,7 +255,7 @@
     "collected": "ยอดเก็บได้",
     "commonExpenses": "ค่าใช้จ่ายส่วนกลาง",
     "collectionRate": "อัตราการเก็บเงินเดือนนี้",
-    "netAfterExpenses": "สุทธิหลังค่าใช้จ่ายส่วนกลางเดือนนี้",
+    "netAfterExpenses": "สุทธิหลังค่าใช้จ่ายเดือนนี้ (รวมค่าซ่อมและค่าออกบัตรใหม่)",
     "noOverviewData": "ยังไม่มีข้อมูลภาพรวมธุรกิจรายเดือน",
     "contractsExpiring": "สัญญาใกล้หมดอายุ",
     "moveOutNotices": "การแจ้งย้ายออก",
@@ -280,7 +281,9 @@
     "fullyCollected": "เก็บครบทุกห้อง",
     "averageOccupancy": "ค่าเฉลี่ย {rate}%",
     "occupantsHint": "ผู้พักรวม {count} คน",
-    "roomStatus": "สถานะห้องพัก"
+    "roomStatus": "สถานะห้องพัก",
+    "depositsHeld": "เงินประกันที่ถืออยู่ (ไม่ใช่รายรับ)",
+    "expensesWithRepairs": "ค่าใช้จ่ายส่วนกลาง + ค่าซ่อม"
   },
   "floorPlan": {
     "title": "ผังห้องพัก",
@@ -427,7 +430,26 @@
     "giveNoticeHint": "บันทึกว่าผู้เช่าแจ้งความประสงค์จะย้ายออก ห้องยังใช้งานอยู่จนถึงวันนั้น จากนั้นระบบจะย้ายออกให้อัตโนมัติ หรือย้ายออกก่อนกำหนดได้หากจำเป็น",
     "plannedMoveOutDate": "วันที่คาดว่าจะย้ายออก",
     "noticeGiven": "แจ้งย้ายออกแล้ว — ออกวันที่ {date}",
-    "cancelNotice": "ยกเลิกการแจ้งย้ายออก"
+    "cancelNotice": "ยกเลิกการแจ้งย้ายออก",
+    "alreadySettled": "เงินประกันนี้คืนไปแล้ว",
+    "deductionBelowOwed": "หากจะชำระบิลค้างจากเงินประกัน ยอดคืนต้องลดลงอย่างน้อยเท่ากับยอดค้าง",
+    "meterStartElectricity": "เลขมิเตอร์ไฟวันย้ายเข้า",
+    "meterStartWater": "เลขมิเตอร์น้ำวันย้ายเข้า",
+    "meterStartHint": "จดเลขจากมิเตอร์จริง ค่าน้ำไฟเดือนแรกจะนับจากเลขนี้",
+    "depositReceivedNow": "รับเงินประกันแล้ว",
+    "depositHeldHint": "เงินประกันเป็นเงินที่ถือไว้แทนผู้เช่า ไม่นับเป็นรายรับ",
+    "markDepositReceived": "บันทึกว่ารับเงินประกันแล้ว",
+    "depositReceivedOn": "รับแล้ว {date} ({method})",
+    "depositNotReceived": "ยังไม่ได้บันทึกว่ารับเงินประกัน",
+    "meterEndElectricity": "เลขมิเตอร์ไฟวันย้ายออก",
+    "meterEndWater": "เลขมิเตอร์น้ำวันย้ายออก",
+    "meterLast": "เลขล่าสุด {value}",
+    "meterBelowLast": {
+      "electricity": "เลขมิเตอร์ไฟต่ำกว่าเลขล่าสุด กรุณาตรวจสอบ",
+      "water": "เลขมิเตอร์น้ำต่ำกว่าเลขล่าสุด กรุณาตรวจสอบ"
+    },
+    "moveOutOwedWarning": "ผู้เช่ายังค้างชำระ {amount} จากบิลที่ออกแล้ว ควรเก็บเงินก่อนย้ายออก",
+    "moveOutLastBillHint": "หลังย้ายออก ออกบิลเดือนสุดท้ายได้ที่แท็บบิล: ค่าเช่าตามจำนวนวัน และค่าน้ำไฟถึงวันย้ายออก"
   },
   "deposits": {
     "title": "คืนเงินประกัน",
@@ -445,7 +467,11 @@
     "filterLabel": "ค้นหาการคืนเงินประกัน",
     "pendingTitle": "รอคืนเงินประกัน · ทุกเดือน",
     "refundedFor": "คืนแล้ว · ย้ายออก{month}",
-    "noRefundedInMonth": "ไม่มีการคืนเงินประกันของผู้ที่ย้ายออกใน{month}"
+    "noRefundedInMonth": "ไม่มีการคืนเงินประกันของผู้ที่ย้ายออกใน{month}",
+    "owedWarning": "ยังค้างชำระ {amount}",
+    "owedExceedsDeposit": "ยังค้างชำระ {amount} มากกว่าเงินประกัน ให้เรียกเก็บจากผู้เช่า",
+    "payBillsFromDeposit": "ชำระบิลค้าง {amount} จากเงินประกัน",
+    "paidBillsReason": "หักชำระบิลค้างจากเงินประกัน"
   },
   "reservation": {
     "title": "การจอง",
@@ -481,7 +507,8 @@
     "filterByStatus": "กรองตามสถานะ",
     "allStatuses": "ทุกสถานะ",
     "resultCount": "{count} บัตร",
-    "noResults": "ไม่พบคีย์การ์ดที่ตรงกับเงื่อนไข"
+    "noResults": "ไม่พบคีย์การ์ดที่ตรงกับเงื่อนไข",
+    "replacementFeeOnSpot": "เก็บค่าออกบัตรใหม่ {amount} ตอนนี้ (นับเป็นรายรับวันนี้ ไม่ลงในบิล)"
   },
   "meters": {
     "title": "จดมิเตอร์",

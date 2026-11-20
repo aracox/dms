@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/layout/AppShell';
 import { MoveInForm } from '@/components/room/MoveInForm';
 import { Link, redirect } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
+import { lastMeterNumber } from '@/lib/meters/tenancy';
 import { assertCan } from '@/lib/permissions';
 import { propertySegment } from '@/lib/reporting/segments';
 import { getHeldReservation } from '@/lib/reservations/queries';
@@ -46,6 +47,13 @@ export default async function MoveInPage({
   const reservation = await getHeldReservation(room.id);
 
   const startDate = bangkokToday();
+  const meterAsOf = (type: 'electricity' | 'water') =>
+    lastMeterNumber({
+      type,
+      readings: detail.meterReadings,
+      contracts: detail.contractHistory,
+      through: startDate,
+    });
   const [year, month, day] = startDate.split('-').map(Number);
   const endDate = `${(year ?? 0) + 1}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
@@ -69,6 +77,7 @@ export default async function MoveInPage({
         defaultRent={defaultRent}
         defaultDeposit={defaultDeposit}
         defaultDueDay={defaultDueDay}
+        defaultMeters={{ electricity: meterAsOf('electricity'), water: meterAsOf('water') }}
         startDate={startDate}
         endDate={endDate}
         reservation={reservation}
