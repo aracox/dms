@@ -881,6 +881,10 @@ export type Database = {
       bangkok_today: { Args: Record<string, never>; Returns: string };
       next_invoice_number: { Args: { p_billing_month: string }; Returns: string };
       recalc_invoice: { Args: { p_invoice_id: string }; Returns: undefined };
+      replace_invoice_charges: {
+        Args: { p_invoice_id: string; p_items: Json };
+        Returns: undefined;
+      };
       mark_overdue_invoices: { Args: Record<string, never>; Returns: number };
       process_due_move_out_notices: { Args: Record<string, never>; Returns: number };
       current_app_role: { Args: Record<string, never>; Returns: AppRole };

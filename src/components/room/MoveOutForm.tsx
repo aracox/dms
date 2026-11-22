@@ -23,6 +23,7 @@ export function MoveOutForm({
   roomId,
   today,
   owed,
+  paidBills,
   lastMeters,
   locale,
 }: {
@@ -31,6 +32,8 @@ export function MoveOutForm({
   today: string;
   /** Still unpaid on this contract's issued bills (amountOwed). */
   owed: number;
+  /** This contract's bills from this month on that already have money on them. */
+  paidBills: string[];
   /** The meters' last known numbers, shown so a typo stands out. */
   lastMeters: { electricity: number | null; water: number | null };
   locale: Locale;
@@ -128,6 +131,11 @@ export function MoveOutForm({
       </div>
 
       <p className="text-ink-subtle text-caption">{t('contract.moveOutLastBillHint')}</p>
+      {paidBills.length > 0 ? (
+        <p className="text-ink-subtle text-caption">
+          {t('contract.moveOutPaidBillsHint', { invoices: paidBills.join(', ') })}
+        </p>
+      ) : null}
 
       {state.error ? <p className="text-brand-red-deep text-caption">{t(state.error)}</p> : null}
     </form>

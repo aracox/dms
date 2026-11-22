@@ -12,9 +12,17 @@ import { can } from '@/lib/permissions';
 import { getHeldReservation } from '@/lib/reservations/queries';
 import type { RoomDetail } from '@/lib/rooms/queries';
 import { getCurrentProfile } from '@/lib/supabase/server';
-import { bangkokToday, formatBillingMonth, formatDate } from '@/lib/utils/date';
+import {
+  addMonths,
+  bangkokToday,
+  billingMonthOf,
+  currentBillingMonth,
+  formatBillingMonth,
+  formatDate,
+} from '@/lib/utils/date';
 
 import { ContractRentField } from './ContractRentField';
+import { FinalMeterForm } from './FinalMeterForm';
 import { MoveOutForm } from './MoveOutForm';
 import { MoveOutNoticeForm } from './MoveOutNoticeForm';
 import { ReservationCard } from './ReservationCard';
@@ -38,6 +46,33 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
   const latestWater = detail.meterReadings.find((reading) => reading.meter_type === 'water');
   const currentInvoice = detail.invoices[0];
   const reservation = await getHeldReservation(room.id);
+
+  // A tenant the notice sweep moved out (or one from before move-outs took
+  // final numbers) recently, with no final meter numbers yet.
+  const missingFinalMeters = detail.contractHistory
+    .filter(
+      (candidate) =>
+        candidate.status === 'terminated' &&
+        candidate.terminated_at !== null &&
+        candidate.meter_end_electricity === null &&
+        candidate.meter_end_water === null &&
+        billingMonthOf(candidate.terminated_at) >= addMonths(currentBillingMonth(), -1),
+    )
+    .sort((a, b) => (a.terminated_at! < b.terminated_at! ? 1 : -1))[0];
+  const lastMetersOn = (through: string) => ({
+    electricity: lastMeterNumber({
+      type: 'electricity',
+      readings: detail.meterReadings,
+      contracts: detail.contractHistory,
+      through,
+    }),
+    water: lastMeterNumber({
+      type: 'water',
+      readings: detail.meterReadings,
+      contracts: detail.contractHistory,
+      through,
+    }),
+  });
 
   return (
     <div className="space-y-4">
@@ -78,6 +113,17 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
             </div>
           ) : null}
 
+          {missingFinalMeters && canEditContract ? (
+            <div className="border-border mt-3 border-t pt-3">
+              <FinalMeterForm
+                contractId={missingFinalMeters.id}
+                movedOutOn={missingFinalMeters.terminated_at!}
+                lastMeters={lastMetersOn(missingFinalMeters.terminated_at!)}
+                locale={locale}
+              />
+            </div>
+          ) : null}
+
           {canMoveIn ? (
             <div className="border-border mt-3 border-t pt-3">
               <Link href={`/rooms/${room.id}/move-in`} className={buttonClasses('primary', 'sm')}>
@@ -104,20 +150,15 @@ export async function RoomOverviewTab({ detail, locale }: { detail: RoomDetail; 
                 owed={amountOwed(
                   detail.invoices.filter((invoice) => invoice.contract_id === contract.id),
                 )}
-                lastMeters={{
-                  electricity: lastMeterNumber({
-                    type: 'electricity',
-                    readings: detail.meterReadings,
-                    contracts: detail.contractHistory,
-                    through: bangkokToday(),
-                  }),
-                  water: lastMeterNumber({
-                    type: 'water',
-                    readings: detail.meterReadings,
-                    contracts: detail.contractHistory,
-                    through: bangkokToday(),
-                  }),
-                }}
+                paidBills={detail.invoices
+                  .filter(
+                    (invoice) =>
+                      invoice.contract_id === contract.id &&
+                      invoice.billing_month >= currentBillingMonth() &&
+                      (invoice.status === 'paid' || invoice.status === 'partially_paid'),
+                  )
+                  .map((invoice) => invoice.invoice_number)}
+                lastMeters={lastMetersOn(bangkokToday())}
                 locale={locale}
               />
             </div>

@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 
 import { subtractMoney } from '@/lib/billing/money';
 import { SUBSCRIPTION_FEE_KEYS, type SubscriptionFeeKey } from '@/lib/invoices/fees';
+import { refreshContractBills } from '@/lib/invoices/refresh';
+import { finalMeterError } from '@/lib/meters/final';
 import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { bangkokToday } from '@/lib/utils/date';
@@ -13,6 +15,7 @@ import {
   contractRentSchema,
   giveMoveOutNoticeSchema,
   recordDepositReceivedSchema,
+  recordFinalMeterSchema,
   renewContractSchema,
   settleDepositSchema,
 } from '@/lib/validation/schemas';
@@ -95,6 +98,82 @@ export async function recordDepositReceivedAction(
 
   if (roomId) revalidatePath(`/rooms/${roomId}`);
   revalidatePath('/dashboard');
+  return { error: null };
+}
+
+export interface RecordFinalMeterState {
+  error: string | null;
+}
+
+/**
+ * Records the final meter numbers of a tenant who moved out without them --
+ * the daily sweep moves a tenant out on their notice date with nobody there
+ * to read the meters. Then re-prices their last bill with the usage up to
+ * move-out day, exactly as a move-out with numbers would have.
+ */
+export async function recordFinalMeterAction(
+  _previous: RecordFinalMeterState,
+  formData: FormData,
+): Promise<RecordFinalMeterState> {
+  const profile = await getCurrentProfile();
+  assertCan(profile?.role, 'contracts:write');
+
+  const meterField = (name: string) => {
+    const raw = String(formData.get(name) ?? '').trim();
+    return raw === '' ? Number.NaN : Number(raw);
+  };
+  const parsed = recordFinalMeterSchema.safeParse({
+    contract_id: String(formData.get('contract_id') ?? ''),
+    meter_end_electricity: meterField('meter_end_electricity'),
+    meter_end_water: meterField('meter_end_water'),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'errors.generic' };
+  }
+
+  const supabase = await createClient();
+  const { data: contract } = await supabase
+    .from('contracts')
+    .select('id, room_id, status, terminated_at, meter_end_electricity, meter_end_water')
+    .eq('id', parsed.data.contract_id)
+    .maybeSingle();
+
+  if (
+    !contract?.terminated_at ||
+    contract.status !== 'terminated' ||
+    contract.meter_end_electricity !== null ||
+    contract.meter_end_water !== null
+  ) {
+    return { error: 'errors.generic' };
+  }
+
+  const meterError = await finalMeterError(supabase, {
+    roomId: contract.room_id,
+    contractId: contract.id,
+    movedOutOn: contract.terminated_at,
+    electricity: parsed.data.meter_end_electricity,
+    water: parsed.data.meter_end_water,
+  });
+  if (meterError) return { error: meterError };
+
+  const { error } = await supabase
+    .from('contracts')
+    .update({
+      meter_end_electricity: parsed.data.meter_end_electricity,
+      meter_end_water: parsed.data.meter_end_water,
+    })
+    .eq('id', contract.id)
+    .is('meter_end_electricity', null)
+    .is('meter_end_water', null);
+
+  if (error) return { error: 'errors.generic' };
+
+  const refreshed = await refreshContractBills(supabase, contract.id);
+  if (refreshed.error) return { error: refreshed.error };
+
+  revalidatePath(`/rooms/${contract.room_id}`);
+  revalidatePath('/billing');
   return { error: null };
 }
 

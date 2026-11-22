@@ -460,6 +460,13 @@ export const moveOutSchema = z.object({
   meter_end_water: meterNumber,
 });
 
+/** Final meter numbers for a tenant who moved out without them (a notice's automatic move-out). */
+export const recordFinalMeterSchema = z.object({
+  contract_id: uuid,
+  meter_end_electricity: meterNumber,
+  meter_end_water: meterNumber,
+});
+
 /** Records that an active contract's deposit has been paid. */
 export const recordDepositReceivedSchema = z.object({
   contract_id: uuid,

@@ -459,7 +459,10 @@
       "water": "The water number is below the last one. Please check it."
     },
     "moveOutOwedWarning": "The tenant still owes {amount} on issued bills. Collect it before they leave.",
-    "moveOutLastBillHint": "After the move-out, issue the last bill from the Billing tab: rent by the day, and usage up to move-out day."
+    "moveOutLastBillHint": "Rent is charged by the day, and electricity and water up to move-out day. A bill already issued for this month is adjusted automatically; otherwise issue it from the Billing tab.",
+    "finalMeterMissing": "The tenant moved out on {date} with no final meter numbers. Record that day's numbers to bill electricity and water on the last bill.",
+    "saveFinalMeter": "Save meter numbers",
+    "moveOutPaidBillsHint": "Bill {invoices} already has payments. Rent is recalculated for the days actually stayed; if more was paid than the new total, that bill is left unchanged. Refund the difference when settling the deposit."
   },
   "deposits": {
     "title": "Deposit refunds",

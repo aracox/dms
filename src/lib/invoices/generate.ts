@@ -13,7 +13,7 @@ import {
 } from '@/lib/meters/tenancy';
 import { propertySegment } from '@/lib/reporting/segments';
 import { bangkokToday, invoiceDueDate, type IsoDate } from '@/lib/utils/date';
-import type { Database } from '@/types/database';
+import type { Database, InvoiceItemType } from '@/types/database';
 
 export interface GenerateInvoicesResult {
   error: string | null;
@@ -28,34 +28,30 @@ export interface GenerateInvoicesResult {
  */
 export type InvoiceExtras = readonly InvoiceExtraFeeKey[] | 'subscriptions';
 
+/** One of the rent / electricity / water lines a contract's bill carries. */
+export type ChargeRow = {
+  type: InvoiceItemType;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  meter_reading_id: string | null;
+  sort_order: number;
+};
+
 /**
- * Generates a room's bills for one billing month: one per contract that
- * covers the month and has no live bill yet (see contractsForBillingMonth) --
- * so in a mid-month turnover the outgoing and the incoming tenant each get
- * their own, and running it again only fills in what is missing.
+ * Everything needed to work out a room's bills for one month: its contracts,
+ * the month's live bills, the readings and the segment's rates -- and
+ * `charges`, the rent and meter lines one contract's bill should carry.
  *
- * Each bill charges rent prorated to the days its contract covers that month
- * (rentForMonth) and falls due per invoiceDueDate. A tenant who moved out
- * with final meter numbers is charged their usage up to move-out day
- * (finalMeterUsage). The month's electricity / water readings go on the bill
- * of the tenant in the room at month end, when meters are read -- unless that
- * tenant already left with final numbers, and never onto a second bill if
- * another live bill already carries them. sync_meter_reading_to_invoice
- * (0046) follows the same rule when a reading is corrected later.
- *
- * Shared by the single-room form action and bulk generation, so both go
- * through the exact same rules and error codes. One live bill per contract
- * per month is enforced by invoices_one_live_per_contract_month_idx (0045);
- * recalc_invoice then totals the items this inserts.
+ * `excludeInvoiceId` leaves one bill out of "readings already billed", so a
+ * bill being re-priced (refresh.ts) can keep the readings it carries itself.
  */
-export async function generateInvoicesForRoom(
+export async function loadRoomMonth(
   supabase: SupabaseClient<Database>,
-  {
-    roomId,
-    billingMonth,
-    extras,
-  }: { roomId: string; billingMonth: IsoDate; extras: InvoiceExtras },
-): Promise<GenerateInvoicesResult> {
+  roomId: string,
+  billingMonth: IsoDate,
+  { excludeInvoiceId }: { excludeInvoiceId?: string } = {},
+) {
   const [{ data: contracts }, { data: room }, { data: liveInvoices }] = await Promise.all([
     // Not just the active contract: a tenant who has already moved out still
     // owes the month they left in.
@@ -78,22 +74,18 @@ export async function generateInvoicesForRoom(
       .neq('status', 'cancelled'),
   ]);
 
-  if (!room) return { error: 'errors.generic', created: 0 };
+  if (!room) return null;
 
   const roomContracts = contracts ?? [];
   const monthContracts = contractsForBillingMonth(roomContracts, billingMonth);
-  if (monthContracts.length === 0) return { error: 'billing.noActiveContract', created: 0 };
-
-  const billed = new Set((liveInvoices ?? []).map((invoice) => invoice.contract_id));
-  const toBill = monthContracts.filter((contract) => !billed.has(contract.id));
-  if (toBill.length === 0) return { error: 'billing.invoiceAlreadyExists', created: 0 };
-
   // The tenant in the room at month end: their bill carries the readings.
-  const monthEndContract = monthContracts[0]!;
+  const monthEndContract = monthContracts[0];
   const segment = propertySegment(room.room_type);
-  const liveInvoiceIds = (liveInvoices ?? []).map((invoice) => invoice.id);
+  const otherInvoiceIds = (liveInvoices ?? [])
+    .map((invoice) => invoice.id)
+    .filter((id) => id !== excludeInvoiceId);
 
-  const [{ data: readings }, { data: carried }, { data: subscriptionRows }] = await Promise.all([
+  const [{ data: readings }, { data: carried }, { data: settingsRows }] = await Promise.all([
     // Earlier months too: a move-out's usage counts from the last reading.
     supabase
       .from('meter_readings')
@@ -104,41 +96,18 @@ export async function generateInvoicesForRoom(
       .order('billing_month', { ascending: false })
       .limit(24),
     // Readings already on another live bill of this month are not billed twice.
-    liveInvoiceIds.length
+    otherInvoiceIds.length
       ? supabase
           .from('invoice_items')
           .select('meter_reading_id')
-          .in('invoice_id', liveInvoiceIds)
+          .in('invoice_id', otherInvoiceIds)
           .not('meter_reading_id', 'is', null)
       : Promise.resolve({ data: [] as { meter_reading_id: string | null }[] }),
-    extras === 'subscriptions'
-      ? supabase
-          .from('contract_subscriptions')
-          .select('contract_id, fee_key')
-          .in(
-            'contract_id',
-            toBill.map((contract) => contract.id),
-          )
-      : Promise.resolve({ data: [] as { contract_id: string; fee_key: string }[] }),
+    // The rates price a move-out's usage, which has no reading of its own.
+    supabase.from('segment_settings').select('key, value').eq('segment', segment),
   ]);
 
-  const extrasFor = (contractId: string): InvoiceExtraFeeKey[] => {
-    if (extras === 'subscriptions') {
-      return (subscriptionRows ?? [])
-        .filter((row) => row.contract_id === contractId)
-        .map((row) => row.fee_key as InvoiceExtraFeeKey);
-    }
-    return contractId === monthEndContract.id ? [...extras] : [];
-  };
-
-  const feeKeys = [...new Set(toBill.flatMap((contract) => extrasFor(contract.id)))];
-  // The rates price a move-out's usage, which has no reading of its own.
-  const { data: settingsRows } = await supabase
-    .from('segment_settings')
-    .select('key, value')
-    .eq('segment', segment)
-    .in('key', [...feeKeys, 'electricity_rate', 'water_rate']);
-  const feeValue = (key: string) => {
+  const setting = (key: string) => {
     const value = settingsRows?.find((row) => row.key === key)?.value;
     return typeof value === 'number' ? value : 0;
   };
@@ -149,12 +118,16 @@ export async function generateInvoicesForRoom(
       (row) => row.meter_type === type && row.billing_month === billingMonth,
     );
     return reading &&
+      monthEndContract &&
       !carriedIds.has(reading.id) &&
       !hasFinalMeterNumber(monthEndContract, type, billingMonth)
       ? reading
       : undefined;
   };
-  const utility = (contract: (typeof toBill)[number], type: UtilityMeter) => {
+
+  type RoomContract = (typeof roomContracts)[number];
+
+  const utility = (contract: RoomContract, type: UtilityMeter) => {
     const final = finalMeterUsage({
       contract,
       type,
@@ -165,12 +138,12 @@ export async function generateInvoicesForRoom(
     if (final) {
       return {
         ...final,
-        rate: feeValue(`${type}_rate`),
+        rate: setting(`${type}_rate`),
         readingId: null,
         note: finalMeterLabel(final, contract.terminated_at!),
       };
     }
-    const reading = contract.id === monthEndContract.id ? unbilledReading(type) : undefined;
+    const reading = contract.id === monthEndContract?.id ? unbilledReading(type) : undefined;
     return reading
       ? {
           previousReading: reading.previous_reading,
@@ -182,10 +155,14 @@ export async function generateInvoicesForRoom(
       : undefined;
   };
 
-  const issueDate = bangkokToday();
-  let created = 0;
-
-  for (const contract of toBill) {
+  /**
+   * Rent prorated to the days the contract covers this month (rentForMonth),
+   * plus its electricity and water: the usage up to move-out day for a tenant
+   * who left with final numbers (finalMeterUsage), otherwise the month's
+   * readings for the tenant in the room at month end -- unless they already
+   * left with final numbers, or another live bill carries them.
+   */
+  const charges = (contract: RoomContract): ChargeRow[] => {
     const newer = roomContracts[roomContracts.indexOf(contract) - 1];
     const rent = rentForMonth({
       monthlyRent: contract.monthly_rent,
@@ -193,12 +170,96 @@ export async function generateInvoicesForRoom(
       startDate: contract.start_date,
       endedOn: contractEndedOn(contract, newer),
     });
-
     const electricity = utility(contract, 'electricity');
     const water = utility(contract, 'water');
-
     const items = buildMonthlyInvoiceItems({ monthlyRent: rent.amount, electricity, water });
 
+    return items.map((item, index) => ({
+      type: item.type,
+      // A part month says which days it covers, e.g. "20/11–30/11 (11/30)";
+      // a move-out's usage, its meter numbers.
+      description:
+        item.type === 'rent' && rent.days < rent.daysInMonth
+          ? rentPeriodLabel(rent)
+          : item.type === 'electricity'
+            ? (electricity?.note ?? '')
+            : item.type === 'water'
+              ? (water?.note ?? '')
+              : '',
+      quantity: item.quantity,
+      unit_price: item.unitPrice,
+      meter_reading_id:
+        item.type === 'electricity'
+          ? (electricity?.readingId ?? null)
+          : item.type === 'water'
+            ? (water?.readingId ?? null)
+            : null,
+      sort_order: index,
+    }));
+  };
+
+  return { roomContracts, monthContracts, liveInvoices: liveInvoices ?? [], setting, charges };
+}
+
+/**
+ * Generates a room's bills for one billing month: one per contract that
+ * covers the month and has no live bill yet (see contractsForBillingMonth) --
+ * so in a mid-month turnover the outgoing and the incoming tenant each get
+ * their own, and running it again only fills in what is missing.
+ *
+ * Each bill carries loadRoomMonth's `charges` and falls due per
+ * invoiceDueDate. sync_meter_reading_to_invoice (0046) follows the same
+ * reading rule when a reading is corrected later, and refresh.ts re-prices a
+ * bill the same way after its tenant moves out.
+ *
+ * Shared by the single-room form action and bulk generation, so both go
+ * through the exact same rules and error codes. One live bill per contract
+ * per month is enforced by invoices_one_live_per_contract_month_idx (0045);
+ * recalc_invoice then totals the items this inserts.
+ */
+export async function generateInvoicesForRoom(
+  supabase: SupabaseClient<Database>,
+  {
+    roomId,
+    billingMonth,
+    extras,
+  }: { roomId: string; billingMonth: IsoDate; extras: InvoiceExtras },
+): Promise<GenerateInvoicesResult> {
+  const month = await loadRoomMonth(supabase, roomId, billingMonth);
+  if (!month) return { error: 'errors.generic', created: 0 };
+
+  const { monthContracts, liveInvoices, setting, charges } = month;
+  if (monthContracts.length === 0) return { error: 'billing.noActiveContract', created: 0 };
+
+  const billed = new Set(liveInvoices.map((invoice) => invoice.contract_id));
+  const toBill = monthContracts.filter((contract) => !billed.has(contract.id));
+  if (toBill.length === 0) return { error: 'billing.invoiceAlreadyExists', created: 0 };
+
+  const monthEndContract = monthContracts[0]!;
+  const { data: subscriptionRows } =
+    extras === 'subscriptions'
+      ? await supabase
+          .from('contract_subscriptions')
+          .select('contract_id, fee_key')
+          .in(
+            'contract_id',
+            toBill.map((contract) => contract.id),
+          )
+      : { data: [] as { contract_id: string; fee_key: string }[] };
+
+  const extrasFor = (contractId: string): InvoiceExtraFeeKey[] => {
+    if (extras === 'subscriptions') {
+      return (subscriptionRows ?? [])
+        .filter((row) => row.contract_id === contractId)
+        .map((row) => row.fee_key as InvoiceExtraFeeKey);
+    }
+    return contractId === monthEndContract.id ? [...extras] : [];
+  };
+
+  const issueDate = bangkokToday();
+  let created = 0;
+
+  for (const contract of toBill) {
     const { data: invoiceNumber, error: numberError } = await supabase.rpc('next_invoice_number', {
       p_billing_month: billingMonth,
     });
@@ -225,29 +286,8 @@ export async function generateInvoicesForRoom(
       };
     }
 
-    const itemRows = items.map((item, index) => ({
-      invoice_id: invoice.id,
-      type: item.type,
-      // A part month says which days it covers, e.g. "20/11–30/11 (11/30)";
-      // a move-out's usage, its meter numbers.
-      description:
-        item.type === 'rent' && rent.days < rent.daysInMonth
-          ? rentPeriodLabel(rent)
-          : item.type === 'electricity'
-            ? (electricity?.note ?? '')
-            : item.type === 'water'
-              ? (water?.note ?? '')
-              : '',
-      quantity: item.quantity,
-      unit_price: item.unitPrice,
-      meter_reading_id:
-        item.type === 'electricity'
-          ? (electricity?.readingId ?? null)
-          : item.type === 'water'
-            ? (water?.readingId ?? null)
-            : null,
-      sort_order: index,
-    }));
+    const chargeRows = charges(contract);
+    const itemRows = chargeRows.map((row) => ({ ...row, invoice_id: invoice.id }));
 
     extrasFor(contract.id).forEach((key, index) => {
       const meta = EXTRA_FEE_META[key];
@@ -256,9 +296,9 @@ export async function generateInvoicesForRoom(
         type: meta.type,
         description: meta.description,
         quantity: 1,
-        unit_price: feeValue(key),
+        unit_price: setting(key),
         meter_reading_id: null,
-        sort_order: items.length + index,
+        sort_order: chargeRows.length + index,
       });
     });
 

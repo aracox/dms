@@ -4,7 +4,8 @@ import { getLocale } from 'next-intl/server';
 import { revalidatePath } from 'next/cache';
 
 import { redirect } from '@/i18n/navigation';
-import { lastMeterNumber } from '@/lib/meters/tenancy';
+import { refreshContractBills } from '@/lib/invoices/refresh';
+import { finalMeterError } from '@/lib/meters/final';
 import { assertCan } from '@/lib/permissions';
 import { createClient, getCurrentProfile } from '@/lib/supabase/server';
 import { uploadTenantDocuments } from '@/lib/tenant-documents/upload';
@@ -299,31 +300,14 @@ export async function moveOutAction(
   const supabase = await createClient();
 
   // A final number below the last known one is a typo, and would bill nothing.
-  const [{ data: readings }, { data: contracts }] = await Promise.all([
-    supabase
-      .from('meter_readings')
-      .select('billing_month, meter_type, current_reading')
-      .eq('room_id', roomId)
-      .order('billing_month', { ascending: false })
-      .limit(24),
-    supabase
-      .from('contracts')
-      .select(
-        'id, status, start_date, terminated_at, meter_start_electricity, meter_start_water, meter_end_electricity, meter_end_water',
-      )
-      .eq('room_id', roomId),
-  ]);
-  for (const type of ['electricity', 'water'] as const) {
-    const last = lastMeterNumber({
-      type,
-      readings: readings ?? [],
-      contracts: contracts ?? [],
-      through: parsed.data.terminated_at,
-    });
-    const final =
-      type === 'electricity' ? parsed.data.meter_end_electricity : parsed.data.meter_end_water;
-    if (last !== null && final < last) return { error: `contract.meterBelowLast.${type}` };
-  }
+  const meterError = await finalMeterError(supabase, {
+    roomId,
+    contractId: parsed.data.contract_id,
+    movedOutOn: parsed.data.terminated_at,
+    electricity: parsed.data.meter_end_electricity,
+    water: parsed.data.meter_end_water,
+  });
+  if (meterError) return { error: meterError };
 
   const { error } = await supabase.rpc('move_out_room', {
     p_contract_id: parsed.data.contract_id,
@@ -336,6 +320,10 @@ export async function moveOutAction(
 
   if (error) return { error: 'errors.generic' };
 
+  // A bill already issued for the move-out month charged the whole month.
+  await refreshContractBills(supabase, parsed.data.contract_id);
+
+  revalidatePath('/billing');
   revalidatePath('/rooms');
   revalidatePath('/floor-plan');
   revalidatePath(`/rooms/${roomId}`);
