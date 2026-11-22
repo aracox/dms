@@ -228,6 +228,16 @@
     "high": "สูง",
     "urgent": "เร่งด่วน"
   },
+  "maintenanceCategory": {
+    "air_conditioning": "แอร์",
+    "electrical": "ไฟฟ้า",
+    "plumbing": "ประปา",
+    "appliance": "เครื่องใช้ไฟฟ้า",
+    "furniture": "เฟอร์นิเจอร์",
+    "door_lock": "ประตู/กุญแจ",
+    "building": "ตัวอาคาร",
+    "other": "อื่นๆ"
+  },
   "meterType": {
     "electricity": "ไฟฟ้า",
     "water": "น้ำ"
@@ -611,6 +621,7 @@
   "maintenance": {
     "title": "งานซ่อมบำรุง",
     "category": "ประเภทงาน",
+    "chooseCategory": "เลือกประเภทงาน",
     "description": "รายละเอียด",
     "priority": "ความสำคัญ",
     "cost": "ค่าใช้จ่าย",
@@ -843,6 +854,15 @@
     },
     "document": {
       "invalid": "ไม่มีไฟล์ที่ถูกต้องถูกอัปโหลด รองรับเฉพาะ JPG, PNG, WEBP หรือ PDF ขนาดไม่เกิน 5MB"
+    },
+    "native": {
+      "format": "รูปแบบข้อมูลไม่ถูกต้อง",
+      "number": "กรุณากรอกตัวเลข",
+      "min": "ค่าต้องไม่น้อยกว่า {min}",
+      "max": "ค่าต้องไม่มากกว่า {max}",
+      "step": "ค่านี้ใช้ทศนิยมเกินที่กำหนด",
+      "tooShort": "ต้องมีอย่างน้อย {count} ตัวอักษร",
+      "tooLong": "ต้องมีไม่เกิน {count} ตัวอักษร"
     }
   },
   "errors": {

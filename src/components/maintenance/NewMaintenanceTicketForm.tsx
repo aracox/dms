@@ -5,11 +5,12 @@ import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
-import { FormField, Input, Select, Textarea } from '@/components/ui/Input';
+import { FormField, Select, Textarea } from '@/components/ui/Input';
 import {
   createMaintenanceTicketAction,
   type CreateMaintenanceTicketState,
 } from '@/lib/maintenance/actions';
+import { MAINTENANCE_CATEGORIES } from '@/lib/maintenance/categories';
 import type { MaintenancePriority } from '@/types/database';
 
 const INITIAL_STATE: CreateMaintenanceTicketState = { error: null };
@@ -76,7 +77,16 @@ export function NewMaintenanceTicketForm({
           </div>
 
           <FormField label={t('maintenance.category')} htmlFor="category">
-            <Input id="category" name="category" type="text" maxLength={60} required />
+            <Select id="category" name="category" defaultValue="" required>
+              <option value="" disabled>
+                {t('maintenance.chooseCategory')}
+              </option>
+              {MAINTENANCE_CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {t(`maintenanceCategory.${category}`)}
+                </option>
+              ))}
+            </Select>
           </FormField>
 
           <FormField label={t('maintenance.description')} htmlFor="description">

@@ -171,10 +171,10 @@ export default async function DashboardPage({
       tone: 'yellow',
       icon: Wrench,
       room: ticket.room_number ?? t('maintenance.commonArea'),
-      title: ticket.description || ticket.category,
+      title: ticket.description || t(`maintenanceCategory.${ticket.category}`),
       meta: (
         <>
-          {ticket.category}
+          {t(`maintenanceCategory.${ticket.category}`)}
           <Badge tone={MAINTENANCE_TONE[ticket.status]} className="ml-1.5">
             {t(`maintenanceStatus.${ticket.status}`)}
           </Badge>

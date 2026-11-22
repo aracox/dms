@@ -11,6 +11,8 @@
 
 import { z } from 'zod';
 
+import { MAINTENANCE_CATEGORIES } from '@/lib/maintenance/categories';
+
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const THAI_PHONE = /^0\d{8,9}$/;
 // Structural check only. z.uuid() enforces RFC 4122 version/variant bits, but
@@ -303,7 +305,7 @@ export type PaymentInput = z.infer<typeof paymentSchema>;
 export const maintenanceSchema = z.object({
   /** Null for a common-area ticket. */
   room_id: uuid.nullable().optional(),
-  category: z.string().trim().min(1, 'validation.required').max(60),
+  category: z.enum(MAINTENANCE_CATEGORIES, { error: 'validation.required' }),
   description: z.string().trim().min(1, 'validation.required').max(2000),
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
   status: z.enum(['open', 'in_progress', 'waiting', 'completed', 'cancelled']),

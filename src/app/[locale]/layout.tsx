@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import type { ReactNode } from 'react';
 
+import { NativeValidationMessages } from '@/components/ui/NativeValidationMessages';
 import { routing } from '@/i18n/routing';
 import { BACKGROUND_IMAGE_INIT_SCRIPT } from '@/lib/appearance/glass';
 
@@ -83,7 +84,10 @@ export default async function LocaleLayout({
         <Script id="background-image-preference" strategy="beforeInteractive">
           {BACKGROUND_IMAGE_INIT_SCRIPT}
         </Script>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <NativeValidationMessages />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

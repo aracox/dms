@@ -63,7 +63,7 @@ export async function RoomMaintenanceTab({
         {detail.tickets.map((ticket) => (
           <tr key={ticket.id}>
             <TD>{formatDate(ticket.created_at.slice(0, 10), locale)}</TD>
-            <TD>{ticket.category}</TD>
+            <TD>{t(`maintenanceCategory.${ticket.category}`)}</TD>
             <TD className="max-w-xs">{ticket.description}</TD>
             <TD>
               <Badge tone={PRIORITY_TONE[ticket.priority]}>

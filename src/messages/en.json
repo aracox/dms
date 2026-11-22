@@ -228,6 +228,16 @@
     "high": "High",
     "urgent": "Urgent"
   },
+  "maintenanceCategory": {
+    "air_conditioning": "Air conditioning",
+    "electrical": "Electrical",
+    "plumbing": "Plumbing",
+    "appliance": "Appliance",
+    "furniture": "Furniture",
+    "door_lock": "Door & lock",
+    "building": "Building",
+    "other": "Other"
+  },
   "meterType": {
     "electricity": "Electricity",
     "water": "Water"
@@ -611,6 +621,7 @@
   "maintenance": {
     "title": "Maintenance",
     "category": "Category",
+    "chooseCategory": "Choose a category",
     "description": "Description",
     "priority": "Priority",
     "cost": "Cost",
@@ -843,6 +854,15 @@
     },
     "document": {
       "invalid": "No valid file was uploaded. Only JPG, PNG, WEBP, or PDF up to 5MB are allowed."
+    },
+    "native": {
+      "format": "The format is not valid",
+      "number": "Enter a number",
+      "min": "Must be at least {min}",
+      "max": "Must be at most {max}",
+      "step": "Too many decimal places",
+      "tooShort": "Must be at least {count} characters",
+      "tooLong": "Must be at most {count} characters"
     }
   },
   "errors": {

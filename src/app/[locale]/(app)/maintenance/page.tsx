@@ -132,7 +132,7 @@ export default async function MaintenancePage({
           <TD>
             <SegmentBadge segment={ticket.property_segment} />
           </TD>
-          <TD>{ticket.category}</TD>
+          <TD>{t(`maintenanceCategory.${ticket.category}`)}</TD>
           <TD className="max-w-sm">{ticket.description}</TD>
           <TD>
             <Badge tone={PRIORITY_TONE[ticket.priority]}>

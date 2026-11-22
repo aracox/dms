@@ -10,7 +10,13 @@
  * however long after seeding it is applied.
  */
 
-import type { CardStatus, MaintenancePriority, MeterType, RoomStatus } from '@/types/database';
+import type {
+  CardStatus,
+  MaintenanceCategory,
+  MaintenancePriority,
+  MeterType,
+  RoomStatus,
+} from '@/types/database';
 
 export const T01_ROOM_NUMBER = 'T01';
 
@@ -80,7 +86,7 @@ export interface TestScenarioState {
   };
   maintenance: {
     priority: MaintenancePriority;
-    category: string;
+    category: MaintenanceCategory;
   } | null;
 }
 

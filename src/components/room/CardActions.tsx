@@ -49,6 +49,18 @@ export function CardActions({
   const onlyAction = actions.length === 1 ? actions[0] : undefined;
   const [action, setAction] = useState<Action | ''>(onlyAction ?? '');
   const [state, formAction, isPending] = useActionState(cardActionAction, INITIAL_STATE);
+  const [handledState, setHandledState] = useState(state);
+  const [formKey, setFormKey] = useState(0);
+
+  // React resets the form's fields after every submit, which leaves the
+  // action dropdown out of step with the chosen action. Remount the form so
+  // it shows the choice again: none after a successful save (no leftover
+  // "replace" with its fee line), the same one after an error, to retry.
+  if (state !== handledState) {
+    setHandledState(state);
+    if (!state.error) setAction('');
+    setFormKey((key) => key + 1);
+  }
 
   // The card's status (and so its valid actions) can change after a
   // successful submit without this component remounting -- fall back to the
@@ -114,7 +126,7 @@ export function CardActions({
   ) : null;
 
   const form = (
-    <form action={formAction} className="space-y-2">
+    <form key={formKey} action={formAction} className="space-y-2">
       {hiddenFields}
       <div className="flex flex-wrap items-center gap-2">
         {actionControl}

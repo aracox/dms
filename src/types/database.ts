@@ -52,6 +52,15 @@ export type PaymentStatus = 'pending' | 'confirmed' | 'cancelled';
 export type MaintenanceStatus = 'open' | 'in_progress' | 'waiting' | 'completed' | 'cancelled';
 
 export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent';
+export type MaintenanceCategory =
+  | 'air_conditioning'
+  | 'electrical'
+  | 'plumbing'
+  | 'appliance'
+  | 'furniture'
+  | 'door_lock'
+  | 'building'
+  | 'other';
 
 export type AuditAction = 'insert' | 'update' | 'delete';
 
@@ -352,7 +361,7 @@ export type MaintenanceTicketRow = {
   id: string;
   /** Null for common-area tickets. */
   room_id: string | null;
-  category: string;
+  category: MaintenanceCategory;
   description: string;
   priority: MaintenancePriority;
   status: MaintenanceStatus;
@@ -607,7 +616,7 @@ export type MaintenanceReportRow = {
   room_id: string | null;
   room_number: string | null;
   floor: number | null;
-  category: string;
+  category: MaintenanceCategory;
   description: string;
   priority: MaintenancePriority;
   status: MaintenanceStatus;
@@ -811,7 +820,10 @@ export type Database = {
       >;
       maintenance_tickets: TableDef<
         MaintenanceTicketRow,
-        Partial<Writable<MaintenanceTicketRow, 'id'>> & { category: string; description: string },
+        Partial<Writable<MaintenanceTicketRow, 'id'>> & {
+          category: MaintenanceCategory;
+          description: string;
+        },
         Partial<Writable<MaintenanceTicketRow, 'id'>>
       >;
       common_expenses: TableDef<
